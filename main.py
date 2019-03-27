@@ -4,38 +4,36 @@ import integrators as i
 import numpy as np
 
 # set up constants
-num_grid_points = 1000
+num_grid_points = 250
 start = 0.0
-stop = 10.0
-f = 0.5
-dx = (stop - start) / num_grid_points
-dt = 0.01
-c = 1.0
+L = 1.0
+f = 1.0
+dx = L / num_grid_points
+dt = 1/(4.0*num_grid_points)
+c = 2.0
 
 # set up display windows
 vis = h.StateVisualizer(2, 1)
 
-# set up bordering condition
-axis = np.linspace(start, stop, num_grid_points)
-state = h.State(2, num_grid_points, axis, ["u", "v"])
+# setup
+axis = np.linspace(start, start + L, num_grid_points)
+state = h.State(2, num_grid_points, axis, [("x","u"), ("x", "v")])
 data = state.get_vars()
 
-# data[0] = np.sinc((axis - 5) * 2 * np.math.pi * f)
-data[0] = (1 - np.cos(axis * 2 * np.math.pi * f)) * 0.5  # - 1
-data[0] *= data[0]
-data[0] *= data[0]
+# setup starting condition
+data[0] = np.sinc((axis-0.5) * 2 * np.math.pi)
 
-for k, x in enumerate(axis):
-    if x > 2:
-        data[0][k] = 0.0
-        print(x)
-
+# choose border condition
 derivative = d.WaveFunctionFixedEnd(dx, c)
 
-data[1] = derivative(data)[1]
+# set up initial derivatives
+#data[1] = derivative(data)[1]
+# alternative: comment out to set data[1] = 0
 
-integrator = i.ExplicitEuler(state, derivative, dt)
+# choose integrator
+integrator = i.ExplicitHeun(state, derivative, dt)
 
+# simulation loop
 for state in integrator:
     vis.display(1, state, 0, -2, 2)
-    vis.display(2, state, 1, -2, 2)
+    vis.display(2, state, 1, -10, 10)

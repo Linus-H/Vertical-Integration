@@ -27,7 +27,6 @@ class WaveFunctionFixedEnd():
         du = z[1]
 
         u = z[0]
-        # c = 0.00025
 
         a = np.roll(u, 1) + np.roll(u, -1)
         b = 2 * u
@@ -50,8 +49,6 @@ class WaveFunctionLooseEnd():
         du = z[1]
 
         u = z[0]
-        # c = self.c
-        # c = 0.00025
 
         a = np.roll(u, 1) + np.roll(u, -1)
         b = 2 * u

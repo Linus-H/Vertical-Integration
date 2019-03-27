@@ -5,7 +5,7 @@ import numpy as np
 class State:
     def __init__(self, num_vars, dim_vars, axis, names=None):
         if names is None:
-            names = [""] * num_vars
+            names = [("", "")] * num_vars
         self.names = names
         self.axis = axis
         self.vars = np.ndarray((num_vars, dim_vars))
@@ -48,11 +48,12 @@ class StateVisualizer:
         ax = self.axes[plot_index - 1]
         ax.clear()
         data = state.get_vars()[state_index]
-        name = state.get_names()[state_index]
+        x_label, y_label = state.get_names()[state_index]
         axis = state.get_axis()
         ax.plot(axis, data)
         if y_min is not None and y_max is not None:
             ax.set_ylim((y_min, y_max))
-        ax.set_ylabel(name)
+        ax.set_ylabel(y_label)
+        ax.set_xlabel(x_label)
         plt.draw()
-        plt.pause(1e-20)
+        plt.pause(1e-20) # necessary for matplotlib to display changes without pausing the program
