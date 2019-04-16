@@ -5,76 +5,51 @@ class ExplicitEuler(h.Integrator):
     def __init__(self, state, func, delta_t):
         super().__init__(state, self.stepper)
         self.f = func
-        self.delta_t = delta_t
+        self.dt = delta_t
 
-    def stepper(self, state):
-        data = state.get_vars()
+    def stepper(self, state_vars):
+        d_state_vars_dt = self.f(state_vars)
+        state_vars += self.dt * d_state_vars_dt
 
-        derivative = self.f(data)
-        data = data + self.delta_t * derivative
-
-        return data
 
 class ModifiedExplicitEuler(h.Integrator):
     def __init__(self, state, func, delta_t):
         super().__init__(state, self.stepper)
         self.f = func
-        self.delta_t = delta_t
+        self.dt = delta_t
 
-    def stepper(self, state):
-        data = state.get_vars()
-
-        derivative = self.f(data)
-        data[0] = (data + self.delta_t * derivative)[0]
-
-        data[1] = (data + self.delta_t * derivative)[1]
-
-        return data
+    def stepper(self, state_vars):
+        for i in range(len(state_vars)):
+            d_state_vars_dt = self.f(state_vars)
+            state_vars[i] += self.dt * d_state_vars_dt[i]
 
 
 class ExplicitHeun(h.Integrator):
     def __init__(self, state, func, delta_t):
         super().__init__(state, self.stepper)
         self.f = func
-        self.delta_t = delta_t
+        self.dt = delta_t
 
-    def helper(self, data):
-        derivative_initial = self.f(data)
-        pred_first = data + self.delta_t * derivative_initial
+    def stepper(self, state_vars_0):
+        d_state_vars_0_dt = self.f(state_vars_0)
 
-        derivative_additional = self.f(pred_first)
+        state_vars_1 = state_vars_0 + self.dt * d_state_vars_0_dt
+        d_state_vars_1_dt = self.f(state_vars_1)
 
-        pred_out = data + 0.5 * self.delta_t * (derivative_initial + derivative_additional)
+        state_vars_0 += 0.5 * self.dt * (d_state_vars_0_dt + d_state_vars_1_dt)
 
-        return pred_out
-
-    def stepper(self, state):
-        data = state.get_vars()
-
-        data = self.helper(data)
-
-        return data
 
 class ModifiedExplicitHeun(h.Integrator):
     def __init__(self, state, func, delta_t):
         super().__init__(state, self.stepper)
         self.f = func
-        self.delta_t = delta_t
+        self.dt = delta_t
 
-    def helper(self, data):
-        derivative_initial = self.f(data)
-        pred_first = data + self.delta_t * derivative_initial
+    def stepper(self, state_vars_0):
+        for i in range(len(state_vars_0)):
+            d_state_vars_0_dt = self.f(state_vars_0)
 
-        derivative_additional = self.f(pred_first)
+            state_vars_1 = state_vars_0 + self.dt * d_state_vars_0_dt
+            d_state_vars_1_dt = self.f(state_vars_1)
 
-        pred_out = data + 0.5 * self.delta_t * (derivative_initial + derivative_additional)
-
-        return pred_out
-
-    def stepper(self, state):
-        data = state.get_vars()
-
-        data[0] = self.helper(data)[0]
-        data[1] = self.helper(data)[1]
-
-        return data
+            state_vars_0[i] += 0.5 * self.dt * (d_state_vars_0_dt + d_state_vars_1_dt)[i]
