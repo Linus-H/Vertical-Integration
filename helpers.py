@@ -8,7 +8,7 @@ class State:
             names = [("", "")] * num_vars
         self._names = names
         self._axes = axes
-        self._vars = np.ndarray((num_vars, dim_vars))
+        self._vars = np.zeros((num_vars,dim_vars))#np.ndarray((num_vars, dim_vars))
 
     def get_state_vars(self):
         return self._vars
