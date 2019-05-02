@@ -1,0 +1,22 @@
+import numpy as np
+
+import operators.laplace
+import operators.derivative
+
+
+class TimeDerivative:
+    def __init__(self, delta_x, c):
+        self.delta_x = delta_x
+        self.c = c
+
+    def __call__(self, z):
+        u = z[0]
+        v = z[1]
+
+        du = v
+        dv = operators.laplace.diff_n2_e4(u, self.delta_x) * self.c ** 2
+
+        # generate output
+        dz = np.stack((du, dv), axis=-1)
+        dz = dz.transpose()
+        return dz
