@@ -2,8 +2,9 @@ import numpy as np
 
 
 class TimeIterator:
-    def __init__(self, dt):
+    def __init__(self, t0, dt):
         self.dt = dt
+        self.t0 = t0
 
     def __iter__(self):
         self.n = 0
@@ -11,7 +12,10 @@ class TimeIterator:
 
     def __next__(self):
         self.n += 1
-        return self.n * self.dt
+        return self.t0 + self.n * self.dt
+
+    def get_time(self):
+        return self.t0 + self.n * self.dt
 
 
 class ErrorTracker:
@@ -26,11 +30,14 @@ class ErrorTracker:
     def add_entry(self, label, real_value, calc_value):
         self.labels.append(label)
         if self.mode == "l_1":
-            self.abs_error.append(np.sum((np.abs(real_value - calc_value))))
+            new_value = (np.sum((np.abs(real_value - calc_value))))
         elif self.mode == "l_1norm":
-            self.abs_error.append(np.sum((np.abs(real_value - calc_value))) / self.num_points)
+            new_value = (np.sum((np.abs(real_value - calc_value))) / self.num_points)
         elif self.mode == "l_inf":
-            self.abs_error.append(np.max(np.abs(real_value - calc_value)))
+            new_value = (np.max(np.abs(real_value - calc_value)))
+        else:
+            new_value = None
+        self.abs_error.append(new_value)
 
     def print(self, with_labels=False):
         if with_labels:

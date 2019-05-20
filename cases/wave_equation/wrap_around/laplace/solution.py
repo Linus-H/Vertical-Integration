@@ -6,7 +6,7 @@ from utils import Solution
 
 class CaseSolution(Solution):
     def __init__(self, c, num_grid_points, dt, f, df_dx):
-        super().__init__(self.solution, dt)
+        super().__init__(self.solution,0, dt)
         self.c = c
         self.num_grid_points = num_grid_points
         self.f = f

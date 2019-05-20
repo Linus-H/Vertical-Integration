@@ -8,7 +8,7 @@ class TimeDerivativeLaplace:
         self.delta_x = delta_x
         self.c = c
 
-    def __call__(self, z):
+    def __call__(self, z, t):
         du = z[1]
         u = z[0]
 

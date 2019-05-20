@@ -14,7 +14,7 @@ class StandingWaveFixedEnd(Solution):
         :param num_grid_points: Number of samples in space-dimension.
         :param dt: Size of a time-step.
         """
-        super().__init__(self.solution, dt)
+        super().__init__(self.solution, 0, dt)
         self._coefficients = coefficients
         self._c = c
         self._num_grid_points = num_grid_points

@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-
+import numpy as np
 
 class WindowManager:
     def __init__(self, n_rows, n_cols):
@@ -11,13 +11,16 @@ class WindowManager:
     def get_axis(self, plot_index):
         return self.axes[plot_index - 1]
 
-    def display_state(self, plot_index, state, state_index, y_min=None, y_max=None):
+    def display_state(self, plot_index, state, state_index, y_min=None, y_max=None, clear_axis=True, exp=False):
         # select and clear the graph to plot in
         ax = self.axes[plot_index - 1]
-        ax.clear()
+        if clear_axis:
+            ax.clear()
 
         # get data to plot
         state_var = state.get_state_vars()[state_index]
+        if exp:
+            state_var = np.exp(state_var)
         x_label, y_label = state.get_names()[state_index]
         axis = state.get_axes()[state_index]
 

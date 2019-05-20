@@ -9,7 +9,7 @@ class TimeDerivative:
         self.delta_x = delta_x
         self.c = c
 
-    def __call__(self, z):
+    def __call__(self, z, t):
         u = z[0]
         v = z[1]
 
