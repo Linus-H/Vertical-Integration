@@ -47,8 +47,8 @@ class Integrator:
         return self
 
     def __next__(self):
-        self.n += 1
         self._stepper(self.state.get_state_vars(), self.t0 + self.n * self.dt)
+        self.n += 1
         return self.state
 
     def get_operator_matrix(self):

@@ -37,7 +37,7 @@ def run_with_solution(Integrator, TimeDerivative, params, CaseSolution, case_sol
     # debugging
     error_tracker_u = error_tracking_tools.ErrorTracker(num_grid_points, "Time", mode="l_1norm")
     error_tracker_v = error_tracking_tools.ErrorTracker(num_grid_points, "Time", mode="l_1norm")
-    timer = error_tracking_tools.TimeIterator(dt)
+    timer = error_tracking_tools.TimeIterator(0,dt)
     time_list = []
 
     # set up display window

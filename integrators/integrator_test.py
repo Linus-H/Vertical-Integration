@@ -31,7 +31,7 @@ integrator_names = ["Euler.Explicit",
 def unit_test():
     expected_orders = [1, 2, 4]
     num_time_res = 6
-    initial_time_factor = 1000
+    initial_time_factor = 4
     t0 = 0
     y0 = 4
 
