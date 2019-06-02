@@ -18,7 +18,7 @@ class TimeIterator:
         return self.t0 + self.n * self.dt
 
 
-class ErrorTracker:
+class ErrorTracker:  # TODO: add method to convert abs_error to numpy array
     def __init__(self, num_points, x_label, mode="l_inf"):
         self.labels = []
         self.label_name = x_label
@@ -47,3 +47,22 @@ class ErrorTracker:
             for label, err in zip(self.labels, self.abs_error):
                 print(str(err), end="\t")
             print("", end="\n")
+
+
+class ErrorIntegrator:  # TODO: add method to convert abs_error to numpy array
+    def __init__(self, num_points, mode="l_inf"):
+        self.error_name = "Error ({})".format(mode)
+        self.tot_error = 0
+        self.num_points = num_points
+        self.mode = mode
+
+    def add_entry(self, label, real_value, calc_value):
+        if self.mode == "l_1":
+            error = (np.sum((np.abs(real_value - calc_value))))
+        elif self.mode == "l_1norm":
+            error = (np.sum((np.abs(real_value - calc_value))) / self.num_points)
+        elif self.mode == "l_inf":
+            error = (np.max(np.abs(real_value - calc_value)))
+        else:
+            error = None
+        self.tot_error += error

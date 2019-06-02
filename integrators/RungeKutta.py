@@ -13,4 +13,4 @@ class Explicit(utils.Integrator):
         k_3 = self.time_derivative(state_vars_0 + k_2 * self.dt * 0.5, t + self.dt * 0.5)
         k_4 = self.time_derivative(state_vars_0 + k_3 * self.dt * 1.0, t + self.dt)
 
-        state_vars_0 += self.dt * (k_1 + 2 * k_2 + 2*k_3 + k_4) / 6.0
+        state_vars_0 += self.dt * ((k_1 + 2 * k_2) + (2*k_3 + k_4)) / 6.0

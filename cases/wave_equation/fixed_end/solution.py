@@ -6,13 +6,15 @@ import utils
 from utils import Solution
 
 
+# TODO: make solution adaptive to the domain size
 class StandingWaveFixedEnd(Solution):
-    def __init__(self, c, num_grid_points, dt, coefficients):
+    def __init__(self, num_grid_points, dt, domain_size, c, coefficients):
         """
-        :param c: Wave speed from wave equation.
         :param coefficients: list of tuples (k,b_k), where k is the number of minimums/maximums of the corresponding sine-wave, and b_k is the coefficient of that sine-wave.
         :param num_grid_points: Number of samples in space-dimension.
         :param dt: Size of a time-step.
+        :param c: Wave speed from wave equation.
+        :param domain_size: is currently ignored and assumed to be 1.
         """
         super().__init__(self.solution, 0, dt)
         self._coefficients = coefficients

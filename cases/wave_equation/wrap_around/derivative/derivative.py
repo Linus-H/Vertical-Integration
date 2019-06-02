@@ -28,6 +28,9 @@ class TimeDerivative:
         dz = dz.transpose()
         return dz
 
+    def __str__(self):
+        return "wave_wrap_around_derivative"
+
 
 class TimeDerivativeMatrix:
     def __init__(self, delta_x, c):

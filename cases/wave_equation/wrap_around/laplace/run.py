@@ -1,15 +1,28 @@
-from cases.wave_equation import run
+from cases import run_utils
 from integrators.RungeKutta import Explicit
 from cases.wave_equation.wrap_around.laplace.derivative import TimeDerivative
 from cases.wave_equation.wrap_around.laplace.solution import CaseSolution
 from starting_conditions import GaussianBump
 
-params = {}
-params['num_grid_points'] = 1000
-params['c'] = 2
+c = 4.0
+num_grid_points = 1000
+dt = 1 / (16 * num_grid_points * c)
 
-special_input = []
-special_input.append(GaussianBump(200).start_cond)
-special_input.append(GaussianBump(200).derivative)
+params = {
+    'num_grid_points': num_grid_points,
+    'domain_size': 3.0,
+    'dt': dt,
+    'sampling_rate': 4000
+}
 
-run.run_with_solution(Explicit, TimeDerivative, params, CaseSolution, special_input)
+time_derivative_input = [c]
+
+start_cond = GaussianBump(params['domain_size'] * 0.5, 200)
+
+case_sol_input = [c,
+                  start_cond.start_cond,
+                  start_cond.derivative]
+
+run_utils.run_visual_with_solution(params, Explicit,
+                                   TimeDerivative, time_derivative_input,
+                                   CaseSolution, case_sol_input)

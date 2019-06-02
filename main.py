@@ -35,7 +35,7 @@ def derivative_f(a):
 
 # setup starting condition
 starting_cond = starting_conditions.GaussianBump(200.0)
-standing_wave_sol = CaseSolution(c, num_grid_points, dt, starting_cond.start_cond)#, starting_cond.derivative)
+standing_wave_sol = CaseSolution(num_grid_points, dt, c, starting_cond.start_cond)  #, starting_cond.derivative)
 # known_problems.StandingWaveFixedEnd(c, num_grid_points, dt, [(1, 1.0), (2, 1.0)])
 state = standing_wave_sol.get_initial_state()
 print(np.max(state.get_state_vars()[1]))
