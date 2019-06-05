@@ -2,7 +2,7 @@ import numpy as np
 
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.wrap_around.derivative.derivative import TimeDerivative
+from cases.wave_equation.periodic.derivative.derivative import TimeDerivative
 from starting_conditions import GaussianBump
 from utils import State
 

@@ -2,8 +2,8 @@ import numpy as np
 
 import starting_conditions
 from cases import run_utils
-from cases.wave_equation.wrap_around.derivative.derivative import TimeDerivativeMatrix
-from cases.wave_equation.wrap_around.derivative.solution import CaseSolution
+from cases.wave_equation.periodic.derivative.derivative import TimeDerivativeMatrix
+from cases.wave_equation.periodic.derivative.solution import CaseSolution
 from integrators.Euler import Explicit
 from integrators.Exponential import Exponential
 from utils import State

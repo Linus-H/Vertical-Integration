@@ -1,7 +1,7 @@
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.wrap_around.laplace.derivative import TimeDerivative
-from cases.wave_equation.wrap_around.laplace.solution import CaseSolution
+from cases.wave_equation.periodic.laplace.derivative import TimeDerivative
+from cases.wave_equation.periodic.laplace.solution import CaseSolution
 from starting_conditions import GaussianBump
 
 c = 4.0

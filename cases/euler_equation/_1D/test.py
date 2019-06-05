@@ -4,7 +4,6 @@ import math
 
 from cases.euler_equation._1D.derivative import LogTimeDerivative
 from cases.run_utils import gen_test_data
-from cases.wave_equation.loose_end.derivative import TimeDerivativeLaplace
 from cases.numerical_ref_solution import CaseSolution, ReferenceSolutionCalculator
 from cases.euler_equation._1D.solution import StationarySolution
 from integrators import Euler

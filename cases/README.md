@@ -90,9 +90,9 @@ There are two implementations, one using $$\rho$$ directly, and one using $$ln\r
 In latter implementation, non-linear terms and viscosity can be disabled.
 * `wave_equation` This folder contains different implementations of the standard wave-equation: $$\frac{d^{2}u}{dt^{2}}&=c^{2} \cdot \frac{d^{2}u}{dx^{2}}$$.
 As different implementations and boundary conditions are possible, this folder contains multiple implementations:
-    * `fixed_end` makes the assumption that the velocity $$\frac{du}{dt}$$ at the locations 0 and L is zero. This leads to solutions that can be found using Fourier-Analysis.
-    * `loose_end` makes the assumption that the ends are loose. This is achieved by 'pretending' that the domain is mirrored at its borders.
-    * `wrap_around` makes the assumption that the domain is circular/periodic
+    * `dirichlet` makes the assumption that the velocity $$\frac{du}{dt}$$ at the locations 0 and L is zero, thus fixing u to a static value, which is a Dirichlet-boundary condition. This leads to solutions that can be found using Fourier-Analysis.
+    * `neumann` makes the assumption that the ends are free. This is achieved by 'pretending' that the domain is mirrored at its borders, which leads to the spacial derivative being fixed to a value of zero, which is a Neumann boundary condition.
+    * `periodic` makes the assumption that the domain is circular/periodic, i.e. one can pretend an infinite amount of identical domains attached to each other at their sides.
         * `derivative` Implements the wave equation using only first-order derivatives and introducing a second variable $$\frac{dv}{dt} = c^2 \frac{du}{dx}$$
         * `laplace` Implements the wave equation using only second-order derivatives (laplacians), and introducing a second variable $$\frac{du}{dt} = v$$
         * `staggered_grid_derivative` Makes the same ansatz as `derivative`, but staggers the two variables $$u$$ and $$v$$ onto two different grids.

@@ -3,9 +3,9 @@ from unittest import TestCase
 import math
 
 from cases.run_utils import gen_test_data
-from cases.wave_equation.fixed_end.derivative import TimeDerivativeLaplace
-from cases.wave_equation.fixed_end.solution import StandingWaveFixedEnd
-from integrators import Heun, RungeKutta
+from cases.wave_equation.periodic.laplace.derivative import TimeDerivative
+from cases.wave_equation.periodic.laplace.solution import CaseSolution
+from integrators import Heun
 from starting_conditions import GaussianBump
 
 
@@ -18,7 +18,7 @@ class Test(TestCase):
         dt_list = []
 
         a = 0.5
-        expected_order = 4
+        expected_order = 2
 
         t = 20 / (4.0 * num_grid_points * c)
 
@@ -34,11 +34,12 @@ class Test(TestCase):
 
             time_derivative_input = [c]
 
-            case_sol_input = [c, [(1, 1.0), (2, 2.0)]]
+            start_cond = GaussianBump(params['domain_size'] * 0.5, 2)
+            case_sol_input = [c, start_cond.start_cond, start_cond.derivative]
 
-            error_tracker_list = gen_test_data(params, RungeKutta.Explicit,
-                                               TimeDerivativeLaplace, time_derivative_input,
-                                               StandingWaveFixedEnd, case_sol_input)
+            error_tracker_list = gen_test_data(params, Heun.Explicit,
+                                               TimeDerivative, time_derivative_input,
+                                               CaseSolution, case_sol_input)
             err_lists[0].append(error_tracker_list[0].tot_error)
             err_lists[1].append(error_tracker_list[1].tot_error)
 
@@ -50,7 +51,7 @@ class Test(TestCase):
                             msg="Mistake found at time-resolutions {} x {} for u. Expected order of {} but got {}".format(
                                 dt_list[i], dt_list[i + 1], expected_order, actual_order))
 
-            # TODO: firgure out why the order is of v is always 3
+            # TODO: figure out why the order is alwas one lower than it should be
             # actual_order = math.log(err_lists[1][i + 1] / err_lists[1][i], a)
             # self.assertTrue(expected_order * 0.95 < actual_order < expected_order * 1.05,
             #                msg="Mistake found at time-resolutions {} x {} for v. Expected order of {} but got {}".format(

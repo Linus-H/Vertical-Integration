@@ -1,7 +1,7 @@
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.fixed_end.derivative import TimeDerivativeLaplace
-from cases.wave_equation.fixed_end.solution import StandingWaveFixedEnd
+from cases.wave_equation.dirichlet.derivative import TimeDerivativeLaplace
+from cases.wave_equation.dirichlet.solution import StandingWaveFixedEnd
 from starting_conditions import GaussianBump
 
 c = 2.0

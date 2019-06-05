@@ -3,8 +3,8 @@ from unittest import TestCase
 import math
 
 from cases.run_utils import gen_test_data
-from cases.wave_equation.wrap_around.staggered_grid_derivative.derivative import TimeDerivative
-from cases.wave_equation.wrap_around.staggered_grid_derivative.solution import CaseSolution
+from cases.wave_equation.periodic.staggered_grid_derivative.derivative import TimeDerivative
+from cases.wave_equation.periodic.staggered_grid_derivative.solution import CaseSolution
 from integrators import Heun
 from starting_conditions import GaussianBump
 
