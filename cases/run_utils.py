@@ -100,9 +100,9 @@ every how many steps the state shall be displayed 'sampling_rate'.
             for j in range(num_vars):
                 error_trackers[j].add_entry(time, state_sol.get_state_vars()[j], state.get_state_vars()[j])
                 # print(error_trackers[j].abs_error[-1], end="\t")
-                window_manager.display_state(1 + j + 0 * num_vars, difference, 0)
-                window_manager.display_state(1 + j + 1 * num_vars, state, 0, -2, 2)
-                window_manager.display_state(1 + j + 2 * num_vars, state_sol, 0, -2, 2)
+                window_manager.display_state(1 + j + 0 * num_vars, difference, j)
+                window_manager.display_state(1 + j + 1 * num_vars, state, j, -2, 2)
+                window_manager.display_state(1 + j + 2 * num_vars, state_sol, j, -2, 2)
                 window_manager.display_error(1 + j + 3 * num_vars, error_trackers[j], double_log=False,
                                              line_name="Error", clear_axis=True)
 

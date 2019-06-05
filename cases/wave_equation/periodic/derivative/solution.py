@@ -12,7 +12,8 @@ class CaseSolution(Solution):
         self.c = c
         self.f = f
         self.axes = np.tile(np.linspace(0, domain_size, self.num_grid_points + 1)[:-1], (2, 1))
-        self.state = utils.State(num_vars=2, dim_vars=self.num_grid_points, axes=self.axes)
+        self.state = utils.State(num_vars=2, dim_vars=self.num_grid_points, axes=self.axes,
+                                 names=[("x", "u"), ("x", "v")])
 
     def solution(self, t, new_object=False):
         # get object to return
