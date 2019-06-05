@@ -26,7 +26,7 @@ state_vars = state.get_state_vars()  # get underlying numpy-array
 
 starting_cond = GaussianBump(params['domain_size'] * 0.5, 200.0)  # choose a starting-condition
 
-state_vars[0] = starting_cond.start_cond(axes[0])  # apply the starting condition variables
+state_vars[0] = starting_cond.get_start_condition(axes[0])  # apply the starting condition variables
 # state_vars[1] = starting_cond.derivative(axes[1])
 
 run_utils.run_visual_without_solution(params, Explicit,

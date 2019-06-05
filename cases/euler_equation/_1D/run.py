@@ -48,7 +48,7 @@ state = utils.State(2, num_grid_points, axes, [("x", "rho"), ("x", "u_x")])  # c
 data = state.get_state_vars()  # get the underlying numpy-array
 
 # specify rho-values
-data[0] = starting_conditions.GaussianBump(0.5 * params['domain_size'], 0.001).start_cond(axes[0]) * 0.1 + 1
+data[0] = starting_conditions.GaussianBump(0.5 * params['domain_size'], 0.001).get_start_condition(axes[0]) * 0.1 + 1
 # data[0] = sinc_start_cond(axes[0])
 # data[0] = const_start_cond(axes[0])
 # data[0] = exp_curve(axes[0])

@@ -34,7 +34,7 @@ class Test(TestCase):
 
             time_derivative_input = [c]
 
-            case_sol_input = [c, GaussianBump(params['domain_size'] * 0.5, 2).start_cond]
+            case_sol_input = [c, GaussianBump(params['domain_size'] * 0.5, 2).get_start_condition]
 
             error_tracker_list = gen_test_data(params, Heun.Explicit,
                                                TimeDerivative, time_derivative_input,

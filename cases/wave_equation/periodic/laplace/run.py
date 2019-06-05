@@ -20,8 +20,8 @@ time_derivative_input = [c]
 start_cond = GaussianBump(params['domain_size'] * 0.5, 200)
 
 case_sol_input = [c,
-                  start_cond.start_cond,
-                  start_cond.derivative]
+                  start_cond.get_start_condition,
+                  start_cond.get_derivative]
 
 run_utils.run_visual_with_solution(params, Explicit,
                                    TimeDerivative, time_derivative_input,

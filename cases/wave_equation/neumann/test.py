@@ -49,7 +49,7 @@ class Test(TestCase):
                                                                  down_sampling_rate=overresolution)
 
             start_cond = GaussianBump(params['domain_size'] * 0.5, 100)
-            case_sol_input = [2, ref_solution_generator, [start_cond.start_cond, start_cond.derivative], ref_dt, ref_t]
+            case_sol_input = [2, ref_solution_generator, [start_cond.get_start_condition, start_cond.get_derivative], ref_dt, ref_t]
 
             error_tracker_list = gen_test_data(params, Heun.Explicit,
                                                TimeDerivativeLaplace, time_derivative_input,

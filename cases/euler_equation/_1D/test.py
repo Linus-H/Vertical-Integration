@@ -100,7 +100,7 @@ class Test(TestCase):
 
             start_cond = GaussianBump(params['domain_size'] * 0.5, 100)
             case_sol_input = [2, ref_solution_generator,
-                              [lambda x: start_cond.start_cond(x) * 0.1 + 1, lambda x: 0 * x], ref_dt, ref_t]
+                              [lambda x: start_cond.get_start_condition(x) * 0.1 + 1, lambda x: 0 * x], ref_dt, ref_t]
 
             error_tracker_list = gen_test_data(params, Euler.Explicit,
                                                LogTimeDerivative, time_derivative_input,
