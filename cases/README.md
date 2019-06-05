@@ -45,7 +45,43 @@ For the remaining inputs identify what case is desired:
         Then as input for the parameter `case_solution_class`, use `numerical_ref_solution.CaseSolution`.
         For `case_sol_inputs` the input needs to be a list of the following form:
         [number of variables; instance of the `ReferenceSolutionCalculator`; list of functions which specify the initial conditions, with len=number of variables; desired time-step-size of the ('exact') numerical reference solution; time up to which the reference solution shall be run]
+### Example: wave_equation/wrap_around/derivative
+1. setting up params
+    ```
+    params = {
+       'num_grid_points': 100,
+       'domain_size': 1.0,
+       'dt': 1e-5
+       }
+    ```
+2. choosing an integrator
+    ```
+    integrator_class = integrators.RungeKutta.Explicit
+    ``` 
+3. specifying the time derivative
+    ```
+    time_derivative_class = cases.wave_equation.wrap_around.derivative.derivative.TimeDerivative
+    ``` 
+4. this time derivative needs a special input, namely the wave speed $$c$$
+    ```
+    time_derivative_inputs = [c]
+    ```
+5. We want to run with a visual and we also have a solution, so we need to add a value `'sampling_rate'`, and also have to specify the `case_solution_class` and its special inputs `case_sol_inputs`.
+These are the wave speed and a function for the starting condition.
+For this we will use a function from `starting_conditions.py`
+    ```
+    params['sampling_rate'] = 50
+    case_solution_class = cases.wave_equation.wrap_around.derivative.solution.CaseSolution
+    start_cond = GaussianBump(params['domain_size'] * 0.5, 100)
+    case_sol_input = [c, start_cond.start_cond]
+    ```
+6. Now we just have to start the simulation:
+    ```
+    run_utils.run_visual_with_solution(params, integrator_class,
+                                   time_derivative_class, time_derivative_inputs,
+                                   case_solution_class, case_sol_input)
 
+    ```
 
 ## Folder descriptions
 * `debug_case` This folder is different from the others because it only contains one-dimensional PDEs (only one variable with only one dimension), which are used to debug the integrators.
