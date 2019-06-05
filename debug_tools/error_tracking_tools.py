@@ -19,13 +19,19 @@ class TimeIterator:
 
 
 class ErrorTracker:  # TODO: add method to convert abs_error to numpy array
-    def __init__(self, num_points, x_label, mode="l_inf"):
+    def __init__(self, num_points, x_label, norm="l_inf"):
+        """
+        :param num_points: number of points in an axis.
+        :param x_label: name of the labels applied to the errors tracked by this object.
+        :param norm: which norm to use. "l_1" sum of absolute error, "l_1norm" sum of absolute error divided by the
+number of points, "l_inf" maximum absolute error.
+        """
         self.labels = []
         self.label_name = x_label
-        self.error_name = "Error ({})".format(mode)
+        self.error_name = "Error ({})".format(norm)
         self.abs_error = []
         self.num_points = num_points
-        self.mode = mode
+        self.mode = norm
 
     def add_entry(self, label, real_value, calc_value):
         self.labels.append(label)
@@ -50,11 +56,16 @@ class ErrorTracker:  # TODO: add method to convert abs_error to numpy array
 
 
 class ErrorIntegrator:  # TODO: add method to convert abs_error to numpy array
-    def __init__(self, num_points, mode="l_inf"):
-        self.error_name = "Error ({})".format(mode)
+    def __init__(self, num_points, norm="l_inf"):
+        """
+        :param num_points: number of points in an axis.
+        :param norm: which norm to use. "l_1" sum of absolute error, "l_1norm" sum of absolute error divided by the
+number of points, "l_inf" maximum absolute error.
+        """
+        self.error_name = "Error ({})".format(norm)
         self.tot_error = 0
         self.num_points = num_points
-        self.mode = mode
+        self.mode = norm
 
     def add_entry(self, label, real_value, calc_value):
         if self.mode == "l_1":

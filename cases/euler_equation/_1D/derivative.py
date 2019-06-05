@@ -56,17 +56,12 @@ class LogTimeDerivative:
 
     def __call__(self, z, t):
         lnrho = z[0]
-        lnrho_flip = np.flip(lnrho)
-        lnrho = np.concatenate((lnrho_flip, lnrho, lnrho_flip))
-
         u_z = z[1]
-        u_z_flip = np.zeros_like(u_z)
-        u_z = np.concatenate((u_z_flip, u_z, u_z_flip))
 
         dlnrho_dt = - derivative.diff_forward_n1_e1(u_z, self.delta_z)
 
         if self.non_linear:
-            dlnrho_dt -= average.avg_forward_1(u_z) * derivative.diff_n1_e2(lnrho, self.delta_z)
+            dlnrho_dt += - average.avg_forward_1(u_z) * derivative.diff_n1_e2(lnrho, self.delta_z)
 
         T = 273.15
         R = 8.314
@@ -74,20 +69,50 @@ class LogTimeDerivative:
         du_dt = - T * R * derivative.diff_backward_n1_e1(lnrho, self.delta_z) + self.g_z
 
         if self.non_linear:
-            du_dt -= u_z * derivative.diff_n1_e2(u_z, self.delta_z)
+            du_dt += - u_z * derivative.diff_n1_e2(u_z, self.delta_z)
             if self.viscosity:
                 du_dt += 0.05 * np.exp(- average.avg_backward_1(lnrho)) * laplace.diff_n2_e2(u_z, self.delta_z)
 
-        drho_dt = np.split(dlnrho_dt, 3)[1]
-        drho_dt[-1] = drho_dt[-2]
-
-        du_dt = np.split(du_dt, 3)[1]
+        dlnrho_dt[-1] = dlnrho_dt[-2]
         du_dt[0] = du_dt[-1] = 0  # wind at top and bottom stays constant at zero
 
         # generate output
-        dz = np.stack((drho_dt, du_dt), axis=-1)
+        dz = np.stack((dlnrho_dt, du_dt), axis=-1)
         dz = dz.transpose()
         return dz
 
     def __str__(self):
         return "log_euler"
+
+
+class MatrixLogTimeDerivative:  # only linear parts
+    def __init__(self, delta_z, g_z=0.0):
+        self.delta_z = delta_z
+        self.g_z = g_z
+
+    def __call__(self, z, t):
+        num_vars, length, *_ = z.shape
+
+        A = -np.eye(length)  # this imitates the u and v state vector as a matrix to extract the operation
+        B = np.zeros((length, length))  # this is a blank padding matrix to get to a square matrix at the end
+
+        dlnrho_dt = - derivative.diff_forward_n1_e1(A, self.delta_z)
+
+        T = 273.15
+        R = 8.314
+
+        du_dt = - T * R * derivative.diff_backward_n1_e1(A, self.delta_z)
+
+        dlnrho_dt[-1] = dlnrho_dt[-2]
+        du_dt[0] = du_dt[-1] = 0  # wind at top and bottom stays constant at zero
+
+        # generate output
+        dlnrho_dt = np.concatenate((B, dlnrho_dt), axis=1)
+        du_dt = np.concatenate((du_dt, B), axis=1)
+
+        dz = np.stack((dlnrho_dt, du_dt), axis=0)
+
+        return dz
+
+    def __str__(self):
+        return "matrix_log_euler"

@@ -10,7 +10,7 @@ from debug_tools.visualization import WindowManager
 
 
 def run_test(test_object, op, expected_order):
-    tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="#Samples", mode="l_1norm")
+    tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="#Samples", norm="l_1norm")
 
     max_res_exp = 7
     # take measurements
@@ -68,7 +68,7 @@ def visual_test():
                          operators.derivative.diff_n1_e4],
                         ["Derivative Order: 1", "Derivative Order: 2", "Derivative Order: 4"]):
         print(name)
-        tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="Number of Samples", mode="l_inf")
+        tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="Number of Samples", norm="l_inf")
         for resolution_exp in range(20):
             num_points = 5 * (2 ** resolution_exp)
             L = 1

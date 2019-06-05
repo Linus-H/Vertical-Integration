@@ -9,9 +9,8 @@ def gen_test_data(params, integrator_class,
     """
     Outputs a list of error trackers that contain data about the difference between the given solution and the
 integrators output over time.
-    :param params: dictionary with values for 'num_grid_points', time-step-size 'dt', after how many time steps should
-samples be collected'sampling_rate', size of the domain 'domain_size'.
-    :param integrator_class: Class of the integrator to be used.
+    :param params: dictionary with values for 'num_grid_points', time-step-size 'dt', time at which to evaluate the difference 'end_time' btw solution and simulation, size of the domain 'domain_size',
+    :param integrator_class: Class of the integrator to be used for the simulation.
     :param time_derivative_class: Class of the time derivative to be used.
     :param time_derivative_inputs: Iterable list of special inputs for the class of the time derivative.
     :param case_solution_class: Class for the solution of the case.
@@ -39,7 +38,7 @@ samples be collected'sampling_rate', size of the domain 'domain_size'.
     num_vars = len(state.get_names())
     error_trackers = []
     for _ in range(num_vars):
-        error_trackers.append(error_tracking_tools.ErrorIntegrator(num_grid_points, mode="l_1norm"))
+        error_trackers.append(error_tracking_tools.ErrorIntegrator(num_grid_points, norm="l_1norm"))
 
     timer = error_tracking_tools.TimeIterator(0, dt)
 
@@ -52,13 +51,15 @@ samples be collected'sampling_rate', size of the domain 'domain_size'.
     return error_trackers
 
 
-def run_visual_with_solution(params, integrator_class, time_derivative_class, time_derivative_inputs,
-                             case_solution_class,
-                             case_sol_inputs):
+def run_visual_with_solution(params, integrator_class,
+                             time_derivative_class, time_derivative_inputs,
+                             case_solution_class, case_sol_inputs):
     """
+    :param params: dictionary with values for 'num_grid_points', time-step-size 'dt', size of the domain 'domain_size',
+every how many steps the state shall be displayed 'sampling_rate'.
     :param integrator_class: Class of the integrator to be used.
     :param time_derivative_class: Class of the time derivative to be used.
-    :param params: dictionary with values for 'num_grid_points' and wave speed 'c'
+    :param time_derivative_inputs: Iterable list of special inputs for the class of the time derivative.
     :param case_solution_class: Class for the solution of the case.
     :param case_sol_inputs: iterable list of special inputs for the class of the solution.
     """
@@ -84,7 +85,7 @@ def run_visual_with_solution(params, integrator_class, time_derivative_class, ti
     num_vars = len(state.get_names())
     error_trackers = []
     for _ in range(num_vars):
-        error_trackers.append(error_tracking_tools.ErrorTracker(num_grid_points, "Time", mode="l_inf"))
+        error_trackers.append(error_tracking_tools.ErrorTracker(num_grid_points, "Time", norm="l_inf"))
 
     timer = error_tracking_tools.TimeIterator(0, dt)
 
@@ -94,7 +95,7 @@ def run_visual_with_solution(params, integrator_class, time_derivative_class, ti
     # simulation loop
     for i, (time, state, state_sol) in enumerate(zip(timer, integrator, solution), 1):
         if i % sampling_rate == 0:
-            print(time, end="\t")
+            # print(time, end="\t")
             difference = state - state_sol
             for j in range(num_vars):
                 error_trackers[j].add_entry(time, state_sol.get_state_vars()[j], state.get_state_vars()[j])
@@ -106,12 +107,18 @@ def run_visual_with_solution(params, integrator_class, time_derivative_class, ti
                                              line_name="Error", clear_axis=True)
 
 
-def run_visual_without_solution(params, integrator_class, time_derivative_class, time_derivative_inputs, state,
-                                vis_extras=None):
+def run_visual_without_solution(params, integrator_class,
+                                time_derivative_class, time_derivative_inputs,
+                                state, display_diagram_exponentially=None):
     """
+    :param params: dictionary with values for 'num_grid_points', time-step-size 'dt', size of the domain 'domain_size',
+every how many steps the state shall be displayed 'sampling_rate'.
     :param integrator_class: Class of the integrator to be used.
     :param time_derivative_class: Class of the time derivative to be used.
-    :param params: dictionary with values for 'num_grid_points', and wave speed 'c'
+    :param time_derivative_inputs: Iterable list of special inputs for the class of the time derivative.
+    :param state: An object of class utils.State, which contains the initial state of the system.
+    :param display_diagram_exponentially: A list of booleans, where it can be specified whether a system variable should
+be exponentiated before being displayed (True), or not (False).
     """
     # choose constants
     num_grid_points = params['num_grid_points']
@@ -131,11 +138,11 @@ def run_visual_without_solution(params, integrator_class, time_derivative_class,
     num_vars = len(state.get_names())
     window_manager = debug_tools.visualization.WindowManager(num_vars, 1)
 
-    if vis_extras is None:
-        vis_extras = [False] * num_vars
+    if display_diagram_exponentially is None:
+        display_diagram_exponentially = [False] * num_vars
 
     # simulation loop
     for i, state in enumerate(integrator, 1):
         if i % sampling_rate == 0:
             for j in range(num_vars):
-                window_manager.display_state(1 + j, state, j, exp=vis_extras[j])
+                window_manager.display_state(1 + j, state, j, exp=display_diagram_exponentially[j])

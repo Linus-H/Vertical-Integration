@@ -1,5 +1,6 @@
 import numpy as np
 
+data_path = None
 
 class State:
     def __init__(self, num_vars, dim_vars, axes, names=None):
@@ -51,11 +52,12 @@ class Integrator:
         self.n += 1
         return self.state
 
-    def get_operator_matrix(self):
+    def get_operator_matrix(self, t):
         num_vars, dim_vars = self.state.get_state_vars().shape
-        A = np.eye(dim_vars * num_vars)
+        #A = np.eye(dim_vars * num_vars)
+        A = np.zeros((dim_vars*num_vars,dim_vars*num_vars))
         A = np.reshape(A, (num_vars, dim_vars, -1))
-        self._stepper(A, self.t0 + self.n * self.dt)
+        self._stepper(A, t)
         A = np.reshape(A, (dim_vars * num_vars, -1))
         return A
 

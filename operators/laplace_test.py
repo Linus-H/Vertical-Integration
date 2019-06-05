@@ -10,7 +10,7 @@ from debug_tools.visualization import WindowManager
 
 
 def run_test(test_object, op, expected_order):
-    tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="#Samples", mode="l_1norm")
+    tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="#Samples", norm="l_1norm")
 
     max_res_exp = 6
     # take measurements
@@ -57,7 +57,7 @@ def visual_test():
     for op, name in zip([operators.laplace.diff_n2_e2, operators.laplace.diff_n2_e4],
                         ["Laplace Order: 2", "Laplace Order: 4"]):
         print(name)
-        tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="Number of Points", mode="l_inf")
+        tracker = error_tracking_tools.ErrorTracker(num_points=None, x_label="Number of Points", norm="l_inf")
         for resolution_exp in range(20):
             tracker.num_points = num_points = 2 * (2 ** resolution_exp)
             L = 1

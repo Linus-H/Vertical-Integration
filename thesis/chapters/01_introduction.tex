@@ -1,0 +1,30 @@
+% !TeX root = ../main.tex
+% Add the above to each chapter to make compiling the PDF easier in some editors.
+
+\chapter{Introduction}\label{chapter:introduction}
+
+\section{Motivation}
+At one point or another, most parts of applied physics and engineering make use of partial differential equations (PDEs).
+And while a small subset of these PDEs can be solved analytically, i.e. it is possible to write down a mathematical formula that solves the PDE and covers all possible states, it is more common to come across PDEs which are not solvable in such a way.
+Instead it becomes necessary to approximate solutions to such PDEs numerically.
+Generally this process can be split up into four steps:
+\begin{enumerate}
+\item finding a system of PDEs that describe a system
+\item simplifying the system of PDEs by making assumptions about the system (e.g. small angle approximation for a pendulum system)
+\item if the system contains scalar- or vector-fields, choosing the locations at which to store the values of each individual field
+\item choosing an integration method
+\end{enumerate}
+Each of these four steps introduce different trade-offs between computational efficiency and errors.
+This thesis will go through all of these four steps by applying them to the system of weather.
+More specifically this thesis will only look into the vertical part of weather simulation using the Navier-Stokes equations.
+The vertical part is viewed in isolation, because current weather simulation tools often split up the vertical and horizontal part of simulation by alternating between simulating horizontal and vertical effects. [TODO: find source]
+After applying the four steps to the system, the errors introduced by the possible choices in each of the steps will be analyzed.
+
+\section{Discretization of Differential Operators}
+% discretization of differential operators
+
+\section{Types of Integrators}
+\subsection{Runge Kutta Methods}
+\subsection{Exponential Integrators}
+
+See~\autoref{tab:sample}, \autoref{fig:sample-drawing}, \autoref{fig:sample-plot}, \autoref{fig:sample-listing}.

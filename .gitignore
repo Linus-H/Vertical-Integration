@@ -3,3 +3,24 @@
 
 __pycache__/
 venv/
+
+data/
+
+demos/
+
+log/
+*.aux
+
+*.bcf
+
+*.lof
+
+*.lot
+
+*.out
+
+*.pdf
+
+*.xml
+
+*.toc

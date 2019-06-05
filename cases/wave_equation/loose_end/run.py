@@ -19,11 +19,14 @@ params = {
 
 time_derivative_input = [c]
 
-starting_cond = GaussianBump(params['domain_size'] * 0.5, 200.0)
-axes = np.tile(np.linspace(0, params['domain_size'], num_grid_points + 1)[:-1], (2, 1))
-state = State(2, num_grid_points, axes, [("u", "x"), ("v", "x")])
-state_vars = state.get_state_vars()
-state_vars[0] = starting_cond.start_cond(axes[0])
+axes = np.tile(np.linspace(0, params['domain_size'], num_grid_points + 1)[:-1], (2, 1))  # setup axes
+state = State(2, num_grid_points, axes, [("u", "x"), ("v", "x")])  # create state
+
+state_vars = state.get_state_vars()  # get underlying numpy-array
+
+starting_cond = GaussianBump(params['domain_size'] * 0.5, 200.0)  # choose a starting-condition
+
+state_vars[0] = starting_cond.start_cond(axes[0])  # apply the starting condition variables
 # state_vars[1] = starting_cond.derivative(axes[1])
 
 run_utils.run_visual_without_solution(params, Explicit,

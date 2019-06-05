@@ -12,6 +12,15 @@ class WindowManager:
         return self.axes[plot_index - 1]
 
     def display_state(self, plot_index, state, state_index, y_min=None, y_max=None, clear_axis=True, exp=False):
+        """
+        :param plot_index: index of the plot to be plotted in (index starts at 1)
+        :param state: state whose variable is to be displayed.
+        :param state_index: index of the state variable to be displayed (index starts at 0)
+        :param y_min: lower bound of y-axis to be displayed.
+        :param y_max: upper bound of y-axis to be displayed.
+        :param clear_axis: whether the axis should be cleared before the new plot is drawn.
+        :param exp: whether the state-variable-content should be exponentiated (e^.) before being displayed.
+        """
         # select and clear the graph to plot in
         ax = self.axes[plot_index - 1]
         if clear_axis:
@@ -39,6 +48,13 @@ class WindowManager:
         plt.pause(1e-20)  # necessary for matplotlib to display changes without pausing the program
 
     def display_error(self, plot_index, error_tracker, double_log, line_name="", clear_axis=False):
+        """
+        :param plot_index: index of the plot to be plotted in (index starts at 1)
+        :param error_tracker: the error-tracker to be displayed.
+        :param double_log: whether to plot the line double-logarithmically.
+        :param line_name: name of the line (for legend).
+        :param clear_axis: whether the axis should be cleared before the new plot is drawn.
+        """
         # select and clear the graph to plot in
         ax = self.axes[plot_index - 1]
 
@@ -62,6 +78,15 @@ class WindowManager:
         plt.pause(1e-20)  # necessary for matplotlib to display changes without pausing the program
 
     def draw_loglog_oder_line(self, plot_index, x_start, y_start, width, order):
+        """
+        Plots a double logarithmic line to visualize a certain order.
+        :param plot_index: index of the plot to be plotted in (index starts at 1).
+        :param x_start: x-coordinate of where the order-line should start.
+        :param y_start: y-coordinate of where the order-line should start.
+        :param width: width of the order-line (i.e. 10^width).
+        :param order: order of the order line.
+        :return:
+        """
         ax = self.axes[plot_index - 1]
 
         x = [x_start, x_start * 10 ** width]

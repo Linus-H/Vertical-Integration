@@ -5,12 +5,21 @@ from debug_tools import error_tracking_tools
 from utils import Solution
 import integrators.RungeKutta
 
-path = """D:/Workspace/Vertical-Integration/data/"""
+path = utils.data_path
 
 
 class ReferenceSolutionCalculator:
     def __init__(self, num_grid_points, num_vars, time_derivative_class, time_derivative_params, axes_offsets,
                  domain_length=1.0, down_sampling_rate=1):
+        """
+        :param num_grid_points: number of grid points each variable shall have.
+        :param num_vars: number of variables the system has.
+        :param time_derivative_class: Class of the time derivative of the system.
+        :param time_derivative_params: Iterable list of special inputs for the class of the time derivative.
+        :param axes_offsets: list of axes-offsets each axis shall have (measured in units of dx). axes_offsets[i] = 0.0 is no offset in axis i, axes_offsets[i]=1.0 is an offset by dx in axis i.
+        :param domain_length: length of the domain to be simulated
+        :param down_sampling_rate: specifies every how many iterations a sample should be stored to the disk. 1 = every iteration, 3 = every third iteration is stored.
+        """
         self.num_grid_points = num_grid_points
         self.num_vars = num_vars
         self.time_derivative_class = time_derivative_class
@@ -69,7 +78,7 @@ def interpolate(location, axis, data):
     if index + 1 == len(axis) and location == axis[index]:
         return data[index]
 
-    #print("max is {}, but got{}".format(axis[-1], location), flush=True)
+    # print("max is {}, but got{}".format(axis[-1], location), flush=True)
     a, b = axis[index], axis[index + 1]
     b_factor = location - a
     b_factor = b_factor / (b - a)
@@ -104,7 +113,6 @@ class CaseSolution(Solution):
             state_vars = state.get_state_vars()
             state_vars.fill(0.0)
 
-        # TODO: interpolate to create proper state
         high_definition_sol = interpolate(t, self.sol_time, self.sol_data)
 
         # low_def_sol = np.zeros((self.num_vars, self.num_grid_points))

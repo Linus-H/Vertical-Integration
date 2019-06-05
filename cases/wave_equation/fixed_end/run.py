@@ -10,7 +10,7 @@ dt = 1 / (16 * num_grid_points * c)
 
 params = {
     'num_grid_points': num_grid_points,
-    'domain_size': 1.0,  # TODO: make solution adaptive to domain size
+    'domain_size': 1.0,  # TODO: make solution adaptive to domain size, right now it has to stay at 1.0
     'dt': dt,
     'sampling_rate': 1000
 }
