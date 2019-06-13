@@ -1,5 +1,5 @@
 from cases import run_utils
-from cases.euler_equation._1D.derivative import LogTimeDerivative
+from cases.euler_equation._1D_wp.derivative import LogTimeDerivative
 import utils
 
 import integrators.RungeKutta
@@ -42,7 +42,7 @@ params = {
 # setup the state
 axes = np.tile(np.linspace(0, params['domain_size'], num_grid_points + 1)[:-1], (2, 1))  # setup the axes
 axes[0] = axes[0] + 0.5 * dx  # offset the lnrho-axis
-state = utils.State(2, num_grid_points, axes, [("x", "rho"), ("x", "u_x")])  # create the state
+state = utils.State(2, num_grid_points, axes, [("x", "rho"), ("x", "w")])  # create the state
 
 # choose starting condition
 data = state.get_state_vars()  # get the underlying numpy-array

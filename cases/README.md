@@ -85,9 +85,12 @@ For this we will use a function from `starting_conditions.py`
 
 ## Folder descriptions
 * `debug_case` This folder is different from the others because it only contains one-dimensional PDEs (only one variable with only one dimension), which are used to debug the integrators.
-* `euler_equation/_1D` This folder contains a 1-dimensional version of the Euler-Equations with gravitation and viscosity.
+* `euler_equation/_1D_wp` This folder contains a 1-dimensional version of the Euler-Equations with gravitation and viscosity.
+It uses two variables: Vertical wind and pressure. Temperature is assumed to be constant.
 There are two implementations, one using $$\rho$$ directly, and one using $$ln\rho$$ instead.
 In latter implementation, non-linear terms and viscosity can be disabled.
+* `euler_equation/_1D_wpT` This folder contains a 1-dimensional version of the Euler-Equations with gravitation and viscosity.
+It uses two variables: Vertical wind, pressure and temperature.
 * `wave_equation` This folder contains different implementations of the standard wave-equation: $$\frac{d^{2}u}{dt^{2}}&=c^{2} \cdot \frac{d^{2}u}{dx^{2}}$$.
 As different implementations and boundary conditions are possible, this folder contains multiple implementations:
     * `dirichlet` makes the assumption that the velocity $$\frac{du}{dt}$$ at the locations 0 and L is zero, thus fixing u to a static value, which is a Dirichlet-boundary condition. This leads to solutions that can be found using Fourier-Analysis.
