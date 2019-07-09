@@ -1,0 +1,127 @@
+\chapter{Discretization}\label{chapter:introduction}
+As most numerical methods emulate physical discrete grids in time and space, all continuous operations in the differential equations describing the physical world, need to be discretized, too.
+In this section, first, the discretization of spacial differential operators is derived.
+Second, for the time-dimension several integrators will be introduced.
+Lastly, different grid discretizations are discussed, i.e. different possibilities of distributing the spacial location at the different variables in a PDE are 'measured'.
+
+\section{Discretization of Differential Operators}
+In order to derive the discrete versions of spacial differential operators, the taylor-series needs to be introduced.
+Let $f:\mathbb{R}\times\mathbb{R}^q\rightarrow \mathbb{R}$ be a function, which we want to develop along its first argument $x$.
+All other inputs $\boldsymbol{v}$ are held constant.
+Using the Landau-notation, we can write, with $\mathcal{O}(\Delta x ^{n+1})$ being the error of the approximation.
+\begin{equation}
+f(x+\Delta x,v) = \sum_{k=0}^{n}\frac{1}{k!}\cdot\frac{\partial^k f}{\partial x ^k}(x,v)\cdot \Delta x^k + \mathcal{O}(\Delta x ^{n+1})
+\end{equation}
+Assuming an equidistant grid, i.e. we know the values of $f(x+k\Delta x)$ for $k\in [-l,u] \cap \mathbb{Z}$, this yields a linear equation system of size $l + u + 1 - 1= l + u$ ($-1$ because $k=0$ yields no information).
+
+\begin{align*}
+f(x - l \Delta x,v) &= f(x,v) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x,v)\cdot (-l\Delta x)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x,v)\cdot (-l\Delta x)^2 + ... + \mathcal{O}((\Delta x) ^{l+u+1})\\
+&...\\
+f(x,v) &= f(x,v) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x,v)\cdot (0)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x,v)\cdot (0)^2 + ... + \mathcal{O}((0) ^{l+u+1})\\
+\\
+&...\\
+f(x + u \Delta x,v) &= f(x,v) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x,v)\cdot (u\Delta x)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x,v)\cdot (u\Delta x)^2 + ... + \mathcal{O}((\Delta x) ^{l+u+1})\\
+\end{align*}
+The equation system consists of $l+u$ unknowns, i.e. $\frac{\partial^k f}{\partial x^k}(x,v)$, and $l+u$ equations.
+The error of the approximation made by solving for one of the unknowns $\frac{\partial^k f}{\partial x^k}(x,v)$ is $\mathcal{O}((\Delta x) ^{l+u+1-k})$ ($-k$ comes from the fact that the equation needs to be divided by $\Delta x ^k$ before being solved).
+In this thesis we will mostly make use of the first derivative.
+To this end, most commonly the following four configurations are used ($v$ is omitted in the equations):
+
+\begin{align*}
+l=0,u=1&: \frac{\partial f}{\partial x}(x) = \frac{f(x+\Delta x) - f(x)}{\Delta x} + \mathcal{O}((\Delta x)^{1})\\
+l=1,u=0&: \frac{\partial f}{\partial x}(x) = \frac{f(x) - f(x-\Delta x)}{\Delta x} + \mathcal{O}((\Delta x)^{1})\\
+l=1,u=1&: \frac{\partial f}{\partial x}(x) = \frac{f(x + \Delta x) - f(x-\Delta x)}{2\Delta x} + \mathcal{O}((\Delta x)^{2})\\
+l=u=2&: \frac{\partial f}{\partial x}(x) = \frac{f(x-2\Delta x) -8 f(x-\Delta x) + 8 f(x+\Delta x) - f(x+2\Delta x)}{12\Delta x} + \mathcal{O}((\Delta x)^{4})\\
+\end{align*}
+
+\subsection{Spectral Methods for periodic boundary conditions?}
+for periodic boundary conditions with high enough spacial resolution, the derivative can be found without error as follows:
+\begin{itemize}
+\item take FFT
+\item multiply by $j\omega$
+\item transform back
+\end{itemize}
+
+
+\section{Types of Integrators}
+Before examples of integrators will be showcased, they first need to be defined.
+An integrator is an algorithm that given a starting condition $x(t_0) = x_0$ can solve a differential equation of the form $\frac{dx}{dt} = f(x,t)$, where $x$ is the state vector and $t$ is time.
+The goal is to generate a trace for $x(t)$ over time, after the starting time $t_0<t$.
+
+\subsection{Runge-Kutta Methods}
+One of the more simple classes of integrators are the explicit Runge Kutta methods.
+They begin with the initial value $x_0$ and then create the trace $x(t)$ taking small time-steps $\Delta t$ starting at $t_0$ and modifying the state through addition: $x(t+h) = x(t) + RK(f,x,t,h)$.\\
+All Runge-Kutta methods aim to approximate the Taylor series expansion of $x(t)$ with respect to $t$, i.e.
+\begin{align*}
+x(t+h) &= x(t) + \sum_{k=1}^{n}\frac{h^k}{k!}\frac{d^kx}{dt^k} + \mathcal{O} (h^{n+1}\frac{d^{n+1}x}{dt^{n+1}})\\
+&= x(t)+ \sum_{k=0}^{n-1}\frac{h^{k+1}}{(k+1)!}\frac{d^kf(x(t),t)}{dt^k} + \mathcal{O}(h^{n+1}\frac{d^{n}f}{dt^{n}})
+\end{align*}
+Using $\frac{df(x(t),t)}{dt} 
+= \frac{\partial f(x(t),t)}{\partial x}\frac{dx}{dt}+\frac{\partial f(x(t),t)}{\partial t} 
+= f\frac{\partial f}{\partial x}+\frac{\partial f}{\partial t}$
+this becomes.
+\begin{align*}
+x(t+h) &= x(t)+ \sum_{k=0}^{n-1}\frac{h^{k+1}}{(k+1)!}(\frac{\partial f}{\partial t} + f(x(t),t)\frac{\partial f}{\partial x})^kf(x(t),t) + \mathcal{O}(h^{n+1}\frac{d^{n}f}{dt^{n}})
+\end{align*}
+
+
+The most simple Runge Kutta method is the Explicit Euler or RK1 scheme, which can be derived by writing down the taylor expansion:
+\begin{align*}
+x(t+h) &= x(t) + h \cdot \frac{dx}{dt} + \mathcal{O}(h ^2)\\
+&= x(t) + h \cdot f(x,t) + \mathcal{O}(h ^2)
+\end{align*}
+RK1 has a local truncation error of $\mathcal{O}(h^2)$, and a total accumulated error of $\mathcal{O}(h)$.\\
+RK2 uses more than one evaluation of $f$ in order to do one step:
+\begin{align*}
+k_1 &= f(x(t),t)\\
+k_2 &= f(x(t) + \frac{h}{2} k_1, t + \frac{h}{2})\\
+&= f(x(t) + \frac{h}{2} f(x(t),t), t + \frac{h}{2})\\
+&= f(x(t),t) + h(\frac{\partial f}{\partial t} + f(x(t),t)\frac{\partial f}{\partial x})f(x(t),t) + \mathcal{O}(h^2)\\
+&= f(x(t),t) + h\frac{df}{dt} + \mathcal{O}(h^2)\\
+x(t) + \frac{h}{2} (k_1+k_2) &= x(t) + \frac{h}{2} (f(x(t),t) + f(x(t),t) + h\frac{df}{dt} + \mathcal{O}(h^2))\\
+&= x(t) + h f(x(t),t) + \frac{h^2}{2} \frac{df}{dt} + \mathcal{O}(h^3)\\
+&= x(t) + h \frac{dx}{dt} + \frac{h^2}{2} \frac{d^2x}{dt^2} + \mathcal{O}(h^3)\\
+x(t+h) &= x(t) + \frac{h}{2} (k_1+k_2) + \mathcal{O}(h^3)
+\end{align*}
+RK2 has a local truncation error of $\mathcal{O}(h^3)$, and a total accumulated error of $\mathcal{O}(h^2)$.\\
+In a similar fashion it can be shown that RK4 is as follows:
+\begin{align*}
+k_1 &= f(x(t),t)\\
+k_2 &= f(x(t)+\frac{h}{2}k_1,t+\frac{h}{2})\\
+k_3 &= f(x(t)+\frac{h}{2}k_2,t+\frac{h}{2})\\
+k_4 &= f(x(t) + h k_3, t + h)\\
+x(t+h) &= x(t) + \frac{h}{6}(k_1+2k_2+2k_3+k_4)
+\end{align*}
+RK4 has a local truncation error of $\mathcal{O}(h^5)$, and a total accumulated error of $\mathcal{O}(h^4)$.\\
+
+\subsection{Exponential Integrators}
+In case $f(x,t)$ is a linear timeinvariant function, $f$ can be written as $f(x)=Ax$, where $A$ is a matrix.
+The resulting differential equation can be solved analytically.
+To this end first, the Laplace transform is taken, and the equation is solved for $X(s)$ (with $I$ being the identity matrix):
+\begin{align*}
+sX(s) - x(t_0) &= AX(s)\\
+X(s) &= (sI-A)^{-1}x(t_0)
+\end{align*}
+Thereafter the inverse Laplace transform can be taken to solve for $x(t)$:
+\begin{align*}
+x(t) &= \exp (A (t-t_0))x(t_0)\\
+\text{using:}~ \exp{At} &= I + \sum_{k=1}^{\infty}\frac{1}{k!}(At)^k
+\end{align*}
+As this is an analytical solution, it is exact and does not depend on step-size.
+However there are two major disadvantages to this method.
+First, if the system is not linear it needs to be linearized, which makes the solution inexact.
+Second, it is comparatively slow as it requires a matrix to be exponentiated.
+Take, for example, the Navier Stokes equations discussed earlier.
+If temperature, wind speed, and density are stored at just 3000 grid points, this would entail the state vector $x$ having at least 3000 entries, and thus $A$ having a size of $3000^2=9\cdot 10^6$, which would still be feasible to compute, but not fast, especially when compared to Runge-Kutta methods.\\
+As a countermeasure to the second issue, the matrix exponential can be approximated using several approaches.
+One common method is the Padé-approximation:
+TODO: Padé-approximation
+
+%\begin{itemize}
+%\item show how linear equations can be solved using laplace-%transforms and matrix exponentials
+%\item give example of how matrix exponential can be approximated
+%\end{itemize}
+
+\section{Grid Discretizations}
+Explain how variables can be placed on different grid-points.\\
+discussion of Lorenz and Charney-Phillips-Grids

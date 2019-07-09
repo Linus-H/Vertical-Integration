@@ -1,0 +1,32 @@
+\chapter{Numerical Analysis}
+\section{Validation}
+Explain how the individual functions were unit-tested.
+\subsection{Differential Operators}
+\subsection{Integrators}
+\subsection{Implementation of Differential Equations}
+
+\section{Analysis of Errors}\label{chapter:introduction}
+In this section the effects (all?) possible choices of simplifications, integrators etc. is analyzed.\\
+To this end we introduce different ways of measuring errors, i.e. different norms, and use them to measure the difference between different simulations.
+
+% analysis of errors
+\subsection{Differential Operators}
+show how the error-order is influenced by grid-size.\\
+grid size far larger than features to be measured => inaccuracy\\
+grid size a little bit smaller than features to be measured => change in accuracy according to error-order of implemented operator\\
+grid size too small for machine precision => loss of accuracy
+
+\subsection{Integrators}
+\subsubsection{Runge-Kutta-Integrators}
+explain how time-step-size and grid-size have to change together, and show trough examples how accuracy changes depending on the choice of these two parameters (maybe a heatmap with x-axis = time-step-size, y-axis=grid-size, color=accuracy after simulation time T?)
+\subsubsection{Exponential Integrators}
+showcase how accuracy stays constant independent of time-step-size (for linear systems)\\
+give a small example of simulating a non-linear system by linearization around the current state
+
+\subsection{Simplifications to the Navier Stokes Equations} % effects of simplifications
+have one simulation without simplifications run with high precision (RK4 with tiny step-sizes and high grid resolution), and compare that to simulations using high precision with simplifications.
+
+\subsection{Grid Discretizations}% grid discretizations
+Quantify the difference between the two different grids.
+How do we really know which one is better?
+Find ways to quantify which one is more accurate?

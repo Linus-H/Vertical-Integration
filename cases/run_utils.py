@@ -141,8 +141,10 @@ be exponentiated before being displayed (True), or not (False).
     if display_diagram_exponentially is None:
         display_diagram_exponentially = [False] * num_vars
 
+    timer = debug_tools.error_tracking_tools.TimeIterator(0, dt)
     # simulation loop
-    for i, state in enumerate(integrator, 1):
+    for i, (t, state) in enumerate(zip(timer, integrator), 1):
         if i % sampling_rate == 0:
+            print(t)
             for j in range(num_vars):
                 window_manager.display_state(1 + j, state, j, exp=display_diagram_exponentially[j])

@@ -1,3 +1,5 @@
+import time
+
 import starting_conditions
 from cases import run_utils
 from cases.wave_equation.periodic.derivative.derivative import TimeDerivativeMatrix
@@ -54,8 +56,8 @@ vis.display_error(1, errors_u, double_log=True, line_name="v_error")
 vis.draw_loglog_oder_line(1, 1e2, 1e-2, 0.5, 2)
 vis.draw_loglog_oder_line(1, 1e2, 1e-2, 0.5, 3)
 vis.draw_loglog_oder_line(1, 1e2, 1e-2, 0.5, 4)
-
-print("u")
+plt.show()
+"""print("u")
 for i in range(len(resolutions) - 1):
     # comparing the previous error with current one
     print(errors_u.abs_error[i] / errors_u.abs_error[i + 1])
@@ -63,3 +65,4 @@ print("v")
 for i in range(len(resolutions) - 1):
     # comparing the previous error with current one
     print(errors_v.abs_error[i] / errors_v.abs_error[i + 1])
+plt.show()"""
