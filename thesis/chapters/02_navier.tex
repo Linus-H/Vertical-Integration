@@ -19,23 +19,23 @@ The following variables are used in the equations (TODO: quote introduction to n
 Using the material derivative $\frac{D\bullet}{Dt}=\frac{\partial\bullet}{\partial t}+\textbf{V}_3\cdot \nabla_3\bullet$ the most general form of the equations can be written follows:
 \begin{align}
 \text{momentum equation}\;\; \frac{D\textbf{V}_3}{Dt} &= -2\boldsymbol{\Omega}\times \textbf{V}_3 - \frac{1}{\rho}\nabla _3 p - \nabla _3 \Phi + \textbf{F} \label{eq_mom}\\
-\text{thermodynamic equation}\;\;\; \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{dp}{dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
+\text{thermodynamic equation}\;\;\; \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
 \text{continuity equation}\;\;\; \frac{D\rho}{Dt} &= -\rho \nabla _3 \cdot \textbf{V}_3\label{eq_cont}\\
 \text{water vapor equation}\;\;\; \frac{Dq}{Dt} &= \textbf{M}\label{eq_water}\\
-\text{equation of state}\;\;\;\;\; p &= \rho R T
+\text{equation of state}\;\;\;\;\; p &= \rho R T \label{eq_state}
 \end{align}
 \subsubsection{Interpretation of the Terms:}
 The material derivative accounts for the fact that the physical properties of a fluid parcel need to 'travel' with their fluid parcel through space.
 Starting with the momentum equation \ref{eq_mom}:
 \begin{itemize}
 \item $-2\boldsymbol{\Omega}\times \textbf{V}_3$ this term describes the Coriolis effect, which needs to be modeled because the rotating earth is used as the frame of reference.
-\item $- \frac{1}{\rho}\nabla _3 p$ this term describes how air flows from high to low pressure.
+\item $- \frac{1}{\rho}\nabla _3 p$ the pressure force term describes how air flows from high to low pressure.
 \item $- \nabla _3 \Phi$ this term describes how air flows from high potential to low potential, i.e. in the direction of gravity.
 \end{itemize}
 For complete accuracy a term of the shape $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity can be added.
 However $\mu \approx 1.7\cdot 10^{-5}$, so the term can often be ignored.
 
-In the thermodynamic equation \ref{eq_therm}, the term $\frac{R}{C_p}\frac{T}{p}\frac{dp}{dt}$ describes how temperature changes given how the pressure changes.
+In the thermodynamic equation \ref{eq_therm}, the term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describes how temperature changes given how the pressure changes.
 This relationship depends on temperature and pressure, because the thermodynamic properties of air also depend on the current temperature and pressure.
 To be completely accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ should be added, to account for thermal conduction, but for these equations they can be neglected, because $\alpha \approx \frac{0.024}{R\rho}$ (TODO: source) is sufficiently small.
 
@@ -51,28 +51,153 @@ In the following the source/sink terms $\textbf{F}$, $\textbf{Q}$ and $\textbf{M
 \section{Assumptions, Simplifications, and Modifications}
 In this section the most common simplifications will be listed and explained.
 
+\subsection{Replacing Occurrences of $\rho$ by $p$}\label{subsec_rho_p}
+In the Navier Stokes Equations the only diagnostic equation containing $\rho$ is the continuity equation \ref{eq_cont} ($rho$ in the momentum equation \ref{eq_mom} can simply be replaced using \ref{eq_state}).
+Using the equation of state \ref{eq_state} and the thermodynamic equation \ref{eq_therm}, we can get the following:
+\begin{align*}
+\frac{D\rho}{Dt} &\stackrel{(\ref{eq_state})}{=} \frac{D\frac{p}{RT}}{Dt} = \frac{1}{RT}\frac{Dp}{Dt}-\frac{p}{RT^2}\frac{DT}{Dt}\\
+&\stackrel{(\ref{eq_therm})}{=} \frac{1}{RT}\frac{Dp}{Dt}-\frac{1}{C_pT}\frac{Dp}{Dt} = \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt}
+\end{align*}
+Now inserting this into the continuity equation \ref{eq_cont} itself:
+\begin{align*}
+\frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt} &= \frac{D\rho}{Dt} = -\rho \nabla _3 \cdot \textbf{V}_3\\
+\frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt} &\stackrel{(\ref{eq_state})}{=} -\frac{p}{RT} \nabla _3 \cdot \textbf{V}_3\\
+\frac{Dp}{Dt} &= - \frac{p}{1-\frac{R}{C_p}} \nabla _3 \cdot \textbf{V}_3
+\end{align*}
+
 \subsection{Splitting into Vertical and Horizontal}
 Commonly the Navier Stokes equations are split up into its vertical and horizontal components.
 To this end two new variables $\textbf{V} \in \mathbb{R}^2$ and $w\in \mathbb{R}$, representing horizontal and vertical winds respectively, are introduced.
 Additionally $\boldsymbol{k}$ is the vertical vector (always perpendicular to the ground), and $f=2\Omega \sin \phi$ is the Coriolis parameter.
-Assuming gravity to only act in the vertical and being constant across the atmosphere, we can write $-\nabla \Phi = -g \boldsymbol{k}$.
+Assuming gravity to only act in the vertical and being constant across the atmosphere, we can write $-\nabla_3 \Phi = -g \boldsymbol{k}$.
 Using these definitions to replace $\textbf{V}_3$, we end up with the following equation system:
 \begin{align*}
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
-\frac{D\boldsymbol{k}}{Dt} &= \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
-\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{dp}{dt}\\
-\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} (\nabla \textbf{V} + \frac{dw}{dz})\\
+\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
+\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
+\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+\end{align*}
+
+
+\subsection{Ignoring Horizontal Winds}
+For the purposes of this thesis, we are only interested in the vertical part of the Navier Stokes equations.
+For this reason we assume that $\textbf{V}=0$, resulting in the following equation system.
+\begin{align*}
+\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
+\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
+\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \frac{\partial w}{\partial z}\\
 p &= \rho R T
 \end{align*}
-\subsection{Ignoring Horizontal Winds}
-\subsection{Replacing $p$ by $\text{ln}p$}
-\subsection{Assuming Constant Temperature}
+
 \subsection{Hydrostatic Assumption}
-give all simplifications made to the navier stokes equations names for later chapters
+Often, for purposes of weather simulation, it is assumed that the change of speed in vertical winds is negligible, i.e. $\frac{Dw}{Dt}=0$.
+This is called the hydrostatic assumption.
+Applying it to the Navier Stokes equations leads to the following:
+\begin{align*}
+\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
+\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
+\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})\\
+\frac{\partial p}{\partial z} &= -\rho g \\
+\end{align*}
+
+\subsection{Replacing $p$ by $\text{ln}p$}
+Another common transformation applied to the Navier Stokes equations, is the replacement of the variable $p$ by $\text{ln}p$.
+This effect of this transformation can be observed by taking the derivative of $\text{ln}p$, w.r.t. some variable $\iota$, and applying the chain rule:
+\begin{align*}
+\frac{d\text{ln}p}{d\iota} =  \frac{1}{p}\frac{dp}{d\iota}
+\end{align*}
+Applying this to the Navier Stokes equations, results in the following set of equations:
+\begin{align*}
+\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - RT\nabla \text{ln}p\\
+\frac{Dw}{Dt} &= - RT \frac{\partial \text{ln}p}{\partial z} - g \\
+\frac{DT}{Dt} &= \frac{RT}{C_p}\frac{D\text{ln}p}{Dt}\\
+\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+\end{align*}
+
+\subsection{Assuming Constant Temperature}
+As a simpler version of the problem, one can assume the temperature to be constant across the domain, i.e. $T=\text{const}$.
+Making this assumption for a domain spanning the entire vertical of the atmosphere is of course not very accurate, however for testing purposes, it can be worthwhile to follow this train of thought.
+From this assumption it follows that $0=\frac{DT}{Dt}=\nabla _3T$
+This has an effect on two equations.
+First, the thermodynamic equation \ref{eq_therm} becomes irrelevant.
+Second, the rewriting of the continuity equation \ref{eq_cont} in section \ref{subsec_rho_p} can be simplified, it was assumed there that $\frac{DT}{Dt}\neq 0$.
+Keeping this in mind, the equations can be written as follows:
+\begin{align*}
+\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
+\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
+\frac{Dp}{Dt} &= -p (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+\end{align*}
 
 \subsection{Alternative Coordinate Systems}
-general explanation of alternate vertical coordinate systems\\
-introducing pressure-coordinates and explaining their advantages
+When simulating the above equations, one would have to pick the boundaries of the simulated space, by choosing the borders of the simulation range, i.e. a range $[z_{\text{bottom}};z_{\text{top}}]$ in which to simulate the system.
+For several reasons this is not optimal:
+First, the lower boundary $z_{\text{bottom}}$ is not constant, but depends on the profile of the ground.
+Second, the atmosphere does not abruptly end at any specific height, so it there is no obvious $z_{\text{top}}$ to pick.
+Considering this, a different measurement for height $s$ is introduced, i.e. all occurrences of $z$ are replaced by some other coordinate $s$.
+Often, $s$ will be dependent on pressure $p$ in some way, as this way an equidistant spacing of $s$ will correspond to higher spacial resolution in areas where $p$ is changing a lot.\\
+To the end of introducing $s$, we use the following identities, with $c\in\{x,y\}$ \cite{kasahara1974various}:
+\begin{align}
+\begin{split}
+(\frac{\partial A}{\partial c})_s &= (\frac{\partial A}{\partial c})_z + \frac{\partial A}{\partial z}(\frac{\partial z}{\partial s})_s\\
+\Rightarrow \nabla _s A &= \nabla _z A+\frac{\partial s}{\partial z}(\nabla _sz)\frac{\partial A}{\partial s}\\
+\frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial z}{\partial s}\\
+\frac{D}{Dt} &= (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}
+\end{split}\label{eq_s_identities}
+\end{align}
+Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
+\begin{align*}
+\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
+\frac{\partial T}{\partial t} &\stackrel{(\ref{eq_s_identities})}{=} -\textbf{V} \cdot \nabla _s T - \dot{s} \frac{\partial T}{\partial s}+\frac{RT}{C_p}\frac{D\text{ln}p}{Dt}
+\end{align*}
+The derivation of the non-hydrostatic Navier Stokes equations also use hydrostatic pressure $\pi$, which has the property:
+\begin{align}
+\frac{\partial \pi}{\partial z} &= -\rho g = - \frac{p}{RT}g \nonumber \\
+\pi(z) &= \int_\infty ^z \rho g dz' \nonumber \\
+\Rightarrow \frac{\partial s}{\partial z} &= \frac{\partial s}{\partial \pi}\frac{\partial \pi}{\partial z} = - g\rho(\frac{\partial \pi}{\partial s})^{-1} = - g\frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} \label{eq_ds_dz}
+\end{align}
+
+Using this definition, the equation for vertical wind can be written as:
+\begin{align*}
+\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g\\
+&= - \frac{RT}{p} \frac{\partial p}{\partial s}\frac{\partial s}{\partial z} - g\\
+&\stackrel{(\ref{eq_ds_dz})}{=} g \frac{\partial p}{\partial s}(\frac{\partial \pi}{\partial s})^{-1} - g\\
+&= -g(1 - \frac{\partial p}{\partial s}(\frac{\partial \pi}{\partial s})^{-1})
+\end{align*}
+The equation for pressure becomes:
+\begin{align*}
+\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} (\nabla_z \cdot \textbf{V} + \frac{\partial w}{\partial z})\\
+&\stackrel{(\ref{eq_s_identities})}{=} -\frac{1}{1- \frac{R}{C_p}} (\nabla _s \cdot \textbf{V} - \frac{\partial s}{\partial z} (\nabla _sz)\cdot \frac{\partial \textbf{V}}{\partial s} + \frac{\partial s}{\partial z}\frac{\partial w}{\partial s})\\
+&\stackrel{(\ref{eq_ds_dz})}{=} -\frac{1}{1- \frac{R}{C_p}} (\nabla _s \cdot \textbf{V} + \frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} (\nabla _s \phi)\cdot\frac{\partial \textbf{V}}{\partial s} - g\frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} \frac{\partial w}{\partial s})\\
+\end{align*}
+
+Starting from the continuity equation \ref{eq_cont}, with the generalized vertical velocity $\dot{s}=\frac{ds}{dt}$, utilizing the above identities, it can be shown that the following equations hold:
+\begin{align*}
+\text{original equation:}~~~~ \frac{d}{dt}(\text{ln}\rho) &+ \nabla _z \cdot \textbf{V} + \frac{\partial w}{\partial z} = 0 \\
+\frac{d}{dt}(\text{ln}(\rho\frac{\partial z}{\partial s})) &+ \nabla _s \cdot \textbf{V} + \frac{\partial \dot{s}}{\partial s} = 0\\
+\frac{\partial}{\partial t}(\rho\frac{\partial z}{\partial s}) &= - \nabla _s \cdot (\rho\frac{\partial z}{\partial s}\textbf{V}) - \frac{\partial }{\partial s}(\rho\frac{\partial z}{\partial s}\dot{s})
+\end{align*}
+Utilizing, $\rho\frac{\partial z}{\partial s} \stackrel{(\ref{eq_ds_dz})}{=} - \frac{1}{g}\frac{\partial \pi}{\partial s}$, we get an equation describing the change of $\frac{\partial \pi}{\partial s}$ over time.
+\begin{align*}
+\frac{\partial}{\partial t}(\frac{\partial \pi}{\partial s}) &= - \nabla _s \cdot (\frac{\partial \pi}{\partial s}\textbf{V}) - \frac{\partial }{\partial s}(\frac{\partial \pi}{\partial s}\dot{s})
+\end{align*}
+Integrating this equation from $s_{top}$ to $s$, gives a diagnostic equation for $\dot{s}$:
+\begin{align*}
+\dot{s}\frac{\partial \pi}{\partial s} = -\int _{s_{top}}^s\nabla _s \cdot (\frac{\partial \pi}{\partial s}\textbf{V})ds' + \frac{\partial \pi}{\partial \pi_{\text{bottom}}} \int  _{s_{top}}^{s_{bottom}} \nabla _s \cdot (\frac{\partial \pi}{\partial s}\textbf{V}) ds
+\end{align*}
+
+Now making the assumption that horizontal winds are zero again, i.e. $\textbf{V}=0$, using the above relation necessitates that $\dot{s}=0$.
+These two statements result in the following equation system:
+\begin{align*}
+\frac{\partial w}{\partial t} &= -g(1 - \frac{\partial p}{\partial s}(\frac{\partial \pi}{\partial s})^{-1}) \\
+\frac{\partial \text{ln}p}{\partial t} &= \frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} \frac{\partial w}{\partial s}\\
+\frac{\partial T}{\partial t} &= \frac{RT}{C_p}\frac{\partial \text{ln}p}{\partial t}\\
+\frac{\partial}{\partial t}(\frac{\partial \pi}{\partial s}) &= 0
+\end{align*}
+Note that for $\textbf{V}=\dot{s}=0$, the material derivative and partial derivative are the same:
+\begin{align*}
+\frac{D}{Dt} = (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s} = (\frac{\partial}{\partial t})_s
+\end{align*}
+
 \subsection{Boundary Conditions}
 discussion of how each of the state variables should behave at the boundaries of the system
 \begin{itemize}
