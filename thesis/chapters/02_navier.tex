@@ -1,5 +1,10 @@
 \chapter{Navier Stokes Equations}\label{chapter:navier_stokes}
-As a case study in this thesis the vertical part of the Navier Stokes Equations with some simplifications will be used.
+As a case study the vertical part of the Navier Stokes Equations with some simplifications will be used.
+They are commonly used to perform numerical weather prediction.
+In this chapter the equations will be introduced, and briefly interpreted, i.e. the first step from the introduction is performed.
+Thereafter, some common simplifications will be introduced, and assumptions about the boundary conditions are made.
+This accounts for the second step from the introduction.
+
 The following variables are used in the equations (TODO: quote introduction to numerical weather prediciton):
 \begin{itemize}
 \item $t$ time (in $s$)
@@ -16,7 +21,7 @@ The following variables are used in the equations (TODO: quote introduction to n
 \item $\textbf{Q}$ source/sink term for heat (in $\frac{J}{mol\cdot K}$)
 \item $\textbf{M}$ source/sink term for specific humidity (in $\frac{g}{s\cdot kg}$)
 \end{itemize}
-Using the material derivative $\frac{D\bullet}{Dt}=\frac{\partial\bullet}{\partial t}+\textbf{V}_3\cdot \nabla_3\bullet$ the most general form of the equations can be written follows:
+Using these definitions, and the material derivative $\frac{D\bullet}{Dt}=\frac{\partial\bullet}{\partial t}+\textbf{V}_3\cdot \nabla_3\bullet$ the most general form of the equations can be written as follows:
 \begin{align}
 \text{momentum equation}\;\; \frac{D\textbf{V}_3}{Dt} &= -2\boldsymbol{\Omega}\times \textbf{V}_3 - \frac{1}{\rho}\nabla _3 p - \nabla _3 \Phi + \textbf{F} \label{eq_mom}\\
 \text{thermodynamic equation}\;\;\; \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
@@ -25,19 +30,20 @@ Using the material derivative $\frac{D\bullet}{Dt}=\frac{\partial\bullet}{\parti
 \text{equation of state}\;\;\;\;\; p &= \rho R T \label{eq_state}
 \end{align}
 \subsubsection{Interpretation of the Terms:}
-The material derivative accounts for the fact that the physical properties of a fluid parcel need to 'travel' with their fluid parcel through space.
-Starting with the momentum equation \ref{eq_mom}:
+The material derivative accounts for the fact that the physical properties of a fluid parcel need to 'travel' along with that fluid parcel through space, e.g. when releasing hot air through a valve at high speeds, the hot air travels through space and the warmness of the air follows the same trajectory.
+
+In the following the right-hand sides of the above equations are interpreted, starting with the momentum equation \ref{eq_mom}:
 \begin{itemize}
 \item $-2\boldsymbol{\Omega}\times \textbf{V}_3$ this term describes the Coriolis effect, which needs to be modeled because the rotating earth is used as the frame of reference.
-\item $- \frac{1}{\rho}\nabla _3 p$ the pressure force term describes how air flows from high to low pressure.
-\item $- \nabla _3 \Phi$ this term describes how air flows from high potential to low potential, i.e. in the direction of gravity.
+\item $- \frac{1}{\rho}\nabla _3 p$ this pressure force term describes how air flows from regions of high pressure to regions of low pressure.
+\item $- \nabla _3 \Phi$ this term describes how air flows from high  potential to low potential, i.e. in the direction of gravity.
 \end{itemize}
 For complete accuracy a term of the shape $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity can be added.
 However $\mu \approx 1.7\cdot 10^{-5}$, so the term can often be ignored.
 
 In the thermodynamic equation \ref{eq_therm}, the term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describes how temperature changes given how the pressure changes.
 This relationship depends on temperature and pressure, because the thermodynamic properties of air also depend on the current temperature and pressure.
-To be completely accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ should be added, to account for thermal conduction, but for these equations they can be neglected, because $\alpha \approx \frac{0.024}{R\rho}$ (TODO: source) is sufficiently small.
+To be more accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ could be added, to account for thermal conduction, but for these equations they can be neglected, because $\alpha \approx \frac{0.024}{R\rho}$ (TODO: source) is sufficiently small.
 
 The continuity equation \ref{eq_cont} can also be written as:
 \begin{align*}
@@ -89,7 +95,7 @@ For this reason we assume that $\textbf{V}=0$, resulting in the following equati
 p &= \rho R T
 \end{align*}
 
-\subsection{Hydrostatic Assumption}
+\subsection{Hydrostatic Assumption}\label{subsec_hydrostat}
 Often, for purposes of weather simulation, it is assumed that the change of speed in vertical winds is negligible, i.e. $\frac{Dw}{Dt}=0$.
 This is called the hydrostatic assumption.
 Applying it to the Navier Stokes equations leads to the following:
@@ -144,6 +150,9 @@ To the end of introducing $s$, we use the following identities, with $c\in\{x,y\
 \frac{D}{Dt} &= (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}
 \end{split}\label{eq_s_identities}
 \end{align}
+
+
+\subsubsection{Non-Hydrostatic Equations:}
 Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
 \begin{align*}
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
@@ -197,6 +206,25 @@ Note that for $\textbf{V}=\dot{s}=0$, the material derivative and partial deriva
 \begin{align*}
 \frac{D}{Dt} = (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s} = (\frac{\partial}{\partial t})_s
 \end{align*}
+According to Laprise \ref{laprise1992euler}, one can implicitly define the vertical coordinate using two functions $f$ and $h$, and with $\pi_0$ and $\pi _{bottom}$ being a reference pressure and hydrostatic pressure at the bottom, respectively:
+\begin{align*}
+\pi (s) = f(s)\pi_0 + h(s)\pi_{bottom}
+\end{align*}
+Using this equation, and integrating equation (\ref{eq_ds_dz}) with respect to $s$, we can get:
+\begin{align*}
+z(s) = z_{bottom} + \frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s})ds'
+\end{align*}
+W.l.o.g. it is assumed that $s=0$ at the top of the system and $s=1$ at the bottom, from which it follows that:
+\begin{align*}
+\pi(1) = \pi_{bottom} \Rightarrow f(1) = 0 , h(1) = 1
+\end{align*}
+Also, assuming pressure at the top of the atmosphere is nonexistent:
+\begin{align*}
+\pi(0) = 0 \Rightarrow f(0) = 0, h(0) = 0
+\end{align*}
+
+\subsubsection{Hydrostatic Equations:}
+Yet another equation system can be gained by making use of the hydrostatic assumption from section \ref{subsec_hydrostat}.
 
 \subsection{Boundary Conditions}
 discussion of how each of the state variables should behave at the boundaries of the system

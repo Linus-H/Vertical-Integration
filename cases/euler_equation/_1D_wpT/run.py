@@ -25,20 +25,19 @@ def const_start_cond(a):
 
 
 # "L" for Lorenz grid, "CP" for charney phillip grid
-mode = "L"  # "CP"
+mode = "CP"  # "CP"
 
 # choose simulation-parameters
 num_grid_points = 1000
-domain_start = 0.0
-domain_size = 1.0
+domain_size = 10000.0
 dx = domain_size / num_grid_points
 
 time_factor = 1.0
-dt = 1e-6  # 1.0 / (1000 * num_grid_points)
+dt = 1e-3  # 1.0 / (1000 * num_grid_points)
 
 params = {
     'num_grid_points': num_grid_points,
-    'domain_size': 10000.0,
+    'domain_size': domain_size,
     'dt': dt,
     'sampling_rate': time_factor * 800
 }
@@ -47,7 +46,7 @@ params = {
 axes = np.tile(np.linspace(0, params['domain_size'], num_grid_points + 1)[:-1], (3, 1))  # setup the axes
 axes[0] = axes[0] + 0.5 * dx  # offset the lnp-axis
 if mode is "L":
-    axes[1] = axes[1] + 0.5 * dx  # offset the lnp-axis
+    axes[1] = axes[1] + 0.5 * dx  # offset the Tp-axis
 state = utils.State(3, num_grid_points, axes, [("z", "p"), ("z", "T"), ("z", "w")])  # create the state
 
 # choose starting condition
@@ -62,7 +61,7 @@ data[0] = starting_conditions.GaussianBump(0.5 * params['domain_size'], 0.000001
 data[0] = np.log(data[0])  # apply logarithm in order to have ln(rho)-axis
 
 # specify T-values
-data[1] = 273
+data[1] = 273 #+ starting_conditions.GaussianBump(0.5*params['domain_size'],0.000001).get_start_condition(axes[0])*50
 
 # choose inputs for the time_derivative
 time_derivative_input = [0]  # gravity
@@ -70,4 +69,4 @@ time_derivative_input = [0]  # gravity
 run_utils.run_visual_without_solution(params, integrators.RungeKutta.Explicit,
                                       LogTimeDerivativeLorenz if mode is "L" else LogTimeDerivativeCP,
                                       time_derivative_input,
-                                      state, [True, False, False])
+                                      state, [(lambda x:x,np.exp), None, None])

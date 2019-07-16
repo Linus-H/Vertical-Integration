@@ -62,4 +62,4 @@ time_derivative_input = [True,  # non-linear
 
 run_utils.run_visual_without_solution(params, integrators.RungeKutta.Explicit,
                                       LogTimeDerivative, time_derivative_input,
-                                      state, [True, False])
+                                      state, [(lambda x:x,np.exp), None])

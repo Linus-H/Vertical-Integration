@@ -109,7 +109,7 @@ every how many steps the state shall be displayed 'sampling_rate'.
 
 def run_visual_without_solution(params, integrator_class,
                                 time_derivative_class, time_derivative_inputs,
-                                state, display_diagram_exponentially=None):
+                                state, display_operation=None):
     """
     :param params: dictionary with values for 'num_grid_points', time-step-size 'dt', size of the domain 'domain_size',
 every how many steps the state shall be displayed 'sampling_rate'.
@@ -117,8 +117,8 @@ every how many steps the state shall be displayed 'sampling_rate'.
     :param time_derivative_class: Class of the time derivative to be used.
     :param time_derivative_inputs: Iterable list of special inputs for the class of the time derivative.
     :param state: An object of class utils.State, which contains the initial state of the system.
-    :param display_diagram_exponentially: A list of booleans, where it can be specified whether a system variable should
-be exponentiated before being displayed (True), or not (False).
+    :param display_operation: A list of functions, where one can specify an operation to be executed on a system variable
+    before being displayed.
     """
     # choose constants
     num_grid_points = params['num_grid_points']
@@ -138,13 +138,13 @@ be exponentiated before being displayed (True), or not (False).
     num_vars = len(state.get_names())
     window_manager = debug_tools.visualization.WindowManager(num_vars, 1)
 
-    if display_diagram_exponentially is None:
-        display_diagram_exponentially = [False] * num_vars
+    if display_operation is None:
+        display_operation = [None] * num_vars
 
     timer = debug_tools.error_tracking_tools.TimeIterator(0, dt)
     # simulation loop
     for i, (t, state) in enumerate(zip(timer, integrator), 1):
-        if i % sampling_rate == 0:
+        if i % sampling_rate == 1:
             print(t)
             for j in range(num_vars):
-                window_manager.display_state(1 + j, state, j, exp=display_diagram_exponentially[j])
+                window_manager.display_state(1 + j, state, j, operations=display_operation[j])

@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
+
 class WindowManager:
     def __init__(self, n_rows, n_cols):
         self.fig = plt.figure()
@@ -11,7 +12,7 @@ class WindowManager:
     def get_axis(self, plot_index):
         return self.axes[plot_index - 1]
 
-    def display_state(self, plot_index, state, state_index, y_min=None, y_max=None, clear_axis=True, exp=False):
+    def display_state(self, plot_index, state, state_index, y_min=None, y_max=None, clear_axis=True, operations=None):
         """
         :param plot_index: index of the plot to be plotted in (index starts at 1)
         :param state: state whose variable is to be displayed.
@@ -19,7 +20,7 @@ class WindowManager:
         :param y_min: lower bound of y-axis to be displayed.
         :param y_max: upper bound of y-axis to be displayed.
         :param clear_axis: whether the axis should be cleared before the new plot is drawn.
-        :param exp: whether the state-variable-content should be exponentiated (e^.) before being displayed.
+        :param operations: tuple of operations to apply to the axis and state variable vector before being displayed.
         """
         # select and clear the graph to plot in
         ax = self.axes[plot_index - 1]
@@ -28,10 +29,13 @@ class WindowManager:
 
         # get data to plot
         state_var = state.get_state_vars()[state_index]
-        if exp:
-            state_var = np.exp(state_var)
-        x_label, y_label = state.get_names()[state_index]
         axis = state.get_axes()[state_index]
+
+        if operations is not None:
+            axis_op, state_op = operations
+            axis = axis_op(axis)
+            state_var = state_op(state_var)
+        x_label, y_label = state.get_names()[state_index]
 
         # plot the data
         ax.plot(axis, state_var)

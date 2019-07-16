@@ -5,6 +5,7 @@ Second, for the time-dimension several integrators will be introduced.
 Lastly, different grid discretizations are discussed, i.e. different possibilities of distributing the spacial location at the different variables in a PDE are 'measured'.
 
 \section{Discretization of Differential Operators}
+TODO: sources\\
 In order to derive the discrete versions of spacial differential operators, the taylor-series needs to be introduced.
 Let $f:\mathbb{R}\times\mathbb{R}^q\rightarrow \mathbb{R}$ be a function, which we want to develop along its first argument $x$.
 All other inputs $\boldsymbol{v}$ are held constant.
@@ -49,6 +50,7 @@ An integrator is an algorithm that given a starting condition $x(t_0) = x_0$ can
 The goal is to generate a trace for $x(t)$ over time, after the starting time $t_0<t$.
 
 \subsection{Runge-Kutta Methods}
+TODO: sources\\
 One of the more simple classes of integrators are the explicit Runge Kutta methods.
 They begin with the initial value $x_0$ and then create the trace $x(t)$ taking small time-steps $\Delta t$ starting at $t_0$ and modifying the state through addition: $x(t+h) = x(t) + RK(f,x,t,h)$.\\
 All Runge-Kutta methods aim to approximate the Taylor series expansion of $x(t)$ with respect to $t$, i.e.
