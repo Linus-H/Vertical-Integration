@@ -1,27 +1,73 @@
-\chapter{Navier Stokes Equations}\label{chapter:navier_stokes}
-As a case study the vertical part of the Navier Stokes Equations with some simplifications will be used.
-They are commonly used to perform numerical weather prediction.
-In this chapter the equations will be introduced, and briefly interpreted, i.e. the first step from the introduction is performed.
-Thereafter, some common simplifications will be introduced, and assumptions about the boundary conditions are made.
-This accounts for the second step from the introduction.
+\chapter{Navier Stokes Equations for Atmospheric Simulation}\label{chapter:navier_stokes}
+As mentioned in the introduction our system of interest is a simplified model of weather.
+This system is commonly described using a variant of the Navier Stokes Equations used for atmospheric simulation (NSE).
+For this reason, in this section the NSE will first be introduced, completing the first step of \emph{modeling}.
+Thereafter, some common simplifications will be introduced, and the boundary conditions of the system are discussed.
+This accounts for the second step of \emph{approximating}.\\
 
-The following variables are used in the equations (TODO: quote introduction to numerical weather prediciton):
-\begin{itemize}
-\item $t$ time (in $s$)
-\item $\textbf{V}_3$ wind speed (in $\frac{m}{s}$)
-\item $T$ temperature (in $K$)
-\item $\rho$ density (in $\frac{kg}{m^3}$)
-\item $q$ specific humidity (in $\frac{g}{kg}$)
-\item $p$ pressure (in $\frac{N}{m^2}$)
-\item $\boldsymbol{\Omega}$ angular velocity of the Earth (in $\frac{m}{s}$)
-\item $\Phi = gz$ geopotential comprising effects of gravity and centrifugal force (in $\frac{J}{kg}$)
-\item $R=8.314\frac{J}{mol\cdot K} = 287.0 \frac{J}{kg\cdot K}$ perfect gas constant
-\item $C_p=28.97 \frac{J}{mol\cdot K} = 1000 \frac{J}{kg\cdot K}$ specific heat at constant pressure for dry air (TODO: source for numbers)
-\item $\textbf{F}$ source/sink term for momentum (in $\frac{m}{s^2}$)
-\item $\textbf{Q}$ source/sink term for heat (in $\frac{J}{mol\cdot K}$)
-\item $\textbf{M}$ source/sink term for specific humidity (in $\frac{g}{s\cdot kg}$)
-\end{itemize}
-Using these definitions, and the material derivative $\frac{D\bullet}{Dt}=\frac{\partial\bullet}{\partial t}+\textbf{V}_3\cdot \nabla_3\bullet$ the most general form of the equations can be written as follows:
+Before the system of equations can be understood, first, the symbols used within them must be discussed.
+The following table introduces the used symbols, their colloquial names, their type, and their SI-unit.
+
+\begin{tabular}{c|c|c|c}
+\hline
+Symbol & Name & Type & SI-unit \\ 
+\hline 
+$t$ & time & variable & $s$ \\
+\hline 
+$\textbf{V}_3$ & wind speed & vector field & $\frac{m}{s}$ \\
+\hline 
+$T$ & temperature & scalar field & $K$ \\
+\hline 
+$\rho$ & density & scalar field & $\frac{kg}{m^3}$ \\
+\hline 
+$q$ & specific humidity & scalar field & $\frac{g}{kg}$ \\
+\hline 
+$p$ & pressure & scalar field & $\frac{N}{m^2}$ \\
+\hline 
+$\boldsymbol{\Omega}$ & angular velocity of Earth & constant vector & $\frac{m}{s}$ \\
+\hline 
+$\Phi = gz$ & \makecell{geopotential comprising effects\\ of gravity and centrifugal force} & scalar field & $\frac{J}{kg}$ \\
+\hline 
+$R \approx 287.0 \frac{J}{kg\cdot K}$ & perfect gas constant & scalar constant & $\frac{J}{kg\cdot K}$ \\ 
+\hline 
+$C_p \approx 1000 \frac{J}{kg\cdot K}$ & \makecell{specific heat at constant \\pressure for dry air} & scalar constant & $\frac{J}{kg\cdot K}$ \\ 
+\hline 
+$\textbf{F}$ & source/sink term for momentum & scalar field & $\frac{m}{s^2}$ \\ 
+\hline 
+$\textbf{Q}$ & source/sink term for heat & scalar field & $\frac{J}{mol\cdot K}$ \\ 
+\hline 
+$\textbf{M}$ & source/sink term for specific humidity & scalar field & $\frac{g}{s\cdot kg}$ \\ 
+%\hline 
+\end{tabular}
+\\(TODO: source for numbers)\\
+
+Now the only components missing to write down the NSE are the differential operators.
+In the following table $A$ stands in for an arbitrary scalar field.
+The third definition of $\nabla$ will be used in later sections and has been included for completeness sake.
+
+{\tabulinesep=0.5mm
+\begin{center}
+\begin{tabu}{c|c|c} 
+\hline
+Operator Symbol & Definition & Operator Name \\ 
+\hline 
+$\frac{DA}{Dt}$ & $\frac{\partial A}{\partial t}+\textbf{V}_3\cdot \nabla_3A$ & material derivative \\ 
+\hline 
+$\nabla _3$ & $\begin{pmatrix}
+\frac{\partial }{\partial x} \\ 
+\frac{\partial }{\partial y} \\ 
+\frac{\partial }{\partial z}
+\end{pmatrix}$ & 3-dimensional nabla-operator \\
+\hline 
+$\nabla$ & $\begin{pmatrix}
+\frac{\partial }{\partial x} \\ 
+\frac{\partial }{\partial y}
+\end{pmatrix}$ & 2-dimensional nabla-operator
+\end{tabu}
+\end{center}}
+
+
+Using these definitions the most general form of the equations can be written as follows:
 \begin{align}
 \text{momentum equation}\;\; \frac{D\textbf{V}_3}{Dt} &= -2\boldsymbol{\Omega}\times \textbf{V}_3 - \frac{1}{\rho}\nabla _3 p - \nabla _3 \Phi + \textbf{F} \label{eq_mom}\\
 \text{thermodynamic equation}\;\;\; \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
@@ -30,9 +76,10 @@ Using these definitions, and the material derivative $\frac{D\bullet}{Dt}=\frac{
 \text{equation of state}\;\;\;\;\; p &= \rho R T \label{eq_state}
 \end{align}
 \subsubsection{Interpretation of the Terms:}
-The material derivative accounts for the fact that the physical properties of a fluid parcel need to 'travel' along with that fluid parcel through space, e.g. when releasing hot air through a valve at high speeds, the hot air travels through space and the warmness of the air follows the same trajectory.
+First, looking at the left sides of the above equations, it can be seen that the material derivative is used.
+These material derivatives account for the fact that the physical properties of a fluid parcel need to ``travel'' along with that fluid parcel through space, e.g. when the entirety of a gas is moving to the right at a constant speed, and there happens to be a region of higher density within that gas, this high-density region quite obviously has to move right along with the gas.
 
-In the following the right-hand sides of the above equations are interpreted, starting with the momentum equation \ref{eq_mom}:
+Next, the right-hand sides of the above equations are interpreted, starting with the momentum equation \ref{eq_mom}:
 \begin{itemize}
 \item $-2\boldsymbol{\Omega}\times \textbf{V}_3$ this term describes the Coriolis effect, which needs to be modeled because the rotating earth is used as the frame of reference.
 \item $- \frac{1}{\rho}\nabla _3 p$ this pressure force term describes how air flows from regions of high pressure to regions of low pressure.
@@ -40,41 +87,92 @@ In the following the right-hand sides of the above equations are interpreted, st
 \end{itemize}
 For complete accuracy a term of the shape $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity can be added.
 However $\mu \approx 1.7\cdot 10^{-5}$, so the term can often be ignored.
-
-In the thermodynamic equation \ref{eq_therm}, the term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describes how temperature changes given how the pressure changes.
+\\
+Looking at the thermodynamic equation \ref{eq_therm}, there is only a single term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describing how temperature changes given how the pressure changes.
 This relationship depends on temperature and pressure, because the thermodynamic properties of air also depend on the current temperature and pressure.
 To be more accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ could be added, to account for thermal conduction, but for these equations they can be neglected, because $\alpha \approx \frac{0.024}{R\rho}$ (TODO: source) is sufficiently small.
-
-The continuity equation \ref{eq_cont} can also be written as:
+\\
+Lastly, interpreting the continuity equation \ref{eq_cont}, it can be helpful to expand the material derivative, in order to highlight how the two similar terms can describe different effects.
 \begin{align*}
-\frac{\partial \rho}{\partial t} =  - \textbf{V}_3 \cdot \nabla _3 \rho -\rho \nabla _3 \cdot \textbf{V}_3 
+\frac{D\rho}{Dt} &= -\rho \nabla _3 \cdot \textbf{V}_3\\
+\frac{\partial \rho}{\partial t} + \textbf{V}_3 \cdot \nabla _3 \rho &= -\rho \nabla _3 \cdot \textbf{V}_3\\
+\frac{\partial \rho}{\partial t} &=  - \textbf{V}_3 \cdot \nabla _3 \rho -\rho \nabla _3 \cdot \textbf{V}_3
 \end{align*}
 The first term accounts for how density travels along with the flow.
-The second term describes how the density of a gas is reduced if the flow is divergent, i.e. if more material flows away from a point in space than flows in, the amount of material in that point reduces.\\
+The second term describes how the density of a gas is reduced if the flow is divergent, i.e. if more material flows away from a point in space than flows in, the amount of material in that point reduces.
+\\
 In the following the source/sink terms $\textbf{F}$, $\textbf{Q}$ and $\textbf{M}$ are set to zero, and the water vapor equation \ref{eq_water} is ignored.
 
+\subsubsection{Categories of Equations and Variables}
+The equations can be split up into two categories, depending on their function.
+The first category comprises any equations describing the evolution of a variable over time.
+Such equations are called \emph{prognostic}, and can be identified by their containing either a material derivative $\frac{D}{Dt}$, or a partial derivative of time $\frac{\partial}{\partial t}$.
+These are the equations which need to be numerically approximated in order to simulate the system.
 
-\section{Assumptions, Simplifications, and Modifications}
-In this section the most common simplifications will be listed and explained.
+The second category consists of all remaining equations, which are called \emph{diagnostic}.
+By method of exclusion they do not contain time derivatives, and only describe static relationships between variables at any point in time.
 
-\subsection{Replacing Occurrences of $\rho$ by $p$}\label{subsec_rho_p}
-In the Navier Stokes Equations the only diagnostic equation containing $\rho$ is the continuity equation \ref{eq_cont} ($rho$ in the momentum equation \ref{eq_mom} can simply be replaced using \ref{eq_state}).
-Using the equation of state \ref{eq_state} and the thermodynamic equation \ref{eq_therm}, we can get the following:
+In the case of the ``raw'' NSE, only the equation of state \ref{eq_state} is \emph{diagnostic}, with the remaining equations being \emph{prognostic}.
+
+Conversely, a variable is called \emph{prognostic} if its evolution is described by some \emph{prognostic} equation.
+Otherwise it is called \emph{diagnostic}.
+
+\section{Rearrangements and Simplifications}
+Having written down and interpreted the NSE, it is now time to perform the second step of \emph{approximating} them.
+This is done for several reasons, all of which can be boiled down to computational efficiency.
+When implementing the original NSE directly, several issues arise.
+\\
+First, the raw equations contain some redundancy, e.g. both $\rho$ and $p$ are used in the equations, even though there is a linear relationship between the two (equation of state \ref{eq_state}).
+Having to perform this conversion between the two variables during simulation is inefficient.
+Getting rid of this kind of inefficiency by transforming the equations does not affect the result of simulations.
+Thus, rearrangements are be called \emph{non-altering}.
+\\
+Second, depending on what atmospheric effects are of interest, some terms in the NSE are negligible.
+Computing them would yet again be inefficient.
+However, simplifying the NSE by ignoring these terms does alter the result of simulations.
+For this reason simplifications are be called \emph{altering}.
+\\
+\\
+In the following, first, some \emph{non-altering} rearrangements are made and, second, some \emph{altering} simplifications are introduced.
+The former have the main goal of condensing the NSE into a more compact and efficient format.
+The latter only have the goal of making computation more efficient.
+
+%both in order to make computation more efficient, and to transform the equations into a form more conducive to making simplifications.
+%These rearrangements do not affect the simulation results.
+%\\
+%Afterwards, some simplifications will be introduced, which do affect the simulation results, but in turn significantly reduce the computational intensity.
+%\\
+%This reduction in computational intensity stems from the fact that simplifications transform the nature of some of the equations from prognostic into diagnostic, thus reducing the number of differential equations to be simulated.
+
+\subsection{Non-Altering Rearrangements}
+The main goal of these rearrangements is to rewrite the NSE in a form more conducive to making assumption, although they sometimes have the nice side-effect of making computation more efficient.
+These rearrangements do not change the number of prognostic equations.
+They can, however, change the number of diagnostic variables, and the type (diagnostic, prognostic) of a variable.
+\subsubsection{Replacing Occurrences of $\rho$ by $p$}\label{subsec_rho_p}
+As mentioned above, having the NSE contain both $\rho$ and $p$ is redundant.
+This makes it desirable to replace occurrences of $\rho$ by $p$.
+In the NSE the only diagnostic equation containing $\rho$ is the continuity equation \ref{eq_cont} ($\rho$ in the momentum equation \ref{eq_mom} can simply be replaced using \ref{eq_state}).
+Using the equation of state \ref{eq_state} and the thermodynamic equation \ref{eq_therm}, yields
 \begin{align*}
 \frac{D\rho}{Dt} &\stackrel{(\ref{eq_state})}{=} \frac{D\frac{p}{RT}}{Dt} = \frac{1}{RT}\frac{Dp}{Dt}-\frac{p}{RT^2}\frac{DT}{Dt}\\
 &\stackrel{(\ref{eq_therm})}{=} \frac{1}{RT}\frac{Dp}{Dt}-\frac{1}{C_pT}\frac{Dp}{Dt} = \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt}
-\end{align*}
-Now inserting this into the continuity equation \ref{eq_cont} itself:
+\end{align*}.
+Now, inserting this into the continuity equation \ref{eq_cont}, we get:
 \begin{align*}
 \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt} &= \frac{D\rho}{Dt} = -\rho \nabla _3 \cdot \textbf{V}_3\\
 \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt} &\stackrel{(\ref{eq_state})}{=} -\frac{p}{RT} \nabla _3 \cdot \textbf{V}_3\\
 \frac{Dp}{Dt} &= - \frac{p}{1-\frac{R}{C_p}} \nabla _3 \cdot \textbf{V}_3
 \end{align*}
+This makes $\rho$ into a purely diagnostic variable, and elevates $p$ to the status of diagnostic variable.
 
-\subsection{Splitting into Vertical and Horizontal}
-Commonly the Navier Stokes equations are split up into its vertical and horizontal components.
+
+\subsubsection{Splitting into Vertical and Horizontal Parts}
+For this second rearrangement one has to look at $\Phi = gz$.
+The only occurence of $\Phi$ is in the momentum equation \ref{eq_mom} in the form of $-\nabla _3 \Phi=\begin{pmatrix}0 & 0 & -g \end{pmatrix}^T $.
+This means $\Phi$ only affects the vertical component of $\textbf{V}_3$.
+For this reason it makes sense to split $\textbf{V}_3$ (and thus the NSE) into its vertical and horizontal components.
 To this end two new variables $\textbf{V} \in \mathbb{R}^2$ and $w\in \mathbb{R}$, representing horizontal and vertical winds respectively, are introduced.
-Additionally $\boldsymbol{k}$ is the vertical vector (always perpendicular to the ground), and $f=2\Omega \sin \phi$ is the Coriolis parameter.
+Additionally, $\boldsymbol{k}$ is the vertical vector (always perpendicular to the ground), and $f=2\Omega \sin \phi$ is the Coriolis parameter.
 Assuming gravity to only act in the vertical and being constant across the atmosphere, we can write $-\nabla_3 \Phi = -g \boldsymbol{k}$.
 Using these definitions to replace $\textbf{V}_3$, we end up with the following equation system:
 \begin{align*}
@@ -84,8 +182,27 @@ Using these definitions to replace $\textbf{V}_3$, we end up with the following 
 \frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
 \end{align*}
 
+\subsubsection{Using $\text{ln}p$ as a Prognostic Variable}
+Looking at the NSE after having replaced $\rho$ by $p$ and split the equations into vertical and horizontal parts, it can be observed that $p$ always occurs in the pattern $\frac{1}{p}\nabla p$, $\frac{1}{p}\frac{Dp}{Dt}$, or $\frac{1}{p}\frac{\partial p}{\partial t}$.
+In order to further save on computational intensity, it would be desirable not to calculate $\frac{1}{p}$.
+This leads to a common transformation applied to the NSE, namely the replacement of $p$ by $\text{ln}p$, making $\text{ln}p$ a prognostic and $p$ a diagnostic variable.
+The effect of this transformation can be observed by taking the derivative of $\text{ln}p$, w.r.t. some variable $\iota$, and applying the chain rule:
+\begin{align*}
+\frac{d\text{ln}p}{d\iota} =  \frac{1}{p}\frac{dp}{d\iota}
+\end{align*}
+The right side of this equation is the pattern just observed.
+\\
+Applying the above identity to the NSE results in the following set of equations:
+\begin{align*}
+\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - RT\nabla \text{ln}p\\
+\frac{Dw}{Dt} &= - RT \frac{\partial \text{ln}p}{\partial z} - g \\
+\frac{DT}{Dt} &= \frac{RT}{C_p}\frac{D\text{ln}p}{Dt}\\
+\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+\end{align*}
 
-\subsection{Ignoring Horizontal Winds}
+\subsection{Altering Simplifications}
+Having transformed the NSE into a more handy form without affecting the result of simulations
+\subsubsection{Ignoring Horizontal Winds}
 For the purposes of this thesis, we are only interested in the vertical part of the Navier Stokes equations.
 For this reason we assume that $\textbf{V}=0$, resulting in the following equation system.
 \begin{align*}
@@ -95,7 +212,7 @@ For this reason we assume that $\textbf{V}=0$, resulting in the following equati
 p &= \rho R T
 \end{align*}
 
-\subsection{Hydrostatic Assumption}\label{subsec_hydrostat}
+\subsubsection{Hydrostatic Assumption}\label{subsec_hydrostat}
 Often, for purposes of weather simulation, it is assumed that the change of speed in vertical winds is negligible, i.e. $\frac{Dw}{Dt}=0$.
 This is called the hydrostatic assumption.
 Applying it to the Navier Stokes equations leads to the following:
@@ -106,21 +223,9 @@ Applying it to the Navier Stokes equations leads to the following:
 \frac{\partial p}{\partial z} &= -\rho g \\
 \end{align*}
 
-\subsection{Replacing $p$ by $\text{ln}p$}
-Another common transformation applied to the Navier Stokes equations, is the replacement of the variable $p$ by $\text{ln}p$.
-This effect of this transformation can be observed by taking the derivative of $\text{ln}p$, w.r.t. some variable $\iota$, and applying the chain rule:
-\begin{align*}
-\frac{d\text{ln}p}{d\iota} =  \frac{1}{p}\frac{dp}{d\iota}
-\end{align*}
-Applying this to the Navier Stokes equations, results in the following set of equations:
-\begin{align*}
-\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - RT\nabla \text{ln}p\\
-\frac{Dw}{Dt} &= - RT \frac{\partial \text{ln}p}{\partial z} - g \\
-\frac{DT}{Dt} &= \frac{RT}{C_p}\frac{D\text{ln}p}{Dt}\\
-\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
-\end{align*}
 
-\subsection{Assuming Constant Temperature}
+
+\subsubsection{Assuming Constant Temperature}
 As a simpler version of the problem, one can assume the temperature to be constant across the domain, i.e. $T=\text{const}$.
 Making this assumption for a domain spanning the entire vertical of the atmosphere is of course not very accurate, however for testing purposes, it can be worthwhile to follow this train of thought.
 From this assumption it follows that $0=\frac{DT}{Dt}=\nabla _3T$
@@ -134,7 +239,7 @@ Keeping this in mind, the equations can be written as follows:
 \frac{Dp}{Dt} &= -p (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
 \end{align*}
 
-\subsection{Alternative Coordinate Systems}
+\section{Alternative Coordinate Systems}
 When simulating the above equations, one would have to pick the boundaries of the simulated space, by choosing the borders of the simulation range, i.e. a range $[z_{\text{bottom}};z_{\text{top}}]$ in which to simulate the system.
 For several reasons this is not optimal:
 First, the lower boundary $z_{\text{bottom}}$ is not constant, but depends on the profile of the ground.
@@ -152,7 +257,7 @@ To the end of introducing $s$, we use the following identities, with $c\in\{x,y\
 \end{align}
 
 
-\subsubsection{Non-Hydrostatic Equations:}
+\subsection{Non-Hydrostatic Equations:}
 Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
 \begin{align*}
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
@@ -223,10 +328,10 @@ Also, assuming pressure at the top of the atmosphere is nonexistent:
 \pi(0) = 0 \Rightarrow f(0) = 0, h(0) = 0
 \end{align*}
 
-\subsubsection{Hydrostatic Equations:}
+\subsection{Hydrostatic Equations:}
 Yet another equation system can be gained by making use of the hydrostatic assumption from section \ref{subsec_hydrostat}.
 
-\subsection{Boundary Conditions}
+\section{Boundary Conditions}
 discussion of how each of the state variables should behave at the boundaries of the system
 \begin{itemize}
 \item winds are zero at upper and lower boundary

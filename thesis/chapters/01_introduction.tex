@@ -3,18 +3,20 @@
 
 \chapter{Introduction}\label{chapter:introduction}
 
-At one point or another, most parts of applied physics and engineering make use of partial differential equations (PDEs).
-And while a small subset of these PDEs can be solved analytically, i.e. it is possible to write down a mathematical formula that solves the PDE and covers all possible states, it is more common to come across PDEs which are not solvable in such a way.
+At one point or another, most parts of applied physics and engineering make use of partial differential equations (PDEs), which are equations describing how the state of a system will evolve.
+And while a small subset of these PDEs can be solved analytically, i.e. it is possible to write down a mathematical formula that solves the PDE and thus describes the system in any state, it is more common to come across PDEs which are not solvable in such a way.
 Instead it becomes necessary to approximate solutions to such PDEs numerically.
 Generally this process can be split up into four steps:
 \begin{enumerate}
-\item finding a system of PDEs that describe a system
-\item simplifying the system of PDEs by making assumptions about the system (e.g. small angle approximation for a pendulum system)
-\item if the system contains scalar- or vector-fields, choosing the locations at which to store the values of each individual field
-\item choosing an integration method
+\item \emph{Modeling}: finding a system of PDEs that describe a system
+\item \emph{Approximating}: simplifying the system of PDEs by making assumptions about the system (e.g. small angle approximation for a pendulum system)
+\item \emph{Space Discretization}: if the system contains scalar- or vector-fields, choosing the locations at which to store the values of each individual field
+\item \emph{Time Discretization}: choosing an integration method
 \end{enumerate}
 Each of these four steps introduce different trade-offs between computational efficiency and errors.
-This thesis will go through all of these four steps by applying them to the system of weather.
+This thesis will go through all of these four steps by applying them to a strongly simplified model of weather.
 More specifically this thesis will only look into the vertical part of weather simulation using the Navier-Stokes equations.
 The vertical part is viewed in isolation, because current weather simulation tools often split up the vertical and horizontal part of simulation by alternating between simulating horizontal and vertical effects. [TODO: find source]
 After applying the four steps to the system, the errors introduced by the possible choices in each of the steps will be analyzed.
+To this end, the numerical approximation was implemented using Python 3.
+The software architecture behind this implementation will be described in section \ref{chapter:software}.
