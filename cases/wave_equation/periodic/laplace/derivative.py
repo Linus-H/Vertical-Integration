@@ -2,9 +2,10 @@ import numpy as np
 
 import operators.laplace
 import operators.derivative
+from utils import TimeDerivative
 
 
-class TimeDerivative:
+class PeriodicWaveLaplace(TimeDerivative):
     def __init__(self, delta_x, c):
         self.delta_x = delta_x
         self.c = c
@@ -20,3 +21,6 @@ class TimeDerivative:
         dz = np.stack((du, dv), axis=-1)
         dz = dz.transpose()
         return dz
+
+    def __str__(self):
+        return "wave_wrap_around_laplace_time_derivative"

@@ -89,7 +89,7 @@ def interpolate(location, axis, data):
 class CaseSolution(Solution):
     def __init__(self, num_grid_points, dt, domain_size, num_vars, ref_solution_generator: ReferenceSolutionCalculator,
                  initial_cond, ref_dt=None, ref_t=10):
-        super().__init__(self.solution, 0, dt)
+        super().__init__(0, dt)
         self.num_grid_points = num_grid_points
         self.num_vars = num_vars
         self.axes = np.tile(np.linspace(0, domain_size, self.num_grid_points + 1)[:-1], (num_vars, 1))

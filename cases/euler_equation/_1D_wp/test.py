@@ -3,11 +3,11 @@ from unittest import TestCase
 import math
 
 from cases.euler_equation._1D_wp.derivative import LogTimeDerivative
+from cases.euler_equation._1D_wp.solution import StationarySolution
 from cases.run_utils import gen_test_data
 from cases.numerical_ref_solution import CaseSolution, ReferenceSolutionCalculator
-from cases.euler_equation._1D_wp.solution import StationarySolution
-from integrators import Euler
 from starting_conditions import GaussianBump
+from integrators import Euler
 
 
 class Test(TestCase):

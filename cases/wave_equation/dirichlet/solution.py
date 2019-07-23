@@ -16,7 +16,7 @@ class StandingWaveFixedEnd(Solution):
         :param c: Wave speed from wave equation.
         :param domain_size: is currently ignored and assumed to be 1.
         """
-        super().__init__(self.solution, 0, dt)
+        super().__init__(0, dt)
         self._coefficients = coefficients
         self._c = c
         self._num_grid_points = num_grid_points

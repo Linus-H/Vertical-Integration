@@ -4,7 +4,7 @@ from debug_tools import error_tracking_tools
 import integrators.Euler
 import integrators.Heun
 import integrators.RungeKutta
-from cases.debug_case.derivative import TimeDerivative
+from cases.debug_case.derivative import DebugTimeDerivative
 from cases.debug_case.solution import CaseSolution
 
 
@@ -23,7 +23,7 @@ def run_test(test_obj, integrator_class, expected_order_power, test_case, initia
 
         solution = CaseSolution(dt, start_time, start_value, test_case)
         state = solution.get_initial_state()
-        derivative = TimeDerivative(test_case)
+        derivative = DebugTimeDerivative(test_case)
 
         # choose integrator
         integrator = integrator_class(state, derivative, start_time, dt)

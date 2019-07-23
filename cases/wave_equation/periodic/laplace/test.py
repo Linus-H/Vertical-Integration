@@ -3,7 +3,7 @@ from unittest import TestCase
 import math
 
 from cases.run_utils import gen_test_data
-from cases.wave_equation.periodic.laplace.derivative import TimeDerivative
+from cases.wave_equation.periodic.laplace.derivative import PeriodicWaveLaplace
 from cases.wave_equation.periodic.laplace.solution import CaseSolution
 from integrators import Heun
 from starting_conditions import GaussianBump
@@ -38,7 +38,7 @@ class Test(TestCase):
             case_sol_input = [c, start_cond.get_start_condition, start_cond.get_derivative]
 
             error_tracker_list = gen_test_data(params, Heun.Explicit,
-                                               TimeDerivative, time_derivative_input,
+                                               PeriodicWaveLaplace, time_derivative_input,
                                                CaseSolution, case_sol_input)
             err_lists[0].append(error_tracker_list[0].tot_error)
             err_lists[1].append(error_tracker_list[1].tot_error)

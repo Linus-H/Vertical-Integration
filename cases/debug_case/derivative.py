@@ -1,8 +1,10 @@
 import math
 import numpy as np
 
+from utils import TimeDerivative
 
-class TimeDerivative:
+
+class DebugTimeDerivative(TimeDerivative):
     def __init__(self, case_num):
         self.case_num = case_num
 
@@ -21,3 +23,6 @@ class TimeDerivative:
         # generate output
         dz = np.resize(dy, (1, 1))
         return dz
+
+    def __str__(self):
+        return "debug_case_{}_time_derivative".format(self.case_num)

@@ -3,7 +3,7 @@ from unittest import TestCase
 import math
 
 from cases.run_utils import gen_test_data
-from cases.wave_equation.periodic.staggered_grid_derivative.derivative import TimeDerivative
+from cases.wave_equation.periodic.staggered_grid_derivative.derivative import PeriodicWaveStaggered
 from cases.wave_equation.periodic.staggered_grid_derivative.solution import CaseSolution
 from integrators import Heun
 from starting_conditions import GaussianBump
@@ -37,7 +37,7 @@ class Test(TestCase):
             case_sol_input = [c, GaussianBump(params['domain_size'] * 0.5, 2).get_start_condition]
 
             error_tracker_list = gen_test_data(params, Heun.Explicit,
-                                               TimeDerivative, time_derivative_input,
+                                               PeriodicWaveStaggered, time_derivative_input,
                                                CaseSolution, case_sol_input)
             err_lists[0].append(error_tracker_list[0].tot_error)
             err_lists[1].append(error_tracker_list[1].tot_error)

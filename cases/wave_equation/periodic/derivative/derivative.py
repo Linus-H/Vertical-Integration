@@ -4,6 +4,7 @@ from operators.derivative import diff_forward_n1_e1
 from operators.derivative import diff_backward_n1_e1
 from operators.derivative import diff_n1_e2
 from operators.derivative import diff_n1_e4
+from utils import TimeDerivative
 
 
 def apply_operation(u, v, c, delta_x):
@@ -12,7 +13,7 @@ def apply_operation(u, v, c, delta_x):
     return du, dv
 
 
-class TimeDerivative:
+class PeriodicWaveTimeDerivative(TimeDerivative):
     def __init__(self, delta_x, c):
         self.delta_x = delta_x
         self.c = c
@@ -29,10 +30,10 @@ class TimeDerivative:
         return dz
 
     def __str__(self):
-        return "wave_wrap_around_derivative"
+        return "wave_wrap_around_time_derivative"
 
 
-class TimeDerivativeMatrix:
+class TimeDerivativeMatrix(TimeDerivative):
     def __init__(self, delta_x, c):
         self.delta_x = delta_x
         self.c = c
@@ -52,3 +53,6 @@ class TimeDerivativeMatrix:
         dz = np.stack((du, dv), axis=0)
 
         return dz
+
+    def __str__(self):
+        return "wave_wrap_around_time_derivative_matrix"

@@ -3,8 +3,7 @@ import utils
 
 class Explicit(utils.Integrator):
     def __init__(self, state, time_derivative, t0, delta_t):
-        super().__init__(state, self.stepper, t0, delta_t)
-        self.time_derivative = time_derivative
+        super().__init__(state, time_derivative, t0, delta_t)
         self.dt = delta_t
 
     def stepper(self, state_vars_0, t):

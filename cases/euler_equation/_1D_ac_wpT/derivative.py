@@ -1,5 +1,6 @@
 import numpy as np
 from operators import derivative, average, laplace
+from utils import TimeDerivative
 
 """class LogTimeDerivativeCP:
     def __init__(self, delta_z, g_z=0.0):
@@ -44,7 +45,7 @@ from operators import derivative, average, laplace
 """
 
 
-class LogTimeDerivativeLorenz:
+class LogTimeDerivativeLorenz(TimeDerivative):
     def __init__(self, delta_s, s, dpi_ds, g_z=0.0):
         self.delta_s = delta_s
         self.g_z = g_z
@@ -77,4 +78,4 @@ class LogTimeDerivativeLorenz:
         return dz
 
     def __str__(self):
-        return "log_euler_alt_coor_wpT_lorenz"
+        return "log_euler_ac_wpT_lorenz_time_derivative"

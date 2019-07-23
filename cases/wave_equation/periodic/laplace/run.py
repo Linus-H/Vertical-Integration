@@ -1,6 +1,6 @@
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.periodic.laplace.derivative import TimeDerivative
+from cases.wave_equation.periodic.laplace.derivative import PeriodicWaveLaplace
 from cases.wave_equation.periodic.laplace.solution import CaseSolution
 from starting_conditions import GaussianBump
 
@@ -24,5 +24,5 @@ case_sol_input = [c,
                   start_cond.get_derivative]
 
 run_utils.run_visual_with_solution(params, Explicit,
-                                   TimeDerivative, time_derivative_input,
+                                   PeriodicWaveLaplace, time_derivative_input,
                                    CaseSolution, case_sol_input)

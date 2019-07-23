@@ -1,9 +1,10 @@
 import numpy as np
 
 import operators.laplace
+from utils import TimeDerivative
 
 
-class TimeDerivativeLaplace:
+class TimeDerivativeLaplace(TimeDerivative):
     def __init__(self, delta_x, c):
         self.delta_x = delta_x
         self.c = c
@@ -23,4 +24,4 @@ class TimeDerivativeLaplace:
         return dz
 
     def __str__(self):
-        return "wave_loose_end_derivative"
+        return "wave_loose_end_time_derivative"

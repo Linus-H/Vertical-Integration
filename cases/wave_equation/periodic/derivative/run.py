@@ -1,6 +1,6 @@
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.periodic.derivative.derivative import TimeDerivative
+from cases.wave_equation.periodic.derivative.derivative import PeriodicWaveTimeDerivative
 from cases.wave_equation.periodic.derivative.solution import CaseSolution
 from starting_conditions import GaussianBump, Sinc
 
@@ -20,5 +20,5 @@ time_derivative_input = [c]
 case_sol_input = [c, GaussianBump(params['domain_size'] * 0.5, 100).get_start_condition]
 
 run_utils.run_visual_with_solution(params, Explicit,
-                                   TimeDerivative, time_derivative_input,
+                                   PeriodicWaveTimeDerivative, time_derivative_input,
                                    CaseSolution, case_sol_input)

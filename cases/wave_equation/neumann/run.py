@@ -2,7 +2,7 @@ import numpy as np
 
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.periodic.derivative.derivative import TimeDerivative
+from cases.wave_equation.periodic.derivative.derivative import PeriodicWaveTimeDerivative
 from starting_conditions import GaussianBump
 from utils import State
 
@@ -30,5 +30,5 @@ state_vars[0] = starting_cond.get_start_condition(axes[0])  # apply the starting
 # state_vars[1] = starting_cond.derivative(axes[1])
 
 run_utils.run_visual_without_solution(params, Explicit,
-                                      TimeDerivative, time_derivative_input,
+                                      PeriodicWaveTimeDerivative, time_derivative_input,
                                       state)

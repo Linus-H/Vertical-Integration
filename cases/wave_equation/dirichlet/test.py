@@ -3,7 +3,7 @@ from unittest import TestCase
 import math
 
 from cases.run_utils import gen_test_data
-from cases.wave_equation.dirichlet.derivative import TimeDerivativeLaplace
+from cases.wave_equation.dirichlet.derivative import WaveEquationLaplace
 from cases.wave_equation.dirichlet.solution import StandingWaveFixedEnd
 from integrators import Heun, RungeKutta
 from starting_conditions import GaussianBump
@@ -37,7 +37,7 @@ class Test(TestCase):
             case_sol_input = [c, [(1, 1.0), (2, 2.0)]]
 
             error_tracker_list = gen_test_data(params, RungeKutta.Explicit,
-                                               TimeDerivativeLaplace, time_derivative_input,
+                                               WaveEquationLaplace, time_derivative_input,
                                                StandingWaveFixedEnd, case_sol_input)
             err_lists[0].append(error_tracker_list[0].tot_error)
             err_lists[1].append(error_tracker_list[1].tot_error)

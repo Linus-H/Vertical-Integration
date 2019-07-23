@@ -12,7 +12,7 @@ def exp_curve(a, g):
 
 class StationarySolution(Solution):
     def __init__(self, num_grid_points, dt, domain_size, g):
-        super().__init__(self.solution, 0, dt)
+        super().__init__(0, dt)
         self.num_grid_points = num_grid_points
         self.domain_size = domain_size
         self.axes = np.tile(np.linspace(0, domain_size, self.num_grid_points + 1)[:-1], (2, 1))

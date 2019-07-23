@@ -1,6 +1,9 @@
+from abc import ABCMeta, abstractmethod
+
 import numpy as np
 
-data_path = None
+data_path = "D:\\Workspace\\Vertical-Integration\\thesis\\data\\"
+
 
 class State:
     def __init__(self, num_vars, dim_vars, axes, names=None):
@@ -32,14 +35,24 @@ class State:
             return None
 
 
-class Integrator:
-    def __init__(self, state, stepper, t0, dt):
+class TimeDerivative(metaclass=ABCMeta):
+    @abstractmethod
+    def __str__(self):
+        pass
+
+    @abstractmethod
+    def __call__(self, *args, **kwargs):
+        pass
+
+
+class Integrator(metaclass=ABCMeta):
+    def __init__(self, state, time_derivative, t0, dt):
         """
         :param state: The state-object the integrator will operate on.
         :param stepper: The function the integrator has to call each iteration, passing the state-variable, which is implicitly modified.
         """
         self.state = state
-        self._stepper = stepper
+        self.time_derivative = time_derivative
         self.t0 = t0
         self.dt = dt
 
@@ -47,29 +60,36 @@ class Integrator:
         self.n = 0
         return self
 
+    @abstractmethod
+    def stepper(self, state_vars, t):
+        pass
+
     def __next__(self):
-        self._stepper(self.state.get_state_vars(), self.t0 + self.n * self.dt)
+        self.stepper(self.state.get_state_vars(), self.t0 + self.n * self.dt)
         self.n += 1
         return self.state
 
     def get_operator_matrix(self, t):
         num_vars, dim_vars = self.state.get_state_vars().shape
-        #A = np.eye(dim_vars * num_vars)
-        A = np.zeros((dim_vars*num_vars,dim_vars*num_vars))
+        # A = np.eye(dim_vars * num_vars)
+        A = np.zeros((dim_vars * num_vars, dim_vars * num_vars))
         A = np.reshape(A, (num_vars, dim_vars, -1))
-        self._stepper(A, t)
+        self.stepper(A, t)
         A = np.reshape(A, (dim_vars * num_vars, -1))
         return A
 
 
-class Solution:
-    def __init__(self, solution, t0, dt):
+class Solution(metaclass=ABCMeta):
+    def __init__(self, t0, dt):
         self.t0 = t0
         self._dt = dt
-        self._solution = solution
+
+    @abstractmethod
+    def solution(self, time, new_object=False):
+        pass
 
     def get_initial_state(self):
-        return self._solution(self.t0, new_object=True)
+        return self.solution(self.t0, new_object=True)
 
     def __iter__(self):
         self.iteration_n = 0
@@ -77,4 +97,4 @@ class Solution:
 
     def __next__(self):
         self.iteration_n += 1
-        return self._solution(self.t0 + self.iteration_n * self._dt)
+        return self.solution(self.t0 + self.iteration_n * self._dt)

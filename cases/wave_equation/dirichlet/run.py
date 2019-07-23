@@ -1,6 +1,6 @@
 from cases import run_utils
 from integrators.RungeKutta import Explicit
-from cases.wave_equation.dirichlet.derivative import TimeDerivativeLaplace
+from cases.wave_equation.dirichlet.derivative import WaveEquationLaplace
 from cases.wave_equation.dirichlet.solution import StandingWaveFixedEnd
 from starting_conditions import GaussianBump
 
@@ -20,5 +20,5 @@ time_derivative_input = [c]
 case_sol_input = [c, [(1, 1.0), (2, 2.0)]]
 
 run_utils.run_visual_with_solution(params, Explicit,
-                                   TimeDerivativeLaplace, time_derivative_input,
+                                   WaveEquationLaplace, time_derivative_input,
                                    StandingWaveFixedEnd, case_sol_input)

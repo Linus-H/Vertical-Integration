@@ -31,7 +31,7 @@ class Test(TestCase):
         ref_t = 33 * baseline_dt
         simul_t = 32 * baseline_dt
 
-        for i in range(5):
+        for i in range(3):
             dt = (a ** i) * baseline_dt
 
             params = {
@@ -60,6 +60,7 @@ class Test(TestCase):
             dt_list.append(dt)
 
         for i in range(len(err_lists[0]) - 1):
+            print(i)
             actual_order = math.log(err_lists[0][i + 1] / err_lists[0][i], a)
             self.assertTrue(expected_order * 0.95 < actual_order < expected_order * 1.05,
                             msg="Mistake found at time-resolutions {} x {} for u. Expected order of {} but got {}".format(

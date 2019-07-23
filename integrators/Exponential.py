@@ -6,8 +6,7 @@ import utils
 
 class Exponential(utils.Integrator):
     def __init__(self, state, time_derivative, t0, delta_t):
-        super().__init__(state, self.stepper, t0, delta_t)
-        self.time_derivative = time_derivative
+        super().__init__(state, time_derivative, t0, delta_t)
         self.dt = delta_t
         self.state = state
 
@@ -23,5 +22,8 @@ class Exponential(utils.Integrator):
 
     def stepper(self, state_vars, t):
         np.copyto(state_vars,
-                  np.reshape(scipy.linalg.expm(self.A * (t + self.dt - self.t0)) @ self.init_state_vector,
-                             (self.num_vars, self.dim_vars)))
+                  np.reshape(
+                      scipy.linalg.expm(self.A * (t + self.dt - self.t0)) @ self.init_state_vector,
+                      (self.num_vars, self.dim_vars)
+                    )
+                  )
