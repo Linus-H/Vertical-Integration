@@ -1,10 +1,10 @@
-\chapter{Discretization}\label{chapter:introduction}
+\chapter{Discretization}\label{chapter:discretization}
 As most numerical methods emulate physical discrete grids in time and space, all continuous operations in the differential equations describing the physical world, need to be discretized, too.
 In this section, first, the discretization of spacial differential operators is derived.
 Second, for the time-dimension several integrators will be introduced.
 Lastly, different grid discretizations are discussed, i.e. different possibilities of distributing the spacial location at the different variables in a PDE are 'measured'.
 
-\section{Discretization of Differential Operators}
+\section{Discretization of Differential Operators}\label{section:diff_op}
 TODO: sources\\
 In order to derive the discrete versions of spacial differential operators, the taylor-series needs to be introduced.
 Let $f:\mathbb{R}\times\mathbb{R}^q\rightarrow \mathbb{R}$ be a function, which we want to develop along its first argument $x$.
@@ -55,15 +55,15 @@ One of the more simple classes of integrators are the explicit Runge Kutta metho
 They begin with the initial value $x_0$ and then create the trace $x(t)$ taking small time-steps $\Delta t$ starting at $t_0$ and modifying the state through addition: $x(t+h) = x(t) + RK(f,x,t,h)$.\\
 All Runge-Kutta methods aim to approximate the Taylor series expansion of $x(t)$ with respect to $t$, i.e.
 \begin{align*}
-x(t+h) &= x(t) + \sum_{k=1}^{n}\frac{h^k}{k!}\frac{d^kx}{dt^k} + \mathcal{O} (h^{n+1}\frac{d^{n+1}x}{dt^{n+1}})\\
-&= x(t)+ \sum_{k=0}^{n-1}\frac{h^{k+1}}{(k+1)!}\frac{d^kf(x(t),t)}{dt^k} + \mathcal{O}(h^{n+1}\frac{d^{n}f}{dt^{n}})
+x(t+h) &= x(t) + \sum_{k=1}^{n}\frac{h^k}{k!}\frac{d^kx}{dt^k} + \mathcal{O} \left(h^{n+1}\frac{d^{n+1}x}{dt^{n+1}}\right)\\
+&= x(t)+ \sum_{k=0}^{n-1}\frac{h^{k+1}}{(k+1)!}\frac{d^kf(x(t),t)}{dt^k} + \mathcal{O}\left(h^{n+1}\frac{d^{n}f}{dt^{n}}\right)
 \end{align*}
 Using $\frac{df(x(t),t)}{dt} 
 = \frac{\partial f(x(t),t)}{\partial x}\frac{dx}{dt}+\frac{\partial f(x(t),t)}{\partial t} 
 = f\frac{\partial f}{\partial x}+\frac{\partial f}{\partial t}$
 this becomes.
 \begin{align*}
-x(t+h) &= x(t)+ \sum_{k=0}^{n-1}\frac{h^{k+1}}{(k+1)!}(\frac{\partial f}{\partial t} + f(x(t),t)\frac{\partial f}{\partial x})^kf(x(t),t) + \mathcal{O}(h^{n+1}\frac{d^{n}f}{dt^{n}})
+x(t+h) &= x(t)+ \sum_{k=0}^{n-1}\frac{h^{k+1}}{(k+1)!}\left(\frac{\partial f}{\partial t} + f(x(t),t)\frac{\partial f}{\partial x}\right)^kf(x(t),t) + \mathcal{O}\left(h^{n+1}\frac{d^{n}f}{dt^{n}}\right)
 \end{align*}
 
 
@@ -78,9 +78,9 @@ RK2 uses more than one evaluation of $f$ in order to do one step:
 k_1 &= f(x(t),t)\\
 k_2 &= f(x(t) + \frac{h}{2} k_1, t + \frac{h}{2})\\
 &= f(x(t) + \frac{h}{2} f(x(t),t), t + \frac{h}{2})\\
-&= f(x(t),t) + h(\frac{\partial f}{\partial t} + f(x(t),t)\frac{\partial f}{\partial x})f(x(t),t) + \mathcal{O}(h^2)\\
+&= f(x(t),t) + h\left(\frac{\partial f}{\partial t} + f(x(t),t)\frac{\partial f}{\partial x}\right)f(x(t),t) + \mathcal{O}(h^2)\\
 &= f(x(t),t) + h\frac{df}{dt} + \mathcal{O}(h^2)\\
-x(t) + \frac{h}{2} (k_1+k_2) &= x(t) + \frac{h}{2} (f(x(t),t) + f(x(t),t) + h\frac{df}{dt} + \mathcal{O}(h^2))\\
+x(t) + \frac{h}{2} (k_1+k_2) &= x(t) + \frac{h}{2} \left(f(x(t),t) + f(x(t),t) + h\frac{df}{dt} + \mathcal{O}(h^2)\right)\\
 &= x(t) + h f(x(t),t) + \frac{h^2}{2} \frac{df}{dt} + \mathcal{O}(h^3)\\
 &= x(t) + h \frac{dx}{dt} + \frac{h^2}{2} \frac{d^2x}{dt^2} + \mathcal{O}(h^3)\\
 x(t+h) &= x(t) + \frac{h}{2} (k_1+k_2) + \mathcal{O}(h^3)
@@ -89,8 +89,8 @@ RK2 has a local truncation error of $\mathcal{O}(h^3)$, and a total accumulated 
 In a similar fashion it can be shown that RK4 is as follows:
 \begin{align*}
 k_1 &= f(x(t),t)\\
-k_2 &= f(x(t)+\frac{h}{2}k_1,t+\frac{h}{2})\\
-k_3 &= f(x(t)+\frac{h}{2}k_2,t+\frac{h}{2})\\
+k_2 &= f\left(x(t)+\frac{h}{2}k_1,t+\frac{h}{2}\right)\\
+k_3 &= f\left(x(t)+\frac{h}{2}k_2,t+\frac{h}{2}\right)\\
 k_4 &= f(x(t) + h k_3, t + h)\\
 x(t+h) &= x(t) + \frac{h}{6}(k_1+2k_2+2k_3+k_4)
 \end{align*}

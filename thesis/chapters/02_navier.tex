@@ -179,7 +179,7 @@ Using these definitions to replace $\textbf{V}_3$, we end up with the following 
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
 \frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
-\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \left(\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)
 \end{align*}
 
 \subsubsection{Using $\text{ln}p$ as a Prognostic Variable}
@@ -197,127 +197,199 @@ Applying the above identity to the NSE results in the following set of equations
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - RT\nabla \text{ln}p\\
 \frac{Dw}{Dt} &= - RT \frac{\partial \text{ln}p}{\partial z} - g \\
 \frac{DT}{Dt} &= \frac{RT}{C_p}\frac{D\text{ln}p}{Dt}\\
-\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} \left(\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)
 \end{align*}
 
 \subsection{Altering Simplifications}
-Having transformed the NSE into a more handy form without affecting the result of simulations
-\subsubsection{Ignoring Horizontal Winds}
-For the purposes of this thesis, we are only interested in the vertical part of the Navier Stokes equations.
-For this reason we assume that $\textbf{V}=0$, resulting in the following equation system.
+In the previous section the NSE have been transformed into a more handy form, without affecting the result of simulations.
+In this section the NSE will be further simplified by making certain assumptions about the prognostic variables.
+All of the following simplifications will result in one less prognostic equation and thus one less prognostic variable.
+Having one less prognostic equation usually reduces computational efforts.
+This in turn entails that the results of simulations will be changed by making these simplifications.
+
+\subsubsection{Ignoring Horizontal Winds}\label{subsec_horizon}
+As main focus of this thesis is the vertical part of the NSE, we are not interested in $\textbf{V}$ as a prognostic variable.
+The most straightforward simplification to remove $\textbf{V}$ from the equations, is the assumption that $\textbf{V}=0$.
+This makes turns horizontal momentum equation into a diagnostic equation stating that the horizontal gradient of pressure is zero.
+The equation system resulting from this assumption is:
 \begin{align*}
+\nabla p &= 0\\
 \frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
 \frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \frac{\partial w}{\partial z}\\
 p &= \rho R T
 \end{align*}
 
+
 \subsubsection{Hydrostatic Assumption}\label{subsec_hydrostat}
-Often, for purposes of weather simulation, it is assumed that the change of speed in vertical winds is negligible, i.e. $\frac{Dw}{Dt}=0$.
-This is called the hydrostatic assumption.
-Applying it to the Navier Stokes equations leads to the following:
+When simulating a region of the atmosphere, quite often the breadth of the region considered is a lot larger than its height.
+For this reason, horizontal effects become dominant and it becomes sufficient to approximate the vertical.
+One commonly made assumption is that the force of gravity $-\rho g$ and the vertical of the pressure gradient force $-\frac{\partial p}{\partial z}$ directly cancel each other out, i.e. their sum equals zero.
+This results in the the hydrostatic assumption:
+\begin{align}\label{eq_hydrostat_assump}
+\frac{\partial p}{\partial z} = -\rho g 
+\end{align}
+As gravity and pressure gradient force are the only effects affecting the evolution of vertical wind speed $w$, this results in
 \begin{align*}
+\frac{Dw}{Dt} &= - \frac{1}{\rho} \frac{\partial p}{\partial z} - g = 0
+\end{align*},
+which removes the vertical momentum equation from the ranks of the prognostic equations, replacing it with the diagnostic hydrostatic assumption.
+The resulting set of equations are:
+\begin{align*}
+\frac{\partial p}{\partial z} &= -\rho g \\
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
-\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})\\
-\frac{\partial p}{\partial z} &= -\rho g \\
+\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \left(\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)\\
 \end{align*}
 
 
-
-\subsubsection{Assuming Constant Temperature}
-As a simpler version of the problem, one can assume the temperature to be constant across the domain, i.e. $T=\text{const}$.
-Making this assumption for a domain spanning the entire vertical of the atmosphere is of course not very accurate, however for testing purposes, it can be worthwhile to follow this train of thought.
-From this assumption it follows that $0=\frac{DT}{Dt}=\nabla _3T$
-This has an effect on two equations.
-First, the thermodynamic equation \ref{eq_therm} becomes irrelevant.
-Second, the rewriting of the continuity equation \ref{eq_cont} in section \ref{subsec_rho_p} can be simplified, it was assumed there that $\frac{DT}{Dt}\neq 0$.
-Keeping this in mind, the equations can be written as follows:
-\begin{align*}
-\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
-\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
-\frac{Dp}{Dt} &= -p (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
-\end{align*}
+%\subsubsection{Assuming Constant Temperature}
+%The last simplification does not have any real-world applications, because it is very inaccurate, but is instead useful for testing implementations of the equation systems.
+%For this simplification it is assumed that temperature is constant across the domain, i.e. $T=\text{const}$.
+%As already mentioned, making this assumption for a domain spanning the entire vertical of the atmosphere is inaccurate.
+%From this assumption it follows that $0=\frac{DT}{Dt}=\nabla _3T$
+%This has an effect on two equations.
+%First, the thermodynamic equation \ref{eq_therm} becomes irrelevant (DIAGNOSTIC $0=\frac{Dp}{Dt}$!?!%)
+%Second, the rewriting of the continuity equation \ref{eq_cont} in section \ref{subsec_rho_p} can be simplified, it was assumed there that $\frac{DT}{Dt}\neq 0$.
+%Keeping this in mind, the equations can be written as follows:
+%\begin{align*}
+%\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - %\frac{RT}{p}\nabla p\\
+%\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
+%\frac{Dp}{Dt} &= -p (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
+%\end{align*}
 
 \section{Alternative Coordinate Systems}
-When simulating the above equations, one would have to pick the boundaries of the simulated space, by choosing the borders of the simulation range, i.e. a range $[z_{\text{bottom}};z_{\text{top}}]$ in which to simulate the system.
-For several reasons this is not optimal:
-First, the lower boundary $z_{\text{bottom}}$ is not constant, but depends on the profile of the ground.
-Second, the atmosphere does not abruptly end at any specific height, so it there is no obvious $z_{\text{top}}$ to pick.
-Considering this, a different measurement for height $s$ is introduced, i.e. all occurrences of $z$ are replaced by some other coordinate $s$.
-Often, $s$ will be dependent on pressure $p$ in some way, as this way an equidistant spacing of $s$ will correspond to higher spacial resolution in areas where $p$ is changing a lot.\\
-To the end of introducing $s$, we use the following identities, with $c\in\{x,y\}$ \cite{kasahara1974various}:
+When simulating the NSE, boundaries within which to simulate have to be chosen.
+Assuming $\textbf{V}=0$, i.e. the equation system from section \ref{subsec_horizon} is used, the only boundaries left to be chosen are the vertical ones.
+Using the equations in section \ref{subsec_horizon} these vertical boundaries can only be described by specifying the vertical lower and upper bound by their relative heights to sea level, i.e. $z_{\text{bottom}}$ and $z_{\text{top}}$ respectively.
+\\
+In order to simulate a column of the atmosphere, it would be desirable to have $z_{\text{bottom}}$ be located at ground level, and $z_{\text{top}}$ at the top of the atmosphere.
+\\
+However, specifying the boundaries directly by their height relative to sea level, has several disadvantages.
+First, the ground is not flat, meaning the value of $z_{\text{bottom}}$ is dependent on location.
+Second, there is no clear end to the atmosphere, meaning there is no obvious single value $z_{\text{top}}$ at which to stop simulating.
+\\
+Considering these problems, it would be desirable not to measure height in meters relative to sea level, but by some other measure.
+And as there is no other obvious measurement of height that would optimal, instead a placeholder variable for measuring height $s$ is introduced.
+This way any possible other measurement of height can easily be plugged in.
+\subsubsection*{Identities to get from $z$ to $s$:}
+Considering that the old measurement of height $z$ used in the NSE was suboptimal and $s$ is supposed to replace it, this means that all occurrences of $z$ in the NSE need to be replaced by $s$.
+%Often, $s$ will be dependent on pressure $p$ in some way, as this way an equidistant spacing of $s$ will correspond to higher spacial resolution in areas where $p$ is changing a lot.\\
+This change from $z$ to $s$ as a vertical coordinate affects all differential operators in the NSE, meaning all of them need to be rewritten.
+\\
+First, the horizontal derivative w.r.t. $x$ or $y$ will be rewritten.
+In the NSE it was always implicitly assumed that derivatives w.r.t. $x$ and $y$ were calculated at constant height $z$.
+This can be denoted by a subscript $\left(\frac{\partial A}{\partial x}\right)_z$ (where $A$ is a placeholder for any scalar or vector field).
+We are interested in $\left(\frac{\partial A}{\partial x}\right)_s$, i.e. the partial derivative of $A$ w.r.t. $x$ at constant $s$.
+According to \cite{kasahara1974various} this can be written as (for formula for $y$ is analogous):
+\begin{align*}
+\left(\frac{\partial A}{\partial x}\right)_s &= \left( \frac{\partial A}{\partial x}\right)_z + \frac{\partial A}{\partial z}\left(\frac{\partial z}{\partial s}\right)_s
+\end{align*}
+To interpret this term, one can to imagine the two-dimensional surface comprising all points in space having the property of $s=s_0$.
+As $s$ is a measurement of height, for every vertical specified by $(x,y)$ there is exactly one point in the vertical with the property of $s=s_0$.
+\\
+$\left(\frac{\partial A}{\partial x}\right)_s$ can be interpreted as the change in the value of $A$ when moving in the direction of $x$ and changing height $z$ in order stay on the surface $s=s_0$.
+Infinitesimally speaking, this change in value of $A$ can be decomposed into two parts.
+First, the change of $A$ due to moving in the direction of $x$ at a constant height $z$: $\left( \frac{\partial A}{\partial x}\right)_z$.
+Second, the change in $A$ due to having to move vertically in order to stay on the surface $s=s_0$.
+This terms magnitude depends on both how much vertical movement was necessary $\left(\frac{\partial z}{\partial s}\right)_s$, and on how much $A$ changes with $z$: $\frac{\partial A}{\partial z}$. 
+Using this identity a new horizontal derivative operator $\nabla_s$ can be introduced:
 \begin{align}
-\begin{split}
-(\frac{\partial A}{\partial c})_s &= (\frac{\partial A}{\partial c})_z + \frac{\partial A}{\partial z}(\frac{\partial z}{\partial s})_s\\
-\Rightarrow \nabla _s A &= \nabla _z A+\frac{\partial s}{\partial z}(\nabla _sz)\frac{\partial A}{\partial s}\\
-\frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial z}{\partial s}\\
-\frac{D}{Dt} &= (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}
-\end{split}\label{eq_s_identities}
+\nabla _s A &= \nabla _z A+\frac{\partial s}{\partial z}(\nabla _sz)\frac{\partial A}{\partial s}\label{id_h_diff}
 \end{align}
+
+Using Leibnitz's notation, the replacement for vertical spacial derivatives can be rewritten as follows:
+\begin{align}
+\frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial A}{\partial s}\label{id_v_diff}
+\end{align}
+
+Lastly, as the material derivative was not dependent on the vertical coordinate system, according to \cite{kasahara1974various} it can be written (with $\dot{s}=\frac{ds}{dt}$ being a generalized version of vertical wind speed, i.e. how much distance $ds$ along the height measurement $s$ does a fluid parcel cover in a time $dt$):
+\begin{align}
+\frac{D}{Dt} &= \left(\frac{\partial}{\partial t}\right)_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}\label{id_t_diff}
+\end{align}
+
+
+%To this end, the following identities are used, with $c\in\{x,y\}$ \cite{kasahara1974various}:
+%\begin{align}
+%\begin{split}
+%\left(\frac{\partial A}{\partial c}\right)_s &= \left( \frac{\partial A}{\partial c}\right)_z + \frac{\partial A}{\partial z}(\frac{\partial z}{\partial s})_s\\
+%\Rightarrow \nabla _s A &= \nabla _z A+\frac{\partial s}{\partial z}(\nabla _sz)\frac{\partial A}{\partial s}\\
+%\frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial A}{\partial s}\\
+%\frac{D}{Dt} &= (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}
+%\end{split}\label{eq_s_identities}
+%\end{align}
 
 
 \subsection{Non-Hydrostatic Equations:}
 Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
 \begin{align*}
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
-\frac{\partial T}{\partial t} &\stackrel{(\ref{eq_s_identities})}{=} -\textbf{V} \cdot \nabla _s T - \dot{s} \frac{\partial T}{\partial s}+\frac{RT}{C_p}\frac{D\text{ln}p}{Dt}
+\frac{\partial T}{\partial t} &\stackrel{(\ref{id_t_diff})}{=} -\textbf{V} \cdot \nabla _s T - \dot{s} \frac{\partial T}{\partial s}+\frac{RT}{C_p}\frac{D\text{ln}p}{Dt}
 \end{align*}
-The derivation of the non-hydrostatic Navier Stokes equations also use hydrostatic pressure $\pi$, which has the property:
+For the other equations a somewhat paradoxical step has to be taken.
+In order to derive the non-hydrostatic Navier Stokes equations, hydrostatic pressure $\pi$ is introduced as a proxy-variable.
+This is done in order to express $\frac{\partial s}{\partial z}$ in equation \ref{id_v_diff}.
+Hydrostatic pressure $\pi$ has the properties:
 \begin{align}
 \frac{\partial \pi}{\partial z} &= -\rho g = - \frac{p}{RT}g \nonumber \\
 \pi(z) &= \int_\infty ^z \rho g dz' \nonumber \\
-\Rightarrow \frac{\partial s}{\partial z} &= \frac{\partial s}{\partial \pi}\frac{\partial \pi}{\partial z} = - g\rho(\frac{\partial \pi}{\partial s})^{-1} = - g\frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} \label{eq_ds_dz}
+\Rightarrow \frac{\partial s}{\partial z} &= \frac{\partial s}{\partial \pi}\frac{\partial \pi}{\partial z} = - g\rho\left(\frac{\partial \pi}{\partial s}\right)^{-1} = - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \label{eq_ds_dz}
 \end{align}
-
-Using this definition, the equation for vertical wind can be written as:
+Now introducing $\frac{\partial \pi}{\partial s}$ as a new diagnostic variable, equation \ref{id_v_diff} can be rewritten:
+\begin{align}
+\frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial A}{\partial s}\nonumber\\
+&\stackrel{\ref{eq_ds_dz}}{=} - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\frac{\partial A}{\partial s}\label{id_v_diff2}
+\end{align}
+Using $\frac{\partial \pi}{\partial s}$, the equation for vertical wind can be written as:
 \begin{align*}
 \frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g\\
-&= - \frac{RT}{p} \frac{\partial p}{\partial s}\frac{\partial s}{\partial z} - g\\
-&\stackrel{(\ref{eq_ds_dz})}{=} g \frac{\partial p}{\partial s}(\frac{\partial \pi}{\partial s})^{-1} - g\\
-&= -g(1 - \frac{\partial p}{\partial s}(\frac{\partial \pi}{\partial s})^{-1})
+&\stackrel{(\ref{id_v_diff2})}{=} g \left(\frac{\partial \pi}{\partial s}\right)^{-1}\frac{\partial p}{\partial s} - g\\
+&= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)
 \end{align*}
-The equation for pressure becomes:
+In a similar fashion using $\frac{\partial \pi}{\partial s}$ as a new variable, the equation for pressure becomes (in the last line $\Phi = zg$ is exploited):
 \begin{align*}
-\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} (\nabla_z \cdot \textbf{V} + \frac{\partial w}{\partial z})\\
-&\stackrel{(\ref{eq_s_identities})}{=} -\frac{1}{1- \frac{R}{C_p}} (\nabla _s \cdot \textbf{V} - \frac{\partial s}{\partial z} (\nabla _sz)\cdot \frac{\partial \textbf{V}}{\partial s} + \frac{\partial s}{\partial z}\frac{\partial w}{\partial s})\\
-&\stackrel{(\ref{eq_ds_dz})}{=} -\frac{1}{1- \frac{R}{C_p}} (\nabla _s \cdot \textbf{V} + \frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} (\nabla _s \phi)\cdot\frac{\partial \textbf{V}}{\partial s} - g\frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} \frac{\partial w}{\partial s})\\
+\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} \left(\nabla_z \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)\\
+&\stackrel{(\ref{id_h_diff} \& \ref{id_v_diff})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} - \frac{\partial s}{\partial z} (\nabla _sz)\cdot \frac{\partial \textbf{V}}{\partial s} + \frac{\partial s}{\partial z}\frac{\partial w}{\partial s}\right)\\
+&\stackrel{(\ref{eq_ds_dz})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} + \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} (\nabla _s \Phi)\cdot\frac{\partial \textbf{V}}{\partial s} - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\right)\\
 \end{align*}
 
-Starting from the continuity equation \ref{eq_cont}, with the generalized vertical velocity $\dot{s}=\frac{ds}{dt}$, utilizing the above identities, it can be shown that the following equations hold:
+Now that $\frac{\partial \pi}{\partial s}$ is a new diagnostic equation, it needs its own diagnostic equation, which can be gained by starting from the continuity equation \ref{eq_cont}.
+Utilizing the above identities, it can be shown that the following equations hold:
 \begin{align*}
-\text{original equation:}~~~~ \frac{d}{dt}(\text{ln}\rho) &+ \nabla _z \cdot \textbf{V} + \frac{\partial w}{\partial z} = 0 \\
-\frac{d}{dt}(\text{ln}(\rho\frac{\partial z}{\partial s})) &+ \nabla _s \cdot \textbf{V} + \frac{\partial \dot{s}}{\partial s} = 0\\
-\frac{\partial}{\partial t}(\rho\frac{\partial z}{\partial s}) &= - \nabla _s \cdot (\rho\frac{\partial z}{\partial s}\textbf{V}) - \frac{\partial }{\partial s}(\rho\frac{\partial z}{\partial s}\dot{s})
+\text{original equation:}~~~~ \frac{d}{dt}\left(\text{ln}\rho\right) &+ \nabla _z \cdot \textbf{V} + \frac{\partial w}{\partial z} = 0 \\
+\frac{d}{dt}\left(\text{ln}\left(\rho\frac{\partial z}{\partial s}\right)\right) &+ \nabla _s \cdot \textbf{V} + \frac{\partial \dot{s}}{\partial s} = 0\\
+\frac{\partial}{\partial t}\left(\rho\frac{\partial z}{\partial s}\right) &= - \nabla _s \cdot \left(\rho\frac{\partial z}{\partial s}\textbf{V}\right) - \frac{\partial }{\partial s}\left(\rho\frac{\partial z}{\partial s}\dot{s}\right)
 \end{align*}
-Utilizing, $\rho\frac{\partial z}{\partial s} \stackrel{(\ref{eq_ds_dz})}{=} - \frac{1}{g}\frac{\partial \pi}{\partial s}$, we get an equation describing the change of $\frac{\partial \pi}{\partial s}$ over time.
+Utilizing, $\rho\frac{\partial z}{\partial s} \stackrel{(\ref{eq_ds_dz})}{=} - \frac{1}{g}\frac{\partial \pi}{\partial s}$, we finally get a diagnostic equation for $\frac{\partial \pi}{\partial s}$.
 \begin{align*}
-\frac{\partial}{\partial t}(\frac{\partial \pi}{\partial s}) &= - \nabla _s \cdot (\frac{\partial \pi}{\partial s}\textbf{V}) - \frac{\partial }{\partial s}(\frac{\partial \pi}{\partial s}\dot{s})
+\frac{\partial}{\partial t}\left(\frac{\partial \pi}{\partial s}\right) &= - \nabla _s \cdot \left(\frac{\partial \pi}{\partial s}\textbf{V}\right) - \frac{\partial }{\partial s}\left(\frac{\partial \pi}{\partial s}\dot{s}\right)
 \end{align*}
 Integrating this equation from $s_{top}$ to $s$, gives a diagnostic equation for $\dot{s}$:
 \begin{align*}
-\dot{s}\frac{\partial \pi}{\partial s} = -\int _{s_{top}}^s\nabla _s \cdot (\frac{\partial \pi}{\partial s}\textbf{V})ds' + \frac{\partial \pi}{\partial \pi_{\text{bottom}}} \int  _{s_{top}}^{s_{bottom}} \nabla _s \cdot (\frac{\partial \pi}{\partial s}\textbf{V}) ds
+\dot{s}\frac{\partial \pi}{\partial s} = -\int _{s_{top}}^s\nabla _s \cdot \left(\frac{\partial \pi}{\partial s}\textbf{V}\right)ds' + \frac{\partial \pi}{\partial \pi_{\text{bottom}}} \int  _{s_{top}}^{s_{bottom}} \nabla _s \cdot \left(\frac{\partial \pi}{\partial s}\textbf{V}\right) ds
 \end{align*}
 
 Now making the assumption that horizontal winds are zero again, i.e. $\textbf{V}=0$, using the above relation necessitates that $\dot{s}=0$.
 These two statements result in the following equation system:
 \begin{align*}
-\frac{\partial w}{\partial t} &= -g(1 - \frac{\partial p}{\partial s}(\frac{\partial \pi}{\partial s})^{-1}) \\
-\frac{\partial \text{ln}p}{\partial t} &= \frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}(\frac{\partial \pi}{\partial s})^{-1} \frac{\partial w}{\partial s}\\
+\frac{\partial w}{\partial t} &= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) \\
+\frac{\partial \text{ln}p}{\partial t} &= \frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\\
 \frac{\partial T}{\partial t} &= \frac{RT}{C_p}\frac{\partial \text{ln}p}{\partial t}\\
-\frac{\partial}{\partial t}(\frac{\partial \pi}{\partial s}) &= 0
+\frac{\partial}{\partial t}\left(\frac{\partial \pi}{\partial s}\right) &= 0
 \end{align*}
 Note that for $\textbf{V}=\dot{s}=0$, the material derivative and partial derivative are the same:
 \begin{align*}
-\frac{D}{Dt} = (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s} = (\frac{\partial}{\partial t})_s
+\frac{D}{Dt} = \left(\frac{\partial}{\partial t}\right)_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s} = \left(\frac{\partial}{\partial t}\right)_s
 \end{align*}
-According to Laprise \ref{laprise1992euler}, one can implicitly define the vertical coordinate using two functions $f$ and $h$, and with $\pi_0$ and $\pi _{bottom}$ being a reference pressure and hydrostatic pressure at the bottom, respectively:
+\\
+Now that the NSE have been rewritten in the $s$-coordinate system, the $s$-coordinates have to be defined.
+One way of defining the vertical coordinate, according to Laprise \cite{laprise1992euler}, is implicitly by defining using two functions $f$ and $h$, and with $\pi_0$ and $\pi _{bottom}$ being a reference pressure and hydrostatic pressure at the bottom, respectively:
 \begin{align*}
 \pi (s) = f(s)\pi_0 + h(s)\pi_{bottom}
 \end{align*}
 Using this equation, and integrating equation (\ref{eq_ds_dz}) with respect to $s$, we can get:
 \begin{align*}
-z(s) = z_{bottom} + \frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s})ds'
+z(s) = z_{bottom} + \frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)ds'
 \end{align*}
 W.l.o.g. it is assumed that $s=0$ at the top of the system and $s=1$ at the bottom, from which it follows that:
 \begin{align*}
@@ -327,6 +399,7 @@ Also, assuming pressure at the top of the atmosphere is nonexistent:
 \begin{align*}
 \pi(0) = 0 \Rightarrow f(0) = 0, h(0) = 0
 \end{align*}
+Other than these restrictions, $f$ and $g$ can be chosen arbitrarily, as long as $\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)$ is positive for $s\in[0;1]$, as this ensures that $z(s)$ is monotonically falling.
 
 \subsection{Hydrostatic Equations:}
 Yet another equation system can be gained by making use of the hydrostatic assumption from section \ref{subsec_hydrostat}.
