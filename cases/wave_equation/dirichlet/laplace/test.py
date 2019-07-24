@@ -3,10 +3,9 @@ from unittest import TestCase
 import math
 
 from cases.run_utils import gen_test_data
-from cases.wave_equation.dirichlet.derivative import WaveEquationLaplace
-from cases.wave_equation.dirichlet.solution import StandingWaveFixedEnd
-from integrators import Heun, RungeKutta
-from starting_conditions import GaussianBump
+from cases.wave_equation.dirichlet.laplace.derivative import WaveEquationLaplace
+from cases.wave_equation.dirichlet.laplace.solution import StandingWaveFixedEnd
+from integrators import RungeKutta
 
 
 class Test(TestCase):
