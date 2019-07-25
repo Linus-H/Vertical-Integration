@@ -13,8 +13,8 @@ class WaveEquationDerivative(TimeDerivative):
         u = z[0]
         v = z[1]
 
-        dv = self.c * operators.derivative.diff_backward_n1_e1(u, self.delta_x)
-        du = self.c * operators.derivative.diff_forward_n1_e1(v, self.delta_x)
+        dv = self.c * operators.derivative.diff_forward_n1_e1(u, self.delta_x)
+        du = self.c * operators.derivative.diff_backward_n1_e1(v, self.delta_x)
         #dv[0] = dv[-1] = 0
         du[0] = 0
 
