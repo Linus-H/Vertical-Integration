@@ -12,6 +12,11 @@ class WindowManager:
     def get_axis(self, plot_index):
         return self.axes[plot_index - 1]
 
+    def sync_axes(self, plot_index_list):
+        grouper = self.axes[plot_index_list[0]].get_shared_x_axes()
+        for i in plot_index_list[1:]:
+            grouper.join(self.axes[plot_index_list[0]], self.axes[plot_index_list[i]])
+
     def display_state(self, plot_index, state, state_index, y_min=None, y_max=None, clear_axis=True, operations=None):
         """
         :param plot_index: index of the plot to be plotted in (index starts at 1)

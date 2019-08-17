@@ -2,8 +2,8 @@ from unittest import TestCase
 
 import math
 
-from cases.euler_equation._1D_wp.derivative import LogTimeDerivative
-from cases.euler_equation._1D_wp.solution import StationarySolution
+from cases.euler_equation._1D_wp_physically_wrong.derivative import LogTimeDerivative
+from cases.euler_equation._1D_wp_physically_wrong.solution import StationarySolution
 from cases.run_utils import gen_test_data
 from cases.numerical_ref_solution import CaseSolution, ReferenceSolutionCalculator
 from starting_conditions import GaussianBump
@@ -36,11 +36,9 @@ class Test(TestCase):
                 'end_time': simul_t
             }
 
-            g = -10
+            time_derivative_input = [True, True]
 
-            time_derivative_input = [True, True, g]
-
-            case_sol_input = [g]
+            case_sol_input = []
 
             error_tracker_list = gen_test_data(params, Euler.Explicit,
                                                LogTimeDerivative, time_derivative_input,
@@ -51,15 +49,17 @@ class Test(TestCase):
             dt_list.append(dt)
 
         for i in range(len(err_lists[0])):
+            print(err_lists[0][i])
+            print(err_lists[1][i])
             # actual_order = math.log(err_lists[0][i + 1] / err_lists[0][i], a)
-            self.assertTrue(err_lists[0][i] < 1e-16,
+            self.assertTrue(err_lists[0][i] < 1e-15,
                             msg="Mistake found at time-resolution {} for u. Expected error of {} but got {}".format(
-                                dt_list[i], 1e-16, err_lists[0][i]))
+                                dt_list[i], 1e-15, err_lists[0][i]))
 
             # actual_order = math.log(err_lists[1][i + 1] / err_lists[1][i], a)
-            self.assertTrue(err_lists[1][i] < 1e-16,
+            self.assertTrue(err_lists[1][i] < 1e-15,
                             msg="Mistake found at time-resolution {} for v. Expected error of {} but got {}".format(
-                                dt_list[i], 1e-16, err_lists[1][i]))
+                                dt_list[i], 1e-15, err_lists[1][i]))
 
     def test_with_numerical_solution(self):
         expected_order = 1
@@ -82,7 +82,7 @@ class Test(TestCase):
         ref_t = 33 * baseline_dt
         simul_t = 32 * baseline_dt
 
-        for i in range(3, 8):
+        for i in range(6, 10):
             dt = (a ** i) * baseline_dt
 
             params = {
@@ -112,9 +112,11 @@ class Test(TestCase):
 
         for i in range(len(err_lists[0]) - 1):
             actual_order = math.log(err_lists[0][i + 1] / err_lists[0][i], a)
+            print("{}\t{}".format(i, actual_order))
+
             self.assertTrue(expected_order * 0.95 < actual_order < expected_order * 1.05,
-                            msg="Mistake found at time-resolutions {} x {} for u. Expected order of {} but got {}".format(
-                                dt_list[i], dt_list[i + 1], expected_order, actual_order))
+                           msg="Mistake found at time-resolutions {} x {} for u. Expected order of {} but got {}".format(
+                               dt_list[i], dt_list[i + 1], expected_order, actual_order))
 
             # actual_order = math.log(err_lists[1][i + 1] / err_lists[1][i], a)
             # self.assertTrue(expected_order * 0.95 < actual_order < expected_order * 1.05,

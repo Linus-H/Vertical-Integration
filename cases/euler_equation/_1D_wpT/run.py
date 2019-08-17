@@ -3,6 +3,7 @@ from cases.euler_equation._1D_wpT.derivative import LogTimeDerivativeCP
 from cases.euler_equation._1D_wpT.derivative import LogTimeDerivativeLorenz
 import utils
 
+import cases.euler_equation.consts as const
 import integrators.RungeKutta
 import integrators.Heun
 
@@ -11,9 +12,7 @@ import numpy as np
 
 
 def exp_curve(a):
-    T = 273.15
-    R = 8.314
-    return np.exp(-10 * a / (R * T))
+    return np.exp(-const.g * a / (const.R * const.T))
 
 
 def sinc_start_cond(a):
@@ -61,7 +60,8 @@ data[0] = starting_conditions.GaussianBump(0.5 * params['domain_size'], 0.000001
 data[0] = np.log(data[0])  # apply logarithm in order to have ln(rho)-axis
 
 # specify T-values
-data[1] = 273 #+ starting_conditions.GaussianBump(0.5*params['domain_size'],0.000001).get_start_condition(axes[0])*50
+data[
+    1] = const.T  # + starting_conditions.GaussianBump(0.5*params['domain_size'],0.000001).get_start_condition(axes[0])*50
 
 # choose inputs for the time_derivative
 time_derivative_input = [0]  # gravity
@@ -69,4 +69,4 @@ time_derivative_input = [0]  # gravity
 run_utils.run_visual_without_solution(params, integrators.RungeKutta.Explicit,
                                       LogTimeDerivativeLorenz if mode is "L" else LogTimeDerivativeCP,
                                       time_derivative_input,
-                                      state, [(lambda x:x,np.exp), None, None])
+                                      state, [(lambda x: x, np.exp), None, None])

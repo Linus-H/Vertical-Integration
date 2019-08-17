@@ -1,6 +1,7 @@
 from cases import run_utils
-from cases.euler_equation._1D_wp.derivative import LogTimeDerivative
+from cases.euler_equation._1D_wp_physically_wrong.derivative import LogTimeDerivative
 import utils
+import cases.euler_equation.consts as const
 
 import integrators.RungeKutta
 import integrators.Heun
@@ -10,9 +11,7 @@ import numpy as np
 
 
 def exp_curve(a):
-    T = 273.15
-    R = 8.314
-    return np.exp(-10 * a / (R * T))
+    return np.exp(-const.g * a / (const.R * const.T))
 
 
 def sinc_start_cond(a):
@@ -57,9 +56,8 @@ data[0] = np.log(data[0])  # apply logarithm in order to have ln(rho)-axis
 
 # choose inputs for the time_derivative
 time_derivative_input = [True,  # non-linear
-                         True,  # viscosity
-                         -10]  # gravity
+                         True]  # viscosity
 
 run_utils.run_visual_without_solution(params, integrators.RungeKutta.Explicit,
                                       LogTimeDerivative, time_derivative_input,
-                                      state, [(lambda x:x,np.exp), None])
+                                      state, [(lambda x: x, np.exp), None])

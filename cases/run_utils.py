@@ -109,7 +109,8 @@ every how many steps the state shall be displayed 'sampling_rate'.
 
 def run_visual_without_solution(params, integrator_class,
                                 time_derivative_class, time_derivative_inputs,
-                                state, display_operation=None):
+                                state, display_operation=None,
+                                state_function=None):
     """
     :param params: dictionary with values for 'num_grid_points', time-step-size 'dt', size of the domain 'domain_size',
 every how many steps the state shall be displayed 'sampling_rate'.
@@ -145,6 +146,8 @@ every how many steps the state shall be displayed 'sampling_rate'.
     # simulation loop
     for i, (t, state) in enumerate(zip(timer, integrator), 1):
         if i % sampling_rate == 1:
-            print(t)
+            if state_function is not None:
+                state_function(state, t)
+            #print(t)
             for j in range(num_vars):
                 window_manager.display_state(1 + j, state, j, operations=display_operation[j])

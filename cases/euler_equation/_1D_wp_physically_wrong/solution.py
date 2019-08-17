@@ -2,16 +2,14 @@ import numpy as np
 
 import utils
 from utils import Solution
-
+import cases.euler_equation.consts as const
 
 def exp_curve(a, g):
-    T = 273.15
-    R = 8.314
-    return np.exp(g * a / (R * T))
+    return np.exp(g * a / (const.R * const.T))
 
 
 class StationarySolution(Solution):
-    def __init__(self, num_grid_points, dt, domain_size, g):
+    def __init__(self, num_grid_points, dt, domain_size):
         super().__init__(0, dt)
         self.num_grid_points = num_grid_points
         self.domain_size = domain_size
@@ -20,7 +18,7 @@ class StationarySolution(Solution):
         self.axes[0] += 0.5 * domain_size / num_grid_points
 
         self.state = utils.State(num_vars=2, dim_vars=self.num_grid_points, axes=self.axes)
-        self.g = g
+        self.g = const.g
 
     def solution(self, t, new_object=False):
         # get object to return
