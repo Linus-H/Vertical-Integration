@@ -320,7 +320,7 @@ Lastly, as the material derivative was not dependent on the vertical coordinate 
 %\end{align}
 
 
-\subsection{Non-Hydrostatic Equations:}
+\subsection{Non-Hydrostatic Equations:}\label{sec:non_hydrostatic}
 Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
 \begin{align*}
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
@@ -353,8 +353,8 @@ In a similar fashion using $\frac{\partial \pi}{\partial s}$ as a new variable, 
 &\stackrel{(\ref{eq_ds_dz})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} + \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} (\nabla _s \Phi)\cdot\frac{\partial \textbf{V}}{\partial s} - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\right)\\
 \end{align*}
 
-Now that $\frac{\partial \pi}{\partial s}$ is a new diagnostic equation, it needs its own diagnostic equation, which can be gained by starting from the continuity equation \ref{eq_cont}.
-Utilizing the above identities, it can be shown that the following equations hold:
+Now that $\frac{\partial \pi}{\partial s}$ is a new diagnostic variable, it needs its own diagnostic equation, which can be gained by starting from the continuity equation \ref{eq_cont}.
+Utilizing the above identities, it can be shown that the following equations hold\footnote{for further detail refer to \cite{} TODO}.
 \begin{align*}
 \text{original equation:}~~~~ \frac{d}{dt}\left(\text{ln}\rho\right) &+ \nabla _z \cdot \textbf{V} + \frac{\partial w}{\partial z} = 0 \\
 \frac{d}{dt}\left(\text{ln}\left(\rho\frac{\partial z}{\partial s}\right)\right) &+ \nabla _s \cdot \textbf{V} + \frac{\partial \dot{s}}{\partial s} = 0\\
@@ -370,20 +370,20 @@ Integrating this equation from $s_{top}$ to $s$, gives a diagnostic equation for
 \end{align*}
 
 Now making the assumption that horizontal winds are zero again, i.e. $\textbf{V}=0$, using the above relation necessitates that $\dot{s}=0$.
-These two statements result in the following equation system:
+Setting $\dot{s}=0$ and $\textbf{V}=0$ in all of the equations results in the following equation system:
 \begin{align*}
 \frac{\partial w}{\partial t} &= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) \\
 \frac{\partial \text{ln}p}{\partial t} &= \frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\\
 \frac{\partial T}{\partial t} &= \frac{RT}{C_p}\frac{\partial \text{ln}p}{\partial t}\\
 \frac{\partial}{\partial t}\left(\frac{\partial \pi}{\partial s}\right) &= 0
 \end{align*}
-Note that for $\textbf{V}=\dot{s}=0$, the material derivative and partial derivative are the same:
+Note that for $\textbf{V}=\dot{s}=0$, the material derivative and partial time derivative are the same:
 \begin{align*}
 \frac{D}{Dt} = \left(\frac{\partial}{\partial t}\right)_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s} = \left(\frac{\partial}{\partial t}\right)_s
 \end{align*}
 \\
 Now that the NSE have been rewritten in the $s$-coordinate system, the $s$-coordinates have to be defined.
-One way of defining the vertical coordinate, according to Laprise \cite{laprise1992euler}, is implicitly by defining using two functions $f$ and $h$, and with $\pi_0$ and $\pi _{bottom}$ being a reference pressure and hydrostatic pressure at the bottom, respectively:
+One way of defining the vertical coordinate, according to Laprise \cite{laprise1992euler} is implicitly, by defining two functions $f$ and $h$, and with $\pi_0$ and $\pi _{bottom}$ being a reference pressure and hydrostatic pressure at the bottom, respectively:
 \begin{align*}
 \pi (s) = f(s)\pi_0 + h(s)\pi_{bottom}
 \end{align*}
@@ -399,19 +399,68 @@ Also, assuming pressure at the top of the atmosphere is nonexistent:
 \begin{align*}
 \pi(0) = 0 \Rightarrow f(0) = 0, h(0) = 0
 \end{align*}
-Other than these restrictions, $f$ and $g$ can be chosen arbitrarily, as long as $\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)$ is positive for $s\in[0;1]$, as this ensures that $z(s)$ is monotonically falling.
+Other than these restrictions, $f$ and $g$ can be chosen arbitrarily, as long as $\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)$ is strictly positive for $s\in[0;1]$, as this ensures that $z(s)$ is monotonically decreasing, making substitutions of $z$ by $s$ in integrals valid.
 
-\subsection{Hydrostatic Equations:}
-Yet another equation system can be gained by making use of the hydrostatic assumption from section \ref{subsec_hydrostat}.
+\subsubsection{Useful Identities}
+In order to verify implementations of these formulas, it is useful to find quantities which have to stay constant over time.
+The two most commonly used quantities are mass and energy.
+A measure of mass in a given column of the atmosphere can be described using the following integral:
+\begin{align*}
+\int_{z_{bottom}}^{z_{top}}\rho(z)dz
+\end{align*}
+Exploiting equation \ref{eq_ds_dz} to substitute $z$ by $s$ yields:
+\begin{align*}
+\int_{s_{top}}^{s_{bottom}}\rho(s)\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds = \int_{s_{top}}^{s_{bottom}}\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds = \int_{s_{top}}^{s_{bottom}}\frac{1}{g}\left( \frac{\partial \pi}{\partial s} \right) ds
+\end{align*}
+From the equation system we know that both $\left( \frac{\partial \pi}{\partial s} \right)$ and $g$ are constant over time, which leads to the conclusion that in this equation system, the mass in the observed domain is constant over time.
+\\
+The second constant, energy, can be split up into three separate components: internal energy $\rho C_vT$, kinetic energy $\frac{\rho}{2}w^2$, and geopotential energy $\rho gz$.
+The expression for energy density $E$ (i.e. energy per volume) then becomes: TODO: source
+\begin{align*}
+E = (C_vT+\frac{1}{2}w^2 + gz)\rho
+\end{align*}
+Integrating this over the entire simulated column and yet again exploiting equation \ref{eq_ds_dz} yields energy per area $E'$:
+\begin{align*}
+E' &= \int_{z_{bottom}}^{z_{top}} (C_vT+\frac{1}{2}w^2 + gz)\frac{p}{RT} dz\\
+&=  \int_{s_{top}}^{s_{bottom}} (C_vT+\frac{1}{2}w^2 + gz(s))\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds\\
+&=  \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\\
+\end{align*}
+Assuming $s_{top}$ and $s_{bottom}$ are constant, it can be shown that the change of energy per area over time can be written as follows:
+\begin{align}\label{dE_dt}
+\frac{\partial E'}{\partial t} = w(s_{bottom})p(s_{bottom})-w(s_{top})p(s_{top})
+\end{align}
+This equation entails that the change of energy in a column is proportional to the amount of air ($\sim p$) flowing over the boundaries ($\sim w$).
+But as the mass in the observed domain is constant, the mass of air flowing over the boundaries still needs to be contained by the domain, meaning the domain must grow, i.e. either $s_{top}$ or $s_{bottom}$ must change.
+However this change of $s_{top}$ or $s_{bottom}$ would break the premise for equation \ref{dE_dt}.
+In order to prevent this from happening, i.e. enforce the premise, the right hand side must be kept at zero, which in turn entails requirements for $w$ and $p$ at the boundaries.
+This leads us to the next section: Boundary conditions.
 
-\section{Boundary Conditions}
-discussion of how each of the state variables should behave at the boundaries of the system
-\begin{itemize}
-\item winds are zero at upper and lower boundary
-\item density is zero at upper boundary
-\item integral over density in vertical needs to be constant over time. (preservation of mass)
-\item Temperature ?
-\item pressure is zero at upper boundary
-\item pressure and density at lower boundary ?
-\end{itemize}
+%\subsection{Hydrostatic Equations:}
+%Yet another equation system can be gained by making use of the hydrostatic assumption from section \ref{subsec_hydrostat}.
+
+\section{Boundary Conditions}\label{sec:boundary}
+From the above discussion, it follows that some restrictions have to be put in place for the value of the variables at the boundaries of the observed domain, in order to avoid errors.
+\subsubsection{Vertical Wind:}
+Looking at the lower boundary, which is placed on the planet's surface, it makes sense to set vertical wind to $w_{bottom}=0$.
+This means no air can move into or out of the ground.\\
+The choice of $w$ at the upper boundary is less restricted.
+On the one hand, it can make sense to set $w_{top}=0$.
+This, together with the choice of $w_{bottom}=0$, sets the equation for change in energy \ref{dE_dt} is zero, ensuring energy conservation.
+On the other hand, analogously to the reasoning for setting $w_{bottom}=0$ in order to simulate a hard wall at the bottom, setting $w_{top}=0$ is equivalent to assuming there is a wall at the top of the atmosphere.
+Of course this is not true to reality.\\
+The other option is to let $w_{top}$ change freely according to its evolution equation, which depends on $\frac{\partial p}{\partial s}\rvert _{s_{top}}$, which itself depends on the boundary condition of $p$.
+\subsubsection{Pressure and Density:}
+In this section for purposes of discussion of boundary conditions $p$ and $\rho$ can be used interchangeably, as they are connected by the ideal gas law $p=\rho RT$.
+At the lower boundary there is no restriction to the density, so it is described by its evolution equation.
+This can be concluded by looking at the equation for change in energy \ref{dE_dt}.
+The previous section set $w_{bottom}=0$, so $p_{bottom}$ has no influence on energy conservation anymore.\\
+As discussed above, the upper boundary of $p$ is connected to the upper boundary of $w$.
+In case $w_{top}$ is evolving according to its diagnostic equation, $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ needs to be chosen.
+The most natural formulation is to assume $p$ is continued smoothly over the upper boundary, and then calculating $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ from there.
+However this would violate the conservation of energy\footnote{or at least the chosen variant of describing energy}.
+The other option is to postulate $p_{top}=0$, which is generally not very smooth, and makes for discontinuous/inaccurate values of $\frac{\partial p}{\partial s}\rvert _{s_{top}}$.\\
+For this reason for simplicity's sake the remainder of this thesis makes the (physically inaccurate) assumption of $w_{top}=0$, as this allows for $p_{top}$ to change freely without violating energy conservation.
+\subsubsection{Temperature:}
+For temperature $T$ no restrictions need to be put in place for the boundary conditions, because $T$ neither has impact on energy conservation nor on mass conservation.
+This means that $T$ is also described by its usual evolution equation at the boundaries.
 

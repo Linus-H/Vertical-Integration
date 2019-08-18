@@ -24,7 +24,7 @@ Focusing on the data-generating component, its functionality was split up as fol
 \begin{itemize}
 \item differential operators, modeled by functions. 
 These functions take in a vector representing a scalar or vector field (represented by a numpy-array), perform their respective operation on it, and return the result of the operation.
-\item system state, modeled by the class \texttt{State}.
+\item storing the system state in instances of the class \texttt{State}.
 This class wraps a numpy-array storing the state variables, and the names of the all axes and variables.
 \item differential equations, modeled by classes inheriting from the abstract class \texttt{TimeDerivative}.
 When called and given an instance of \texttt{State}, objects of the \texttt{TimeDerivative} class calculate the time derivative given the current state, by applying the diagnostic equations of their respective differential equation to it.
@@ -36,13 +36,13 @@ As these solutions are analytic, any time t can be specified, and an instance of
 In order to be more similar to \texttt{Integrator} classes, they also contain an internal timer, which can be advanced by calling the instance of \texttt{Solution} without specifying a time t.
 \end{itemize}
 Using this separation into classes fulfills the objective of modularity.
-For one, one \texttt{Integrator} class can be replaced for another without affecting other components of the program using it.
+For one, one \texttt{Integrator} class can be replaced for another without affecting other components of the program.
 The same goes for different implementations of the same differential operators.
 Second, for a given differential equation, it is possible to implement several different test scenarios or analytic solutions, by representing each by its own \texttt{Solution} class.
-Last, it is possible to change the differential equation being run by changing the \texttt{TimeDerivative} class.
+Last, it is possible to change the differential equation being simulated by changing the \texttt{TimeDerivative} class.
 \\
 As already mentioned above, as another design step taken for better readability, any class which repeatedly outputs new data was implemented as an iterator.
-This includes, all classes inheriting from \texttt{Integrator} and \texttt{Solution}, as they both generate new output for every iteration.
+This includes all classes inheriting from \texttt{Integrator} and \texttt{Solution}, as they both generate new output for every iteration.
 Using iterators makes code using repeated data-generation more compact and readable.
 
 \subsection*{Evaluator}
@@ -67,7 +67,7 @@ Example: When simulating, $\text{ln}p$ can be a diagnostic variable. In order to
 
 \subsection{Operators}
 The smallest units of the framework are the operators.
-Two categories of operators have been implemented: averaging operators, and the differential operators discussed in section \ref{section:diff_op}.
+Two categories of operators have been implemented: averaging operators, and the differential operators discussed in section \ref{section:diff_op}.\\
 The averaging operators follow the naming scheme:
 \\
 \texttt{[operation abbreviation]\_e[error order]}
@@ -102,12 +102,12 @@ Now, the program that requested the information can use the \texttt{State}-objec
 To this end the Evaluator components can be used.
 
 \subsection{Usage of the Framework}
-Having established the framework with its abstract classes, in this section the way it was used is described.
+Having established the framework with its abstract classes, in this section the way it is used is described.
 As was foreseen during design, there are multiple implementations of the abstract \texttt{Integrator}, namely implementations of RK1 (explicit Euler), RK2 (explicit Heun), RK4, and an implementation of an exponential integrator.
 All of them can be found in the same folder.
 \\
-The remaining abstract classes which can be implemented for modularity's sake, are \texttt{TimeDerivative} and \texttt{Solution}.
-Both of them are dependent on the differential equation to be simulated, and on the way it is simulated, i.e. different spacial discretizations require new implementations of both \texttt{TimeDerivative} and \texttt{Solution}.
+The remaining abstract classes are \texttt{TimeDerivative} and \texttt{Solution}.
+Both of them are dependent on the differential equation to be simulated, and on the way it is simulated, i.e. different spacial discretizations/grids require new implementations of both \texttt{TimeDerivative} and \texttt{Solution}.
 For this reason there is a separate folder for each differential equation to be analyzed.
 Within each folder an appropriate implementation of \texttt{TimeDerivative} and \texttt{Solution} can be found.
 \\
@@ -117,15 +117,22 @@ If the calculated result should be compared against an analytic solution, the in
 Otherwise one can directly create an instance of \texttt{State} and set its initial conditions manually.
 \\
 Next, an instance of \texttt{TimeDerivative} must is created.
-Both this instance and the instance of \texttt{State} containing the starting conditions of the system, are necessary to create an instance of \texttt{Integrator}.
+Both this instance and the instance of \texttt{State} containing the starting conditions of the system are necessary to create an instance of \texttt{Integrator}.
 \\
 Now, depending on what the aim of the simulation is, the appropriate instances from the Evaluator components can be instantiated, which concludes the setup.
 \\
-As both \texttt{Integrator} and \texttt{Solution} are implemented as iterators, in Python 3 simulating the system can be done by using a simple \texttt{for}-loop.
-As iterators, \texttt{Integrator} will return the calculated result, and \texttt{Solution} will return the analytic result.
-This means that within the \texttt{for}-loop the programmer has access to the accurate result, the analytic result, and can now perform any further tasks necessary.
+As both \texttt{Integrator} and \texttt{Solution} are implemented as iterators, the system can simulated by using a simple \texttt{for}-loop.
+As an iterator, \texttt{Integrator} will return the calculated result, and \texttt{Solution} will return the analytic result.
+This means that within the \texttt{for}-loop the programmer has access to the accurate result, the analytic result, and can now perform any further necessary operations on those results.
+\\
+For some of the most common operations a programmer might want to do within the \texttt{for}-loop, a function performing the entire setup has been preimplemented in the \texttt{run\_ utils.py} file.
+\\
+Another helpful preimplementation is that of the numerical reference solution.
+It can be used whenever no analytic solution is known, but a reference solution is still required.
+In this case, a reference solution is created by simulating the differential equation using RK4 and doing very small time-steps.
+To avoid having to re-calculate this, the result of this time-intensive simulation is stored to the disk.
 
-\section{Testing}
+\section{Testing}\label{sec:testing}
 While it is not possible to mathematically prove that the implementation is without fault, the next best thing is exhaustive testing.
 For this framework testing usually entails checking the outputs of the components against a reference solution, which was found separately.
 This reference solution is usually analytic in nature and has to be derived through manual calculation.
@@ -144,8 +151,8 @@ In order to further verify the derivative operators, the order of the error was 
 \subsection{Integrators}
 In order to test the integrators separately from the differential operators, single-variable differential equations were used.
 Having only one variable and no spacial dimension means spacial derivative operators do not have to be utilized.
-For testing purposes four such differential equations for which there analytic solutions exist, were implemented as subclasses of  \texttt{TimeDerivative} and \texttt{Solution}.
-Having isolated the Integrator as the component to be tested (as much as possible), it was then run at different resolutions.
+For testing purposes four such differential equations for which analytic solutions exist, were implemented as subclasses of  \texttt{TimeDerivative} and \texttt{Solution}.
+Having isolated the Integrator as the component to be tested (as much as possible), it is then run at different resolutions.
 For Runge Kutta methods of order $n$ an increase in resolution by a factor of $a$ was expected to reduce error by a factor of $a^n$.
 However, for exponential integrators this method fails, as exponential integrators are either accurate down to machine precision or wholly inaccurate.
 For them, instead, a very small error was sufficient in order to complete the test.
@@ -164,3 +171,12 @@ Now running both the analytic solution and the calculated simulation, these two 
 If the results are coinciding, chances are good the implementation of \texttt{TimeDerivative} was correct.
 To further verify the solution, one can also vary the resolution with which RK4 is run.
 If change in resolution by a factor of $a$ translates into a reduction in error by a factor of $a^4$, this is a good indicator that the solution described by \texttt{TimeDerivative} converges towards the analytic solution, which was found separately.
+
+\subsection{Example}
+TODO
+\begin{itemize}
+\item Lorenz-Grid
+\item introduce used variables
+\item show equivalence between symbolic math and code
+\item show how to enforce boundary conditions
+\end{itemize}

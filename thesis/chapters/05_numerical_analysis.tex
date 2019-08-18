@@ -1,17 +1,15 @@
-\chapter{Numerical Analysis}
-\section{Validation}
-In this section it will be explained how all of the above theory has been validated.
-Explain how the individual functions were unit-tested.
-\subsection{Differential Operators}
-\subsection{Integrators}
-\subsection{Implementation of Differential Equations}
+\chapter{Numerical Studies}
+Having discussed how the NSE were simplified, discretized, and implemented, in this section the implementation is tested and validated.
+To this end, first the results of the unit tests described in section \ref{sec:testing} are discussed, by looking at the numerical errors made by the differential operators and integrators.
+Thereafter the implementations of the non-hydrostatic NSE discussed in section \ref{sec:non_hydrostatic} are analyzed.
 
-\section{Analysis of Errors}\label{chapter:introduction}
-In this section the effects (all?) possible choices of simplifications, integrators etc. is analyzed.\\
-To this end we introduce different ways of measuring errors, i.e. different norms, and use them to measure the difference between different simulations.
+\section{Validation by Analyzing Numerical Errors}
+In this section the results of the tests performed in section \ref{sec:testing} are discussed.
 
 % analysis of errors
 \subsection{Differential Operators}
+Test-Function: $\sin(20\pi (x-e))$ on domain $[0;1]$, with resolutions from 5 to $20\cdot 10^7 $
+Actual result is $20\pi\cos(20\pi (x-e))$\\
 show how the error-order is influenced by grid-size.\\
 grid size far larger than features to be measured => inaccuracy\\
 grid size a little bit smaller than features to be measured => change in accuracy according to error-order of implemented operator\\
@@ -19,10 +17,19 @@ grid size too small for machine precision => loss of accuracy
 
 \subsection{Integrators}
 \subsubsection{Runge-Kutta-Integrators}
+First off, to verify the implementation, the RK-Integrators were used to solve a differential equation without any spacial resolution, but with temporal variance.
+$\frac{dx}{dt}=\frac{t}{t^2+1}$
+with solution $x_0 + 0.5\text{ln}(t^2+1)$.
+
 explain how time-step-size and grid-size have to change together, and show trough examples how accuracy changes depending on the choice of these two parameters (maybe a heatmap with x-axis = time-step-size, y-axis=grid-size, color=accuracy after simulation time T?)
 \subsubsection{Exponential Integrators}
 showcase how accuracy stays constant independent of time-step-size (for linear systems)\\
 give a small example of simulating a non-linear system by linearization around the current state
+
+
+\section{Analysis of Errors}
+In this section the effects (all?) possible choices of simplifications, integrators etc. is analyzed.\\
+To this end we introduce different ways of measuring errors, i.e. different norms, and use them to measure the difference between different simulations.
 
 \subsection{Simplifications to the Navier Stokes Equations} % effects of simplifications
 have one simulation without simplifications run with high precision (RK4 with tiny step-sizes and high grid resolution), and compare that to simulations using high precision with simplifications.

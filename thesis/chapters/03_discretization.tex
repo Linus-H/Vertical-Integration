@@ -1,32 +1,55 @@
 \chapter{Discretization}\label{chapter:discretization}
-As most numerical methods emulate physical discrete grids in time and space, all continuous operations in the differential equations describing the physical world, need to be discretized, too.
-In this section, first, the discretization of spacial differential operators is derived.
-Second, for the time-dimension several integrators will be introduced.
-Lastly, different grid discretizations are discussed, i.e. different possibilities of distributing the spacial location at the different variables in a PDE are 'measured'.
+%As most numerical methods emulate physical discrete grids in time and space, all continuous operations in the differential equations describing the physical world, need to be discretized, too.
+Having discussed the NSE and the different kinds of rearrangements and simplifications, the first two steps of \emph{modeling} and \emph{approximating} have been completed.
+Now the question poses itself how they can be simulated on computers with their finite memory.
+To this end, all the continuous spacial and temporal terms in the NSE need to be discretized, in order to make the memory required for computation finite.
+These discretizations are steps three (\emph{Space Discretization}) and four (\emph{Time Discretization}) of solving a PDE numerically.\\
+The meaning of discretization can be seen by looking at one of the equations to be discretized:
+\begin{align*}
+\frac{\partial w}{\partial t} &= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)
+\end{align*}
+First, spacial derivatives and other spacial differential operators like $\frac{\partial p}{\partial s}$ need to be discretized, i.e. they need to be approximated using a finite number of values of $p$ around the point where the derivative is to be calculated.\\
+Second, $w$ and $p$ need to be discretized themselves.
+In the real world they are continuous in space, but when computing, they can only be represented by a finite number of samples.
+Usually, every variable in a differential equation is assigned to a grid, and at every node of that grid a measurement of the variable is stored.\\
+Third, time $\frac{\partial w}{\partial t}$ needs to be discretized.
+To be more specific, the time derivative must be reversed, i.e. integrated, in order to transform the diagnostic equation of $\frac{\partial w}{\partial t}$ to the real value of $w$.\\
+In summary, we assume the state of the system at time $t$ to be represented by a number of variables stored at the nodes of a grid.
+Next the value of the differential equation is evaluated at those grid-nodes.
+Any spacial derivative necessary for this is calculated through its respective discrete spacial derivative, which approximates the true value of the derivative while only making use of the variable values at the grid points.
+To then approximate the state of the system at some other discrete time $t+\Delta t$, the value of the differential equation is fed into an integrator which reverses the time derivative.
 
 \section{Discretization of Differential Operators}\label{section:diff_op}
+In this section two methods for approximating spacial derivatives using only samples at discrete spacial locations are introduced.
+The first method is called finite differences and approximates the derivative at a location by looking only at samples close to the location.
+While not always being the most accurate, this method makes no assumptions about the function it is approximating.\\
+The second method (sometimes called spectral) takes a detour to the frequency domain to approximate the derivative.
+While this method is highly accurate, it assumes the boundary conditions to be periodic, which is not the case for the vertical of weather simulation, meaning this method cannot be used for simulating the vertical of the NSE.
+
+\subsection{Finite Differences}
 TODO: sources\\
-In order to derive the discrete versions of spacial differential operators, the taylor-series needs to be introduced.
+In order to derive finite difference operators, the Taylor-Series needs to be introduced.
+It approximates a function around a given point using polynomials and spacial derivatives:\\
 Let $f:\mathbb{R}\times\mathbb{R}^q\rightarrow \mathbb{R}$ be a function, which we want to develop along its first argument $x$.
 All other inputs $\boldsymbol{v}$ are held constant.
-Using the Landau-notation, we can write, with $\mathcal{O}(\Delta x ^{n+1})$ being the error of the approximation.
+Using the Landau-notation, and with $\mathcal{O}(\Delta x ^{n+1})$ being the error of the approximation, the following holds:
 \begin{equation}
 f(x+\Delta x,v) = \sum_{k=0}^{n}\frac{1}{k!}\cdot\frac{\partial^k f}{\partial x ^k}(x,v)\cdot \Delta x^k + \mathcal{O}(\Delta x ^{n+1})
 \end{equation}
-Assuming an equidistant grid, i.e. we know the values of $f(x+k\Delta x)$ for $k\in [-l,u] \cap \mathbb{Z}$, this yields a linear equation system of size $l + u + 1 - 1= l + u$ ($-1$ because $k=0$ yields no information).
+Assuming an equidistant grid, i.e. the values of $f(x+k\Delta x,v)$ for $k\in [-l,u] \cap \mathbb{Z}$ are known, this yields a linear equation system of size $l + u + 1 - 1= l + u$ ($-1$ because $k=0$ yields no information).\\
+In the following, the second argument $v$ is omitted in the equations.
 
 \begin{align*}
-f(x - l \Delta x,v) &= f(x,v) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x,v)\cdot (-l\Delta x)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x,v)\cdot (-l\Delta x)^2 + ... + \mathcal{O}((\Delta x) ^{l+u+1})\\
+f(x - l \Delta x) &= f(x) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x)\cdot (-l\Delta x)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x)\cdot (-l\Delta x)^2 + ... + \mathcal{O}((\Delta x) ^{l+u+1})\\
 &...\\
-f(x,v) &= f(x,v) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x,v)\cdot (0)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x,v)\cdot (0)^2 + ... + \mathcal{O}((0) ^{l+u+1})\\
-\\
+f(x) &= f(x) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x)\cdot (0)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x)\cdot (0)^2 + ... + \mathcal{O}((0) ^{l+u+1})= f(x)\\
 &...\\
-f(x + u \Delta x,v) &= f(x,v) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x,v)\cdot (u\Delta x)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x,v)\cdot (u\Delta x)^2 + ... + \mathcal{O}((\Delta x) ^{l+u+1})\\
+f(x + u \Delta x) &= f(x) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x)\cdot (u\Delta x)^1 + \frac{1}{2!}\cdot\frac{\partial^2 f}{\partial x^2}(x)\cdot (u\Delta x)^2 + ... + \mathcal{O}((\Delta x) ^{l+u+1})\\
 \end{align*}
 The equation system consists of $l+u$ unknowns, i.e. $\frac{\partial^k f}{\partial x^k}(x,v)$, and $l+u$ equations.
 The error of the approximation made by solving for one of the unknowns $\frac{\partial^k f}{\partial x^k}(x,v)$ is $\mathcal{O}((\Delta x) ^{l+u+1-k})$ ($-k$ comes from the fact that the equation needs to be divided by $\Delta x ^k$ before being solved).
 In this thesis we will mostly make use of the first derivative.
-To this end, most commonly the following four configurations are used ($v$ is omitted in the equations):
+To this end, most commonly the following four configurations are used:
 
 \begin{align*}
 l=0,u=1&: \frac{\partial f}{\partial x}(x) = \frac{f(x+\Delta x) - f(x)}{\Delta x} + \mathcal{O}((\Delta x)^{1})\\
@@ -44,9 +67,32 @@ for periodic boundary conditions with high enough spacial resolution, the deriva
 \end{itemize}
 
 
-\section{Types of Integrators}
-Before examples of integrators will be showcased, they first need to be defined.
-An integrator is an algorithm that given a starting condition $x(t_0) = x_0$ can solve a differential equation of the form $\frac{dx}{dt} = f(x,t)$, where $x$ is the state vector and $t$ is time.
+\section{Grid Discretizations}
+TODO: source\\
+When implementing the non-hydrostatic version of the NSE discussed in section \ref{sec:non_hydrostatic}, there are three variables to be considered: Vertical wind speed $w$, pressure $\text{ln}p$, and Temperature $T$.
+Each of them vary across the atmosphere and must thus be sampled at different points across space.
+Now the question of where to place these points for each of the variables poses itself.\\
+Generally speaking, every variable gets its own arbitrary set of points at which to sample.
+Also, in theory, the set of points could vary over time.\\
+However, to simplify calculation, grids are introduced to bring order to the sets of points.
+When a variable is sampled along a grid, it is sampled at every node of that grid.
+In order to make use of the discrete differential operators introduced in section \ref{section:diff_op}, the grids are chosen to be equidistant, i.e. the distance between two consecutive grid-points is always the same.
+It is also assumed that the distance between two consecutive grid-points is the same for all three variables.\\
+Having now established that all three variables will be sampled along grids of equal grid size, the only remaining question is how the grids should be aligned or offset to one another, or if the grids of some of the variables should be identical.\\
+TODO: source
+For the NSE there are two prevailing grid-systems: The Lorenz-grid, and the Charney-Phillips-grid, which are shown in Figure TODO.\\
+For the Lorenz-grid, vertical wind $w$ is placed on the aligned grid, whereas pressure $\text{ln}p$ and Temperature $T$ are on the offset grid.\\
+For the Charney-Phillips-grid, both vertical wind $w$ and Temperature $T$ are placed on the aligned grid, and only pressure $\text{ln}p$ is on the offset grid.\\
+The reason for always placing $w$ on the aligned grid, and pressure $\text{ln}p$ on the offset grid, is to enforce the boundary conditions discussed in section \ref{sec:boundary}.
+By placing wind $w$ on the aligned grid, it is possible to force $w_{top}$ and $w_{bottom}$ to be zero, as there are sample points both at the top and the bottom.\\
+In contrast, with pressure $\text{ln}p$ it is desirable not to have a sampling point at the upper boundary of the domain, because one may want to postulate that pressure at the upper boundary is zero, because the atmosphere is supposed to end there, i.e. $p_{top}=0$, which would mean $\text{ln}p = -\infty$.
+To avoid dealing with non-computable numbers, pressure $\text{ln}p$ is placed on the offset grid.\\
+The remaining variable Temperature $T$ can then either be placed on the offset or the aligned grid, because it not affected to boundary conditions.
+
+
+\section{Discretization of Time/Types of Integrators}
+Before examples of integrators can be introduced, they first need to be defined.
+An integrator is an algorithm that, given a starting condition $x(t_0) = x_0$, can solve a differential equation of the form $\frac{dx}{dt} = f(x,t)$, where $x$ is the state vector and $t$ is time.
 The goal is to generate a trace for $x(t)$ over time, after the starting time $t_0<t$.
 
 \subsection{Runge-Kutta Methods}
@@ -98,9 +144,10 @@ RK4 has a local truncation error of $\mathcal{O}(h^5)$, and a total accumulated 
 
 \subsection{Exponential Integrators}
 In case $f(x,t)$ is a linear timeinvariant function, $f$ can be written as $f(x)=Ax$, where $A$ is a matrix.
-The resulting differential equation can be solved analytically.
-To this end first, the Laplace transform is taken, and the equation is solved for $X(s)$ (with $I$ being the identity matrix):
+The resulting differential equation can be solved analytically, using the Laplace Transform, which is explained in further detail in the appendix.
+To this end first, the Laplace transform is taken, and then the equation is solved for $X(s)$ (with $I$ being the identity matrix):
 \begin{align*}
+\frac{dx}{dt}(t) &= Ax(t)\\ 
 sX(s) - x(t_0) &= AX(s)\\
 X(s) &= (sI-A)^{-1}x(t_0)
 \end{align*}
@@ -109,21 +156,17 @@ Thereafter the inverse Laplace transform can be taken to solve for $x(t)$:
 x(t) &= \exp (A (t-t_0))x(t_0)\\
 \text{using:}~ \exp{At} &= I + \sum_{k=1}^{\infty}\frac{1}{k!}(At)^k
 \end{align*}
-As this is an analytical solution, it is exact and does not depend on step-size.
+As this is an analytic solution, it is exact and does not depend on step-size.
 However there are two major disadvantages to this method.
 First, if the system is not linear it needs to be linearized, which makes the solution inexact.
 Second, it is comparatively slow as it requires a matrix to be exponentiated.
-Take, for example, the Navier Stokes equations discussed earlier.
-If temperature, wind speed, and density are stored at just 3000 grid points, this would entail the state vector $x$ having at least 3000 entries, and thus $A$ having a size of $3000^2=9\cdot 10^6$, which would still be feasible to compute, but not fast, especially when compared to Runge-Kutta methods.\\
+Take, for example, the NSE discussed earlier.
+If temperature, wind speed, and density are stored at just 3000 grid points, this would entail the state vector $x$ having at least $3000\cdot 3=9000$ entries, and thus $A$ having $9000^2=8.1\cdot 10^7$ entries, which would still be feasible to compute, but not fast, especially when compared to Runge-Kutta methods.\\
 As a countermeasure to the second issue, the matrix exponential can be approximated using several approaches.
-One common method is the Padé-approximation:
-TODO: Padé-approximation
+For further reading on this topic refer to \cite{moler2003nineteen}.
 
 %\begin{itemize}
 %\item show how linear equations can be solved using laplace-%transforms and matrix exponentials
 %\item give example of how matrix exponential can be approximated
 %\end{itemize}
 
-\section{Grid Discretizations}
-Explain how variables can be placed on different grid-points.\\
-discussion of Lorenz and Charney-Phillips-Grids
