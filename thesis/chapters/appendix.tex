@@ -1,0 +1,10 @@
+\chapter{Appendix}
+\begin{align*}
+\mathcal{L}\{x(t)\}=X(s)=\int_0^\infty x(t)\exp (-st)dt
+\end{align*}
+For differential equations the identity for derivatives is key:
+\begin{align*}
+\mathcal{L} \left\{ \frac{dx}{dt}(t) \right\} &=\int_0^\infty \frac{dx}{dt}(t)\exp (-st)dt\\
+&=x(t)\exp(-st)\rvert _0^\infty + s  \int_0^\infty x(t)\exp (-st)dt\\
+&=-x(t=0) + sX(s)
+\end{align*}
