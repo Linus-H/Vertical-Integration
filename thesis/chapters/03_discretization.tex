@@ -78,7 +78,10 @@ However, to simplify calculation, grids are introduced to bring order to the set
 When a variable is sampled along a grid, it is sampled at every node of that grid.
 In order to make use of the discrete differential operators introduced in section \ref{section:diff_op}, the grids are chosen to be equidistant, i.e. the distance between two consecutive grid-points is always the same.
 It is also assumed that the distance between two consecutive grid-points is the same for all three variables.\\
-Having now established that all three variables will be sampled along grids of equal grid size, the only remaining question is how the grids should be aligned or offset to one another, or if the grids of some of the variables should be identical.\\
+Note that in this context, distance between grid-points does not necessarily correspond to distance (measured in meters) in the real world.
+This is due to the alternative coordinate system introduced in section \ref{sec:non_hydrostatic}, which transforms equidistant grid-points in the s-coordinate-system, to non-equidistant grid-points in the z-coordinate system, depending on how the function $\pi(s)$ is defined.
+\\
+Having now established that all three variables ($\text{ln}p$, $T$, and $w$) will be sampled along grids of equal grid size, one remaining question is how the grids should be aligned or offset to one another, or if the grids of some of the variables should be identical.\\
 TODO: source
 For the NSE there are two prevailing grid-systems: The Lorenz-grid, and the Charney-Phillips-grid, which are shown in Figure TODO.\\
 For the Lorenz-grid, vertical wind $w$ is placed on the aligned grid, whereas pressure $\text{ln}p$ and Temperature $T$ are on the offset grid.\\
