@@ -28,7 +28,7 @@ number of points, "l_inf" maximum absolute error.
         """
         self.labels = []
         self.label_name = x_label
-        self.error_name = "Error ({})".format(norm)
+        self.error_name = "Error (Norm: {})".format(norm.capitalize())
         self.abs_error = []
         self.num_points = num_points
         self.mode = norm
@@ -62,7 +62,7 @@ class ErrorIntegrator:  # TODO: add method to convert abs_error to numpy array
         :param norm: which norm to use. "l_1" sum of absolute error, "l_1norm" sum of absolute error divided by the
 number of points, "l_inf" maximum absolute error.
         """
-        self.error_name = "Error ({})".format(norm)
+        self.error_name = "Error ({})".format(norm.capitalize())
         self.tot_error = 0
         self.num_points = num_points
         self.mode = norm

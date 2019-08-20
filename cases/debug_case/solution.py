@@ -6,7 +6,7 @@ from utils import Solution
 
 
 class CaseSolution(Solution):
-    def __init__(self, dt, t0, start_value, case_num):
+    def __init__(self, num_grid_points, dt, domain_size, t0, start_value, case_num):
         super().__init__(t0, dt)
         self.start_value = start_value
         self.axes = np.zeros((1, 1))

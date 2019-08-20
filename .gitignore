@@ -6,8 +6,6 @@ venv/
 
 data/
 
-demos/
-
 log/
 *.aux
 

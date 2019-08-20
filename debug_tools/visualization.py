@@ -1,4 +1,8 @@
 from matplotlib import pyplot as plt
+import matplotlib
+
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['font.family'] = 'STIXGeneral'
 import numpy as np
 
 
@@ -16,6 +20,9 @@ class WindowManager:
         grouper = self.axes[plot_index_list[0]].get_shared_x_axes()
         for i in plot_index_list[1:]:
             grouper.join(self.axes[plot_index_list[0]], self.axes[plot_index_list[i]])
+
+    def show(self):
+        self.fig.show()
 
     def display_state(self, plot_index, state, state_index, y_min=None, y_max=None, clear_axis=True, operations=None):
         """
@@ -43,7 +50,7 @@ class WindowManager:
         x_label, y_label = state.get_names()[state_index]
 
         # plot the data
-        ax.plot(axis, state_var)
+        ax.plot(axis, state_var, "k")
 
         # label and scale the axes
         if y_min is not None and y_max is not None:
@@ -56,7 +63,7 @@ class WindowManager:
         plt.draw()
         plt.pause(1e-20)  # necessary for matplotlib to display changes without pausing the program
 
-    def display_error(self, plot_index, error_tracker, double_log, line_name="", clear_axis=False):
+    def display_error(self, plot_index, error_tracker, double_log, line_name="", clear_axis=False, linestyle=None):
         """
         :param plot_index: index of the plot to be plotted in (index starts at 1)
         :param error_tracker: the error-tracker to be displayed.
@@ -72,9 +79,15 @@ class WindowManager:
 
         # plot the data
         if double_log:
-            ax.loglog(error_tracker.labels, error_tracker.abs_error, label=line_name)
+            if linestyle is None:
+                ax.loglog(error_tracker.labels, error_tracker.abs_error, label=line_name)
+            else:
+                ax.loglog(error_tracker.labels, error_tracker.abs_error, label=line_name, c="k", ls=linestyle)
         else:
-            ax.plot(error_tracker.labels, error_tracker.abs_error, label=line_name)
+            if linestyle is None:
+                ax.plot(error_tracker.labels, error_tracker.abs_error, label=line_name)
+            else:
+                ax.plot(error_tracker.labels, error_tracker.abs_error, label=line_name, c="k", ls=linestyle)
 
         # label the axes
         ax.set_ylabel(error_tracker.error_name)
@@ -101,8 +114,8 @@ class WindowManager:
         x = [x_start, x_start * 10 ** width]
         y = [y_start, y_start / 10 ** (width * order)]
 
-        ax.loglog(x, y, 'k--')
-        ax.text(x[-1], y[-1], "O(dx^{})".format(order))
+        ax.loglog(x, y, 'k-.')
+        ax.text(x[-1], y[-1], "$\mathcal{O}" + "(\Delta x^{" + "{}".format(abs(order)) + "})$")
 
         # make sure updated graph is actually plotted
         ax.grid()

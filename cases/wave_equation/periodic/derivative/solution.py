@@ -15,7 +15,7 @@ class CaseSolution(Solution):
         self.state = utils.State(num_vars=2, dim_vars=self.num_grid_points, axes=self.axes,
                                  names=[("x", "u"), ("x", "v")])
 
-    def solution(self, t, new_object=False):
+    def solution(self, t, new_object=False): # according to D'Alembert
         # get object to return
         if new_object:
             state = utils.State(num_vars=2, dim_vars=self.num_grid_points, axes=self.axes)

@@ -14,6 +14,7 @@ def s_to_z(axis, lnp, T, dpi_ds, num_grid_points):
     p[-1] = np.exp(bottom_val)
 
     z = (const.R / const.g * np.cumsum(np.flip((T * dpi_ds(axis) / p))) / num_grid_points)
+    # print("align: {}".format(np.max(z)))
     return np.flip(z)
 
 
@@ -27,10 +28,11 @@ def s_offset_to_z(axis, lnp, T, dpi_ds, num_grid_points):
     T[0] = top_val
 
     z = (const.R / const.g * np.cumsum(np.flip((T * dpi_ds(axis) / p))) / num_grid_points)
+    # print("offset: {}".format(np.max(z)))
     return np.flip(z)
 
 
-def calc_energy(w_align, T_align, z, dpi_ds, num_grid_points, axis):
+def calc_energy(w_align, T_align, z_offset, dpi_ds, num_grid_points, axis_offset):
     # transfer w & T from non-offset layer to offset layer
     w_offset = average.avg_backward_e1(w_align)
     T_offset = average.avg_backward_e1(T_align)
@@ -40,19 +42,19 @@ def calc_energy(w_align, T_align, z, dpi_ds, num_grid_points, axis):
     # cut out top-most offset layer, because it is outside the domain
     w_offset = w_offset[1:]
     T_offset = T_offset[1:]
-    z = z[1:]
-    axis = axis[1:]
+    z_offset = z_offset[1:]
+    axis_offset = axis_offset[1:]
 
     kinetic = 0.5 * w_offset * w_offset
     internal = (const.C_p - const.R) * T_offset
-    geopotential = const.g * z
+    geopotential = const.g * z_offset
 
-    kinetic_en = kinetic * dpi_ds(axis) / (const.g * num_grid_points)
-    internal_en = internal * dpi_ds(axis) / (const.g * num_grid_points)
-    geopotential_en = geopotential * dpi_ds(axis) / (const.g * num_grid_points)
+    kinetic_en = kinetic * dpi_ds(axis_offset) / (const.g * num_grid_points)
+    internal_en = internal * dpi_ds(axis_offset) / (const.g * num_grid_points)
+    geopotential_en = geopotential * dpi_ds(axis_offset) / (const.g * num_grid_points)
 
-    E = np.sum((kinetic + internal + geopotential) * dpi_ds(axis)) / (const.g * num_grid_points)
-    #E0 = (((kinetic + internal + geopotential) * dpi_ds(axis)) / (const.g * num_grid_points))[-1]
+    E = np.sum((kinetic + internal + geopotential) * dpi_ds(axis_offset)) / (const.g * num_grid_points)
+    # E0 = (((kinetic + internal + geopotential) * dpi_ds(axis)) / (const.g * num_grid_points))[-1]
     return (E, np.sum(kinetic_en), np.sum(internal_en), np.sum(geopotential_en))
 
 

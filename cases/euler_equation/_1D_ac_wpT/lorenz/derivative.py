@@ -16,12 +16,12 @@ class LogTimeDerivativeLorenz(TimeDerivative):
         w = z[2]
 
         dlnp_dt = (const.g * np.exp(lnp) / ((1 - const.R / const.C_p) * (const.R * T))) \
-                  * derivative.diff_backward_n1_e1(w, self.delta_s) \
+                  * derivative.diff_s_offset_n1_e2(w, self.delta_s) \
                   / self.dpi_ds(self.s + self.delta_s / 2)
 
         dT_dt = (const.R / const.C_p) * T * dlnp_dt
 
-        dw_dt = - const.g * (1 - derivative.diff_forward_n1_e1(np.exp(lnp), self.delta_s) / self.dpi_ds(self.s))
+        dw_dt = - const.g * (1 - derivative.diff_s_align_n1_e2(np.exp(lnp), self.delta_s) / self.dpi_ds(self.s))
 
         dlnp_dt[0] = 0  # fix pressure to 0 (ln0=-inf) above atmosphere
         dT_dt[0] = dT_dt[1]  # fix Temperature above atmosphere

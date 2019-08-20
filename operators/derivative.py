@@ -15,6 +15,22 @@ def diff_forward_n1_e1(data, delta_x):
     return output
 
 
+def diff_offset_n1_e2(aligned_data, delta_x):
+    return diff_forward_n1_e1(aligned_data, delta_x)
+
+
+def diff_align_n1_e2(offset_data, delta_x):
+    return diff_backward_n1_e1(offset_data, delta_x)
+
+
+def diff_s_offset_n1_e2(aligned_data, delta_x):
+    return diff_backward_n1_e1(aligned_data, delta_x)
+
+
+def diff_s_align_n1_e2(offset_data, delta_x):
+    return diff_forward_n1_e1(offset_data, delta_x)
+
+
 def diff_n1_e2(data, delta_x):
     data_plus1 = np.roll(data, -1, -1)
     data_minus1 = np.roll(data, 1, -1)
@@ -34,7 +50,7 @@ def diff_n1_e4(data, delta_x):
 
 
 def diff_fft(data, delta_x):
-    transformed = np.fft.fft(data)/len(data)
+    transformed = np.fft.fft(data) / len(data)
     shifted = np.fft.fftshift(transformed)
     N = len(data)
     L = N * delta_x

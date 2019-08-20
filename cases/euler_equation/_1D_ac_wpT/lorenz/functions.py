@@ -10,7 +10,7 @@ def s_to_z(axis, lnp, T, dpi_ds, num_grid_points):
     top_val = lnp[1]
     lnp = average.avg_forward_e1(lnp)
     p = np.exp(lnp)
-    p[0] = np.exp(top_val)/2
+    p[0] = np.exp(top_val) / 2
     p[-1] = np.exp(bottom_val)
 
     # converting T on offset grid to T on non-offset grid
@@ -43,7 +43,12 @@ def calc_energy(w, T, z, dpi_ds, num_grid_points, axis):
     internal = (const.C_p - const.R) * T
     geopotential = const.g * z
     E = np.sum((kinetic + internal + geopotential) * dpi_ds(axis)) / (const.g * num_grid_points)
-    return E
+
+    kinetic_en = kinetic * dpi_ds(axis) / (const.g * num_grid_points)
+    internal_en = internal * dpi_ds(axis) / (const.g * num_grid_points)
+    geopotential_en = geopotential * dpi_ds(axis) / (const.g * num_grid_points)
+
+    return E, np.sum(kinetic_en), np.sum(internal_en), np.sum(geopotential_en)
 
 
 def calc_mass():

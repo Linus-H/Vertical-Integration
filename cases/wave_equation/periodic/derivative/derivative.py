@@ -4,12 +4,13 @@ from operators.derivative import diff_forward_n1_e1
 from operators.derivative import diff_backward_n1_e1
 from operators.derivative import diff_n1_e2
 from operators.derivative import diff_n1_e4
+from operators.derivative import diff_fft
 from utils import TimeDerivative
 
 
 def apply_operation(u, v, c, delta_x):
-    du = diff_n1_e4(v, delta_x)
-    dv = c * c * diff_n1_e4(u, delta_x)
+    du = np.real(diff_fft(v,delta_x))#diff_n1_e4(v, delta_x)
+    dv = c * c * np.real(diff_fft(u,delta_x))#diff_n1_e4(u, delta_x)
     return du, dv
 
 

@@ -5,7 +5,7 @@ from utils import TimeDerivative
 
 
 class DebugTimeDerivative(TimeDerivative):
-    def __init__(self, case_num):
+    def __init__(self, dx, case_num):
         self.case_num = case_num
 
     def __call__(self, z, t):

@@ -105,7 +105,7 @@ every how many steps the state shall be displayed 'sampling_rate'.
                 window_manager.display_state(1 + j + 2 * num_vars, state_sol, j, -2, 2)
                 window_manager.display_error(1 + j + 3 * num_vars, error_trackers[j], double_log=False,
                                              line_name="Error", clear_axis=True)
-
+                print(error_trackers[j].abs_error)
 
 def run_visual_without_solution(params, integrator_class,
                                 time_derivative_class, time_derivative_inputs,
@@ -139,6 +139,8 @@ every how many steps the state shall be displayed 'sampling_rate'.
     num_vars = len(state.get_names())
     window_manager = debug_tools.visualization.WindowManager(num_vars, 1)
 
+    window_manager.sync_axes(list(range(num_vars)))
+
     if display_operation is None:
         display_operation = [None] * num_vars
 
@@ -151,3 +153,5 @@ every how many steps the state shall be displayed 'sampling_rate'.
             #print(t)
             for j in range(num_vars):
                 window_manager.display_state(1 + j, state, j, operations=display_operation[j])
+            if t>=130:
+                break
