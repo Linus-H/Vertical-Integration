@@ -23,7 +23,7 @@ This component is called Evaluator.
 Focusing on the data-generating component, its functionality was split up as follows:
 \begin{itemize}
 \item differential operators, modeled by functions. 
-These functions take in a vector representing a scalar or vector field (represented by a numpy-array), perform their respective operation on it, and return the result of the operation.
+These functions take in a vector representing a scalar or vector field (represented by numpy-arrays), perform their respective operation on it, and return the result of the operation.
 \item storing the system state in instances of the class \texttt{State}.
 This class wraps a numpy-array storing the state variables, and the names of the all axes and variables.
 \item differential equations, modeled by classes inheriting from the abstract class \texttt{TimeDerivative}.
@@ -73,14 +73,32 @@ The averaging operators follow the naming scheme:
 \texttt{[operation abbreviation]\_e[error order]}
 \\
 where the error order indicates how many neighboring variables are taken into account when calculating the local average.
-When considering a high spacial resolution, using more neighboring variables will make the estimation more accurate.
+When considering a high spacial resolution, using more neighboring variables will make the estimation more accurate.\\
+Example: Averaging samples of a function $f$ on an equidistant grid of mesh size $\Delta x$ by averaging each grid point with the following grid point.
+\begin{figure}[htpb]
+  \centering
+  \begin{tabular}{c}
+  \begin{lstlisting}[language=Python]
+    f_average = avg_forward_e1(f, delta_x)
+  \end{lstlisting}
+  \end{tabular}
+\end{figure}
 \\
 The differential operators follow the naming scheme:
 \\
 \texttt{[operation abbreviation]\_n[operator order]\_e[error order]}
 \\ 
 where the \texttt{operator order} can either be \texttt{1} for the first order derivative, or \texttt{2} for the second order derivative (also known as the laplacian).
-The error order \texttt{e} is the exponent of $h$ in the error term $\mathcal{O}(h^\texttt{e})$ (see section \ref{section:diff_op}).
+The error order \texttt{e} is the exponent of $h$ in the error term $\mathcal{O}(h^\texttt{e})$ (see section \ref{section:diff_op}).\\
+Example: calculating the derivative $\frac{df}{dx}$ of some function $f$ w.r.t. $x$ on an equidistant grid with mesh size $\Delta x$
+\begin{figure}[htpb]
+  \centering
+  \begin{tabular}{c}
+  \begin{lstlisting}[language=Python]
+    df_dt = diff_n1_e2(f, delta_x)
+  \end{lstlisting}
+  \end{tabular}
+\end{figure}
 
 \subsection{Class Structure and Information Flow}
 The interaction between the different types of classes is visualized in fig. \ref{UML_diagram}.
@@ -102,7 +120,11 @@ Now, the program that requested the information can use the \texttt{State}-objec
 To this end the Evaluator components can be used.
 
 \subsection{Usage of the Framework}
-Having established the framework with its abstract classes, in this section the way it is used is described.
+Having established the framework with its abstract classes, in this section the way it is used is described, using the example of the wave equation with periodic boundary conditions\footnote{i.e. $u(x)=u(x+a)$ if $a$ is the periodicity} in the following form:
+\begin{align*}
+\frac{du}{dt} = \frac{dv}{dx}\\
+\frac{dv}{dt} = c^2\frac{du}{dt}
+\end{align*}
 As was foreseen during design, there are multiple implementations of the abstract \texttt{Integrator}, namely implementations of RK1 (explicit Euler), RK2 (explicit Heun), RK4, and an implementation of an exponential integrator.
 All of them can be found in the same folder.
 \\
@@ -111,19 +133,99 @@ Both of them are dependent on the differential equation to be simulated, and on 
 For this reason there is a separate folder for each differential equation to be analyzed.
 Within each folder an appropriate implementation of \texttt{TimeDerivative} and \texttt{Solution} can be found.
 \\
+Using the example of the wave equation, the implementation of the \texttt{TimeDerivative}-class can be written as follows:\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+class PeriodicWaveTimeDerivative(TimeDerivative):
+  def __init__(self, delta_x, c):
+    self.delta_x = delta_x
+    self.c = c
+
+  def __call__(self, state_vars, t):
+    # extract the variables from the state variables
+    u = state_vars[0]
+    v = state_vars[1]
+			
+    # calculated the time-derivatives
+    du_dt = diff_n1_e4(v, self.delta_x)
+    dv_dt = self.c * self.c *  diff_n1_e4(u, self.delta_x)
+        	
+    # transform result into canonical format
+    return np.stack((du_dt, dv_dt), axis=-1).transpose()
+\end{lstlisting}
+\end{tabular}\\
+Using d'Alemberts solution, which dictates that for a starting condition of $u(x,t=0)=f(x)$ and $v(x,t=0)=0$, the solution can be written as $u(x,t)=\frac{1}{2}(f(x+ct)+f(x-ct))$ and $v(x,t)=\frac{c}{2}(f(x+ct)-f(x-ct))$, one possible implementation of the \texttt{Solution}-class can be written as follows:\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+class WaveEqSolution(Solution):
+  def __init__(self, num_grid_points, dt, domain_size, c, f):
+    super().__init__(0, dt)
+    # store all variables necessary for calculating the solution
+    self.c = c
+    self.f = f
+    # create the grid along which to sample u and v
+    self.x = np.tile(np.linspace(0, domain_size, num_grid_points + 1)[:-1],
+                       (2, 1))
+    # create an instance of State-class
+    self.state = utils.State(num_vars=2, dim_vars=num_grid_points,
+                         axes=self.x, names=[("x", "u"), ("x", "v")])
+
+  def solution(self, t): # according to D'Alembert
+    # u = state_vars[0] and v = state_vars[1]
+    state_vars = self.state 
+        
+    # calculate the result
+    state_vars[0] = 0.5 * (self.f(self.x[0] + t * self.c)
+                             + self.f(self.x[0] - t * self.c))
+    state_vars[1] = self.c * 0.5 * (self.f(self.x[0] + t * self.c)
+                                       - self.f(self.x[0] - t * self.c))
+
+    return self.state
+\end{lstlisting}
+\end{tabular}
+\\
 To now put everything together, the modus operandi is as follows:
 First, an initial state of the system must be defined.
 If the calculated result should be compared against an analytic solution, the initial state can be gained by first creating an instance of \texttt{Solution}, and then asking it for the system state at time $0$.
 Otherwise one can directly create an instance of \texttt{State} and set its initial conditions manually.
 \\
-Next, an instance of \texttt{TimeDerivative} must is created.
-Both this instance and the instance of \texttt{State} containing the starting conditions of the system are necessary to create an instance of \texttt{Integrator}.
+In the example there is a solution so the starting condition can be gained as follows:\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+# creating an instance of WaveEqSolution
+solver = WaveEqSolution(num_grid_points, dt, domain_size, c, f)
+initial_state = solver.solution(t=0)
+\end{lstlisting}
+\end{tabular}
+\\
+Next, an instance of \texttt{TimeDerivative} must is created.\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+# calculate mesh size
+delta_x = domain_size / num_grid_points
+# creating an instance of PeriodicWaveTimeDerivative
+time_derivative = PeriodicWaveTimeDerivative(delta_x, c)
+\end{lstlisting}
+\end{tabular}\\
+Both this instance and the instance of \texttt{State} containing the starting conditions of the system are necessary to create an instance of \texttt{Integrator}.\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+# creating an instance of RungeKutta.Explicit
+integrator = RungeKutta.Explicit(initial_state, time_derivative, t0=0,delta_t=dt)
+\end{lstlisting}
+\end{tabular}
 \\
 Now, depending on what the aim of the simulation is, the appropriate instances from the Evaluator components can be instantiated, which concludes the setup.
 \\
 As both \texttt{Integrator} and \texttt{Solution} are implemented as iterators, the system can simulated by using a simple \texttt{for}-loop.
 As an iterator, \texttt{Integrator} will return the calculated result, and \texttt{Solution} will return the analytic result.
-This means that within the \texttt{for}-loop the programmer has access to the accurate result, the analytic result, and can now perform any further necessary operations on those results.
+This means that within the \texttt{for}-loop the programmer has access to the accurate result, the analytic result, and can now perform any further necessary operations on those results.\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+for int_state, sol_state in zip(integrator, solver): 
+  # do operations on the states
+\end{lstlisting}
+\end{tabular}
 \\
 For some of the most common operations a programmer might want to do within the \texttt{for}-loop, a function performing the entire setup has been preimplemented in the \texttt{run\_ utils.py} file.
 \\
@@ -173,10 +275,148 @@ To further verify the solution, one can also vary the resolution with which RK4 
 If change in resolution by a factor of $a$ translates into a reduction in error by a factor of $a^4$, this is a good indicator that the solution described by \texttt{TimeDerivative} converges towards the analytic solution, which was found separately.
 
 \subsection{Example}
-TODO
-\begin{itemize}
-\item Lorenz-Grid
-\item introduce used variables
-\item show equivalence between symbolic math and code
-\item show how to enforce boundary conditions
-\end{itemize}
+Now that the implementation architecture has been detailed, the implementation of the non-hydrostatic NSE in the form of a \texttt{TimeDerivative}-implementation is explained.
+More specifically an implementation of the Lorenz-grid is shown.\\
+First off, the variables used in the implementation are detailed:\\
+{\tabulinesep=0.5mm
+\begin{center}
+\begin{tabu}{c|c|c}
+\hline 
+Variable Name & Type & Meaning \\ 
+\hline 
+\texttt{delta\_s} & scalar & mesh size/distance between $s$-grid points \\ 
+\hline 
+\texttt{s} & vector & \makecell{vector containing the $s$-locations\\of all grid nodes of the aligned grid.}\\ 
+\hline 
+\texttt{dpi\_ds}& function & this represents $\frac{\partial\pi}{\partial s}$ \\ 
+\hline 
+\texttt{state\_vars} & 2d-array/list of vectors & \makecell{contains the state-variables.\\$\text{ln}p$=\texttt{state\_vars[0]}\\ $T$=\texttt{state\_vars[1]}\\ $w$=\texttt{state\_vars[2]}}\\ 
+\hline 
+\texttt{t} & scalar & \makecell{contains the elapsed simulation time\\(is not used in this implementation).} \\ 
+\hline 
+\texttt{lnp} & vector & contains all samples of $\text{ln}p$ \\
+\hline 
+\texttt{p} & vector & contains all samples of $p$ \\
+\hline 
+\texttt{T} & vector & contains all samples of $T$ \\ 
+\hline 
+\texttt{w} & vector & contains all samples of $w$ \\ 
+\hline 
+\texttt{dlnp\_dt} & vector & contains all samples of $\frac{\partial\text{ln}p}{\partial t}$ \\
+\hline 
+\texttt{dT\_dt} & vector & contains all samples of $\frac{\partial T}{\partial t}$ \\ 
+\hline 
+\texttt{dw\_dt} & vector & contains all samples of $\frac{\partial w}{\partial t}$ \\ 
+\hline 
+\end{tabu} 
+\end{center}}
+
+The only two operators utilized are the following:\\
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+diff_s_align_n1_e2(f_offset, delta_s)
+diff_s_offset_n1_e2(f_aligned, delta_s)
+\end{lstlisting}
+\end{tabular}\\
+Both functions approximate the derivative using central differences with a twist.
+Usually, when central differences are calculated, if the input is on an aligned grid, the output will also be on an aligned grid.
+This means the derivative at location $f(s)$ is approximated using values at $f(s-\Delta s)$ and at $f(s+\Delta s)$.
+In contrast, \texttt{diff\_s\_offset\_n1\_e2} takes its input on an aligned grid, and outputs it on an offset grid.
+That is, the derivative at location $f(s)$ is approximated using the values at $f(s-\frac{\Delta s}{2})$ and $f(s+\frac{\Delta s}{2})$.
+Vice versa, \texttt{diff\_s\_offset\_n1\_e2} takes its input on an offset grid, and outputs it on an aligned grid.\\
+Using these definitions, implementation of the non-hydrostatic NSE is reasonably simple.
+When reading the code, note the close relation to the mathematical notation, which can be seen best by writing them down side by side:
+\paragraph{Evolution of Vertical Wind Speed:}
+\begin{align*}
+\frac{\partial w}{\partial t} = -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)
+\end{align*}
+\begin{center}
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+dw_dt =
+- const.g * (1 - diff_s_align_n1_e2(p, self.delta_s) / self.dpi_ds(self.s))
+\end{lstlisting}
+\end{tabular}
+\end{center}
+
+\paragraph{Evolution of Pressure}
+\begin{align*}
+\frac{\partial \text{ln}p}{\partial t} = \frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}
+\end{align*}
+
+\begin{center}
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+dlnp_dt = (const.g / (1 - const.R / const.C_p)) 
+           * (p / (const.R * T)) 
+           * diff_s_offset_n1_e2(w, self.delta_s) 
+           / self.dpi_ds(self.s + self.delta_s / 2)
+\end{lstlisting}
+\end{tabular}
+\end{center}
+
+\paragraph{Evolution of Temperature}
+\begin{align*}
+\frac{\partial T}{\partial t} = \frac{RT}{C_p}\frac{\partial \text{ln}p}{\partial t}
+\end{align*}
+
+\begin{center}
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+dT_dt = (const.R / const.C_p) * T * dlnp_dt
+\end{lstlisting}
+\end{tabular}
+\end{center}
+
+\begin{tabular}{c}
+\begin{lstlisting}[language=Python]
+class LorenzTimeDerivative(TimeDerivative):
+  def __init__(self, delta_s, s, dpi_ds):
+    # store the variables necessary for computation
+    self.delta_s = delta_s
+    self.dpi_ds = dpi_ds
+    self.s = s
+
+  def __call__(self, state_vars, t):
+    # extract the state variables from the system state
+    lnp = state_vars[0]
+    p = np.exp(lnp)
+    T = state_vars[1]
+    w = state_vars[2]
+	
+    # prognostic equation for pressure (offset grid)
+    dlnp_dt = (const.g / (1 - const.R / const.C_p)) \
+               * (p / (const.R * T)) \
+               * diff_s_offset_n1_e2(w, self.delta_s) \
+               / self.dpi_ds(self.s + self.delta_s / 2)
+    
+    # prognostic equation for temperature (offset grid)
+    dT_dt = (const.R / const.C_p) * T * dlnp_dt
+    
+    # prognostic equation for vertical wind (aligned grid)
+    dw_dt = - const.g \ 
+    * (1 - diff_s_align_n1_e2(p, self.delta_s) / self.dpi_ds(self.s))
+	
+    # boundary conditions
+      # index 0 <=> s=0 <=> top of atmosphere
+      # index -1 <=> s=1 <=> bottom of atmosphere
+    # fix pressure to 0 (ln(0)=-inf) above atmosphere
+    dlnp_dt[0] = 0  
+    # fix temperature outside atmosphere to be same as at top of atmosphere
+    dT_dt[0] = dT_dt[1]
+    # set wind at top and bottom to stay constant at zero
+    dw_dt[0] = 0 
+    dw_dt[-1] = 0
+
+    # transform result into canonical format
+    return np.stack((dlnp_dt, dT_dt, dw_dt), axis=-1).transpose()
+\end{lstlisting}
+\end{tabular}\\
+
+
+%\begin{itemize}
+%\item Lorenz-Grid
+%\item introduce used variables
+%\item show equivalence between symbolic math and code
+%\item show how to enforce boundary conditions
+%\end{itemize}

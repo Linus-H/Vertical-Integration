@@ -7,7 +7,7 @@ Thereafter the implementations of the non-hydrostatic NSE discussed in section \
 In this section the results of the tests performed in section \ref{sec:testing} are discussed.
 
 % analysis of errors
-\subsection{Differential Operators}
+\subsection{Differential Operators}\label{sec:numeric_diff_ops}
 To test the differential operators, the function $f(x)=\sin(20\pi (x-e))$ was used on the domain $[0;1]$.
 The offset of $e$ was introduced in order to avoid random perfect results.
 Without it, if, for example, the samples happen to be located at the maximums, minimums and zero-crossings, even a simple central difference would make zero error.
@@ -159,8 +159,8 @@ This is reflected by both implementations as can be seen in Fig. \ref{fig:lorenz
 
 \begin{figure}[!h]
 	\makebox[\textwidth]{ 
-  		 \includegraphics[width=1.2\textwidth]{figures/lorenz_240s_stat.pdf}}
-    \caption{Error (deviation from stationary solution) made using RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (the corresponding diagram \ref{fig:cp_stat_err} for the Charney-Phillips-grid is nearly identical and can be found in the appendix)}
+  		 \includegraphics[width=1.0\textwidth]{figures/lorenz_240s_stat.pdf}}
+    \caption{Error (deviation from stationary solution) made using RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (the corresponding diagram \ref{fig:cp_stat_err} for the Charney-Phillips-grid is nearly identical and can be found in appendix \ref{sec:stationary_cp_error})}
     \label{fig:lorenz_stat_err}
 \end{figure}
 

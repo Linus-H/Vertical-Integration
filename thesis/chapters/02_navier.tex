@@ -28,7 +28,7 @@ $\boldsymbol{\Omega}$ & angular velocity of Earth & constant vector & $\frac{m}{
 \hline 
 $\Phi = gz$ & \makecell{geopotential comprising effects\\ of gravity and centrifugal force} & scalar field & $\frac{J}{kg}$ \\
 \hline 
-$R \approx 287.0 \frac{J}{kg\cdot K}$ & perfect gas constant & scalar constant & $\frac{J}{kg\cdot K}$ \\ 
+$R \approx 287.0 \frac{J}{kg\cdot K}$ & specific gas constant for dry air & scalar constant & $\frac{J}{kg\cdot K}$ \\ 
 \hline 
 $C_p \approx 1000 \frac{J}{kg\cdot K}$ & \makecell{specific heat at constant \\pressure for dry air} & scalar constant & $\frac{J}{kg\cdot K}$ \\ 
 \hline 
@@ -39,7 +39,10 @@ $\textbf{Q}$ & source/sink term for heat & scalar field & $\frac{J}{mol\cdot K}$
 $\textbf{M}$ & source/sink term for specific humidity & scalar field & $\frac{g}{s\cdot kg}$ \\ 
 %\hline 
 \end{tabular}
-\\(TODO: source for numbers)\\
+\\
+The value of $R$ can be calculated by dividing the ideal gas constant $8.31\frac{J}{mol K}$\cite{mohr2008codata} by the molar mass of dry air $28.96\frac{g}{mol}$\cite{langeheinecke1993thermodynamik}.
+The value for specific heat $C_p$ can be found in \cite{beckett1955tables}.
+\\
 
 Now the only components missing to write down the NSE are the differential operators.
 In the following table $A$ stands in for an arbitrary scalar field.
@@ -67,7 +70,7 @@ $\nabla$ & $\begin{pmatrix}
 \end{center}}
 
 
-Using these definitions the most general form of the equations can be written as follows:
+Using these definitions the most general form of the equations can be written as follows \cite{coiffier2011fundamentals}:
 \begin{align}
 \text{momentum equation}\;\; \frac{D\textbf{V}_3}{Dt} &= -2\boldsymbol{\Omega}\times \textbf{V}_3 - \frac{1}{\rho}\nabla _3 p - \nabla _3 \Phi + \textbf{F} \label{eq_mom}\\
 \text{thermodynamic equation}\;\;\; \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
@@ -85,12 +88,12 @@ Next, the right-hand sides of the above equations are interpreted, starting with
 \item $- \frac{1}{\rho}\nabla _3 p$ this pressure force term describes how air flows from regions of high pressure to regions of low pressure.
 \item $- \nabla _3 \Phi$ this term describes how air flows from high  potential to low potential, i.e. in the direction of gravity.
 \end{itemize}
-For complete accuracy a term of the shape $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity can be added.
-However $\mu \approx 1.7\cdot 10^{-5}$, so the term can often be ignored.
+For complete accuracy a term of the shape $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity can be added \cite{cabralnsthermo}.
+However dynamic viscosity $\mu \approx 1.7\cdot 10^{-5}\frac{kg}{sm}$\cite{pennlectureconsts} is very small, so the term can often be ignored.
 \\
 Looking at the thermodynamic equation \ref{eq_therm}, there is only a single term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describing how temperature changes given how the pressure changes.
 This relationship depends on temperature and pressure, because the thermodynamic properties of air also depend on the current temperature and pressure.
-To be more accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ could be added, to account for thermal conduction, but for these equations they can be neglected, because $\alpha \approx \frac{0.024}{R\rho}$ (TODO: source) is sufficiently small.
+To be more accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ could be added, to account for thermal conduction, but for these equations they can be neglected, because thermal diffusivity of air $\alpha \approx 2\cdot 10^{-5}\frac{m^2}{s}$ \cite{pennlectureconsts} is sufficiently small.
 \\
 Lastly, interpreting the continuity equation \ref{eq_cont}, it can be helpful to expand the material derivative, in order to highlight how the two similar terms can describe different effects.
 \begin{align*}
@@ -135,7 +138,8 @@ For this reason simplifications are be called \emph{altering}.
 \\
 In the following, first, some \emph{non-altering} rearrangements are made and, second, some \emph{altering} simplifications are introduced.
 The former have the main goal of condensing the NSE into a more compact and efficient format.
-The latter only have the goal of making computation more efficient.
+The latter only have the goal of making computation more efficient.\\
+All of the rearrangements and simplifications made in this section come from the book \emph{Fundamentals of numerical weather prediction} by Jean Coiffier\cite{coiffier2011fundamentals}.
 
 %both in order to make computation more efficient, and to transform the equations into a form more conducive to making simplifications.
 %These rearrangements do not affect the simulation results.
@@ -271,8 +275,9 @@ Second, there is no clear end to the atmosphere, meaning there is no obvious sin
 \\
 Considering these problems, it would be desirable not to measure height in meters relative to sea level, but by some other measure.
 And as there is no other obvious measurement of height that would optimal, instead a placeholder variable for measuring height $s$ is introduced.
-This way any possible other measurement of height can easily be plugged in.
-\subsubsection*{Identities to get from $z$ to $s$:}
+This way any possible other measurement of height can easily be plugged in.\\
+Yet again all formulas in this section can also be read up on in the book {Fundamentals of numerical weather prediction}\cite{coiffier2011fundamentals}.
+\subsubsection{Identities to get from $z$ to $s$:}
 Considering that the old measurement of height $z$ used in the NSE was suboptimal and $s$ is supposed to replace it, this means that all occurrences of $z$ in the NSE need to be replaced by $s$.
 %Often, $s$ will be dependent on pressure $p$ in some way, as this way an equidistant spacing of $s$ will correspond to higher spacial resolution in areas where $p$ is changing a lot.\\
 This change from $z$ to $s$ as a vertical coordinate affects all differential operators in the NSE, meaning all of them need to be rewritten.
@@ -320,7 +325,7 @@ Lastly, as the material derivative was not dependent on the vertical coordinate 
 %\end{align}
 
 
-\subsection{Non-Hydrostatic Equations:}\label{sec:non_hydrostatic}
+\subsubsection{Non-Hydrostatic Equations:}\label{sec:non_hydrostatic}
 Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
 \begin{align*}
 \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
@@ -354,7 +359,7 @@ In a similar fashion using $\frac{\partial \pi}{\partial s}$ as a new variable, 
 \end{align*}
 
 Now that $\frac{\partial \pi}{\partial s}$ is a new diagnostic variable, it needs its own diagnostic equation, which can be gained by starting from the continuity equation \ref{eq_cont}.
-Utilizing the above identities, it can be shown that the following equations hold\footnote{for further detail refer to \cite{} TODO}.
+Utilizing the above identities, it can be shown that the following equations hold\footnote{for further detail refer to \cite{coiffier2011fundamentals}}.
 \begin{align*}
 \text{original equation:}~~~~ \frac{d}{dt}\left(\text{ln}\rho\right) &+ \nabla _z \cdot \textbf{V} + \frac{\partial w}{\partial z} = 0 \\
 \frac{d}{dt}\left(\text{ln}\left(\rho\frac{\partial z}{\partial s}\right)\right) &+ \nabla _s \cdot \textbf{V} + \frac{\partial \dot{s}}{\partial s} = 0\\
@@ -387,10 +392,10 @@ One way of defining the vertical coordinate, according to Laprise \cite{laprise1
 \begin{align*}
 \pi (s) = f(s)\pi_0 + h(s)\pi_{bottom}
 \end{align*}
-Using this equation, and integrating equation (\ref{eq_ds_dz}) with respect to $s$, we can get:
-\begin{align*}
+Using this equation, and integrating equation (\ref{eq_ds_dz}) with respect to $s$ yields:
+\begin{align}\label{eq_s_to_z}
 z(s) = z_{bottom} + \frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)ds'
-\end{align*}
+\end{align}
 W.l.o.g. it is assumed that $s=0$ at the top of the system and $s=1$ at the bottom, from which it follows that:
 \begin{align*}
 \pi(1) = \pi_{bottom} \Rightarrow f(1) = 0 , h(1) = 1
@@ -401,7 +406,7 @@ Also, assuming pressure at the top of the atmosphere is nonexistent:
 \end{align*}
 Other than these restrictions, $f$ and $g$ can be chosen arbitrarily, as long as $\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)$ is strictly positive for $s\in[0;1]$, as this ensures that $z(s)$ is monotonically decreasing, making substitutions of $z$ by $s$ in integrals valid.
 
-\subsubsection{Useful Identities}
+\paragraph{Useful Identities}
 In order to verify implementations of these formulas, it is useful to find quantities which have to stay constant over time.
 The two most commonly used quantities are mass and energy.
 A measure of mass in a given column of the atmosphere can be described using the following integral:
@@ -414,8 +419,8 @@ Exploiting equation \ref{eq_ds_dz} to substitute $z$ by $s$ yields:
 \end{align}
 From the equation system we know that both $\left( \frac{\partial \pi}{\partial s} \right)$ and $g$ are constant over time, which leads to the conclusion that in this equation system, the mass in the observed domain is constant over time.
 \\
-The second constant, energy, can be split up into three separate components: internal energy $\rho C_vT$, kinetic energy $\frac{\rho}{2}w^2$, and geopotential energy $\rho gz$.
-The expression for energy density $E$ (i.e. energy per volume) then becomes: TODO: source
+The second constant, energy, can be split up into three separate components (\cite{vallis2017atmospheric} page 45): internal energy $\rho C_vT$, kinetic energy $\frac{\rho}{2}w^2$, and geopotential energy $\rho gz$.
+The expression for energy density $E$ (i.e. energy per volume) then becomes:
 \begin{align*}
 E = (C_vT+\frac{1}{2}w^2 + gz)\rho
 \end{align*}
@@ -425,7 +430,7 @@ E' &= \int_{z_{bottom}}^{z_{top}} (C_vT+\frac{1}{2}w^2 + gz)\frac{p}{RT} dz\nonu
 &=  \int_{s_{top}}^{s_{bottom}} (C_vT+\frac{1}{2}w^2 + gz(s))\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds\nonumber\\
 &=  \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\label{eq_energy}
 \end{align}
-Assuming $s_{top}$ and $s_{bottom}$ are constant, it can be shown that the change of energy per area over time can be written as follows:
+Assuming $s_{top}$ and $s_{bottom}$ are constant, it can be shown that the change of energy per area over time can be written as follows (the full derivation can be found in appendix \ref{sec:derivation:dE_dt}):
 \begin{align}\label{dE_dt}
 \frac{\partial E'}{\partial t} = w(s_{bottom})p(s_{bottom})-w(s_{top})p(s_{top})
 \end{align}
@@ -457,7 +462,7 @@ The previous section set $w_{bottom}=0$, so $p_{bottom}$ has no influence on ene
 As discussed above, the upper boundary of $p$ is connected to the upper boundary of $w$.
 In case $w_{top}$ is evolving according to its diagnostic equation, $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ needs to be chosen.
 The most natural formulation is to assume $p$ is continued smoothly over the upper boundary, and then calculating $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ from there.
-However this would violate the conservation of energy\footnote{or at least the chosen variant of describing energy}.
+However this would violate the conservation of energy\footnote{or at least the chosen variant of defining energy}.
 The other option is to postulate $p_{top}=0$, which is generally not very smooth, and makes for discontinuous/inaccurate values of $\frac{\partial p}{\partial s}\rvert _{s_{top}}$.\\
 For this reason for simplicity's sake the remainder of this thesis makes the (physically inaccurate) assumption of $w_{top}=0$, as this allows for $p_{top}$ to change freely without violating energy conservation.
 \subsubsection{Temperature:}

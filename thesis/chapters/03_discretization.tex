@@ -27,8 +27,7 @@ The second method (sometimes called spectral) takes a detour to the frequency do
 While this method is highly accurate, it assumes the boundary conditions to be periodic, which is not the case for the vertical of weather simulation, meaning this method cannot be used for simulating the vertical of the NSE.
 
 \subsection{Finite Differences}
-TODO: sources\\
-In order to derive finite difference operators, the Taylor-Series needs to be introduced.
+In order to derive the commonly known (e.g. refer to \cite{smith1985numerical}) finite difference operators, the Taylor-Series needs to be introduced.
 It approximates a function around a given point using polynomials and spacial derivatives:\\
 Let $f:\mathbb{R}\times\mathbb{R}^q\rightarrow \mathbb{R}$ be a function, which we want to develop along its first argument $x$.
 All other inputs $\boldsymbol{v}$ are held constant.
@@ -65,14 +64,29 @@ l=1,u=1&: \frac{\partial f}{\partial x}(x) = \frac{f(x + \Delta x) - f(x-\Delta 
 l=u=2&: \frac{\partial f}{\partial x}(x) = \frac{f(x-2\Delta x) -8 f(x-\Delta x) + 8 f(x+\Delta x) - f(x+2\Delta x)}{12\Delta x} + \mathcal{O}((\Delta x)^{4})\\
 \end{align*}
 
-\subsection{Spectral Methods for periodic boundary conditions?}
-for periodic boundary conditions with high enough spacial resolution, the derivative can be found without error as follows:
-\begin{itemize}
-\item take FFT
-\item multiply by $j\omega$
-\item transform back
-\end{itemize}
 
+\subsection{Spectral Methods for Periodic Boundary Conditions}
+While finite differences are quite intuitive in their nature, another method of calculating the derivative of a function are spectral methods.
+For periodic boundary conditions this entails the usage of the Fourier Transform.
+According to Johnson \cite{johnson2011notes}, the intuition behind this can be seen by assuming any function on a domain $[0;L]$ can be written as a series:
+\begin{align*}
+y(x) = \sum_{k=-\infty}^{\infty}Y_k\exp \left(\frac{2\pi i}{L}kx\right)
+\end{align*}
+This way, given that all $Y_k$ are known, the derivative $\frac{dy}{dx}$ can be written as a new series:
+\begin{align*}
+\frac{dy}{dx}(x) = \sum_{k=-\infty}^{\infty}\left(\frac{2\pi i}{L}kY_k\right)\exp \left(\frac{2\pi i}{L}kx\right)
+\end{align*}
+In this example the coefficients $Y_k$ are the Fourier Transform of $y(x)$, and the coefficients $(\frac{2\pi i}{L}kY_k)$ are the Fourier Transform of the derivative $\frac{dy}{dx}(x)$.
+As there is clearly a linear relationship between the Fourier-coefficients of the function and the coefficients of its derivative, this means the derivative of any function can be calculated in three steps:
+First, calculating the Fourier-coefficents of a function.
+Second, modifying the calculated Fourier-coefficients appropriately.
+Third, calculating the derivative by applying the inverse Fourier Transform on the the modified Fourier-coefficients, i.e. calculating $\frac{dy}{dx}(x)$ from $(\frac{2\pi i}{L}kY_k)$.\\
+Given the fact computers are not dealing with continuous functions, but only with discrete samples thereof, the discrete Fourier Transform must be used, which can be computed using the Fast Fourier Transform (FFT).\\
+The derivation behind this method can be read in \cite{johnson2011notes}.\\
+The main advantage of this spectral method is its precision as soon as the spacial sampling rate is sufficiently high\footnote{This has to do with the Nyquist frequency.}, as will be seen in the numerical testing done in section \ref{sec:numeric_diff_ops}.\\
+However, the downsides to this method are twofold.
+First, the method requires boundary conditions to be periodic in order to work, because the FFT assumes periodic boundary conditions.
+Second, computing the FFT takes $\mathcal{O}(n\log n)$, which is significantly slower than the $\mathcal{O}(n)$ when using finite difference operators.
 
 \section{Grid Discretizations}
 \begin{figure}[ht]
@@ -83,11 +97,11 @@ for periodic boundary conditions with high enough spacial resolution, the deriva
 \end{figure}
 \begin{figure}[ht]
 	\makebox[\textwidth]{ 
-  		 \includegraphics[width=.8\textwidth]{figures/lorenz_cp.pdf}}
+  		 \includegraphics[width=.7\textwidth]{figures/lorenz_cp.pdf}}
     \caption{Variable distribution for Lorenz grid and Charney-Phillips grid}
     \label{fig:lorenz_cp}
 \end{figure}
-TODO: source\\
+
 When implementing the non-hydrostatic version of the NSE discussed in section \ref{sec:non_hydrostatic}, there are three variables to be considered: Vertical wind speed $w$, pressure $\text{ln}p$, and Temperature $T$.
 Each of them vary across the atmosphere and must thus be sampled at different points across space.
 Now the question of where to place these points for each of the variables poses itself.\\
@@ -99,11 +113,23 @@ In order to make use of the discrete differential operators introduced in sectio
 It is also assumed that the distance between two consecutive grid-points is the same for all three variables.\\
 Note that in this context, distance between grid-points does not necessarily correspond to distance (measured in meters) in the real world.
 This is due to the alternative coordinate system introduced in section \ref{sec:non_hydrostatic}, which transforms equidistant grid-points in the s-coordinate-system, to non-equidistant grid-points in the z-coordinate system, depending on how the function $\pi(s)$ is defined.
+This effect can be observed in Fig. \ref{fig:s_grid}
+\begin{figure}[ht]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=.9\textwidth]{figures/50gridpoints.pdf}}
+  	\makebox[\textwidth]{ 
+  		 \includegraphics[width=.9\textwidth]{figures/s_to_z.pdf}}
+    \caption{Translation of $s$-coordinates to $z$-coordinates.}
+    \label{fig:s_grid}
+    \small
+    Both diagrams assume that $\pi (s)=s\cdot 1atm$, and $T=273K$, and use eq. \ref{eq_s_to_z} to translate an equidistant $s$-grid to a non-equidistant $z$-grid.
+    The first diagram shows where each grid point is located in $z$-coordinates when using $50$ grid points. 
+    The second diagram shows the relationship between $s$-coordinates and $z$-coordinates.
+\end{figure}
 \\
 Having now established that all three variables ($\text{ln}p$, $T$, and $w$) will be sampled along grids of equal grid size, one remaining question is how the grids should be aligned or offset to one another, or if the grids of some of the variables should be identical.
-To reiterate the train of thought behind grid discretization refer to Fig. \ref{fig:grid_discretization}.
-TODO: source
-For the NSE there are two prevailing grid-systems: The Lorenz-grid, and the Charney-Phillips-grid, which are shown in Figure \ref{fig:lorenz_cp}.
+To reiterate the train of thought behind grid discretization refer to Fig. \ref{fig:grid_discretization}.\\
+For the NSE there are two prevailing grid-systems \cite{holdaway2013comparison}: The Lorenz-grid, and the Charney-Phillips-grid, which are shown in Figure \ref{fig:lorenz_cp}.
 For the Lorenz-grid, vertical wind $w$ is placed on the aligned grid, whereas pressure $\text{ln}p$ and Temperature $T$ are on the offset grid.\\
 For the Charney-Phillips-grid, both vertical wind $w$ and Temperature $T$ are placed on the aligned grid, and only pressure $\text{ln}p$ is on the offset grid.\\
 The reason for always placing $w$ on the aligned grid, and pressure $\text{ln}p$ on the offset grid, is to enforce the boundary conditions discussed in section \ref{sec:boundary}.
@@ -118,9 +144,9 @@ An integrator is an algorithm that, given a starting condition $x(t_0) = x_0$, c
 The goal is to generate a trace for $x(t)$ over time, after the starting time $t_0<t$.
 
 \subsection{Runge-Kutta Methods}
-TODO: sources\\
-One of the more simple classes of integrators are the explicit Runge Kutta methods.
+One of the more simple classes of integrators are the explicit Runge-Kutta methods.
 They begin with the initial value $x_0$ and then create the trace $x(t)$ taking small time-steps $\Delta t$ starting at $t_0$ and modifying the state through addition: $x(t+h) = x(t) + RK(f,x,t,h)$.\\
+The following derivation closely follows the derivation in \cite{lyu2016plasma}, but other derivations such as in \cite{suli2003introduction} are also possible.\\
 All Runge-Kutta methods aim to approximate the Taylor series expansion of $x(t)$ with respect to $t$, i.e.
 \begin{align*}
 x(t+h) &= x(t) + \sum_{k=1}^{n}\frac{h^k}{k!}\frac{d^kx}{dt^k} + \mathcal{O} \left(h^{n+1}\frac{d^{n+1}x}{dt^{n+1}}\right)\\
@@ -166,7 +192,7 @@ RK4 has a local truncation error of $\mathcal{O}(h^5)$, and a total accumulated 
 
 \subsection{Exponential Integrators}
 In case $f(x,t)$ is a linear timeinvariant function, $f$ can be written as $f(x)=Ax$, where $A$ is a matrix.
-The resulting differential equation can be solved analytically, using the Laplace Transform, which is explained in further detail in the appendix.
+The resulting differential equation can be solved analytically, using the Laplace Transform, which is explained in further detail in appendix \ref{sec:laplace_trafo}.
 To this end first, the Laplace transform is taken, and then the equation is solved for $X(s)$ (with $I$ being the identity matrix):
 \begin{align*}
 \frac{dx}{dt}(t) &= Ax(t)\\ 
