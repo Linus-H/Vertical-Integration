@@ -134,8 +134,10 @@ Instead, four tests will be considered:
 \item energy conservation
 \item comparison of the two implementations to one another
 \end{itemize}
+Due to the nature of the non-hydrostatic NSE, mass conservation cannot be used as a test, because mass conservation is always preserved according to equation \ref{eq_mass_conservation}.
 
 \subsection{Comparison with Stationary Solution}
+The first way to test the implementations is by verifying that the system state will stay the same, when the starting condition is a stationary solution of the non-hydrostatic NSE.
 To find a stationary solution for the non-hydrostatic NSE, all time-derivatives have to be set to zero:
 \begin{align}
 \frac{\partial w}{\partial t} =0&= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)\label{stat_dw_dt} \\
@@ -153,14 +155,135 @@ Due to the boundary conditions, at the bottom of the atmosphere $w(1)=0$, so $w(
 The last equation \ref{stat_dT_dt} yields no information, because the right hand side is already zero, due to $\frac{\partial \text{ln}p}{\partial t}=0$.
 This means $T$ can be chosen freely, e.g. $T=273K$.\\
 Using this stationary solution to define the initial state of the system, the integrator is expected not to change the system state.
-This is reflected by both implementations as can be seen in Fig. 
+This is reflected by both implementations as can be seen in Fig. \ref{fig:lorenz_stat_err}, where the magnitude of the error is never greater than $10^{-8}$.
 
 \begin{figure}[!h]
 	\makebox[\textwidth]{ 
   		 \includegraphics[width=1.2\textwidth]{figures/lorenz_240s_stat.pdf}}
-    \caption{Error (deviation from stationary solution) made using RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time}
+    \caption{Error (deviation from stationary solution) made using RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (the corresponding diagram \ref{fig:cp_stat_err} for the Charney-Phillips-grid is nearly identical and can be found in the appendix)}
     \label{fig:lorenz_stat_err}
 \end{figure}
+
+\subsection{Comparison with Real World Measurements}
+Another method to test the implementation is to compare measurements from the real world with measurements made within the implementation.
+First, one can compare the distribution of density $\rho=\frac{p}{RT}$ in the stationary case to real world measurements made by NASA \cite{larson1963stratosphere} of the atmosphere.
+For the simulation it was assumed that pressure at the bottom of the system was $\pi_{bottom}=1atm=101325 Pa$, and $T=273K$.
+Also it was assumed that $\pi (s) = s\cdot\pi_{bottom}$
+In Fig. \ref{fig:cmp_nasa} it can be seen that the calculated result closely mirrors reality.
+
+
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=0.5\textwidth]{figures/height_density_nasa.png}
+  		 \includegraphics[width=0.5\textwidth]{figures/height_density.pdf}}
+    \caption{Comparison of real world measurements from NASA \cite{larson1963stratosphere} with simulated results.}
+    \label{fig:cmp_nasa}
+\end{figure}
+
+The second comparison with real world measurements is the speed of sound.
+The speed of sound is essentially nothing but the speed at which a region of increased pressure will travel.
+In other words the wave speed of the system.
+To measure wave speed, first, an appropriate starting condition containing a region of increased pressure has to defined, and then the location of this bump has to measured over time.
+From the trace of time and location, speed can be calculated through the derivative.\\
+The result of such an experiment can be seen in Fig. \ref{fig:sound_speed}, namely that the speed of sound in the simulation ranges between $331\frac{m}{s}$ and $341\frac{m}{s}$.
+This is close to the actual speed of sound at sea level around $331\frac{m}{s}$ according to \cite{hardy1942velocity}.
+
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=1.0\textwidth]{figures/sound_speed.pdf}}
+    \caption{Graph of location over time of (a) a region of increased pressure; (b) a reference object moving at the speed of sound ($331\frac{m}{s}$)}
+    \label{fig:sound_speed}
+    \small
+    The simulation was run using $1000$ grid points and a time step size of $2.5ms$ on a Lorenz-grid. Simulations using Charney-Phillips-grids yield similar results.
+\end{figure}
+
+For the experiment, the starting condition was chosen as follows: $T=273K$, $w=0$.
+For $p$, first, the stationary solution was used as a baseline, i.e. $p(s)=\pi (s)$.
+Then a Gaussian bellcurve of magnitude $1\frac{N}{m^2}$ with its maximum at the bottom $s=1$ was added onto this configuration.
+Inserting the Gaussian bump at any other location but the boundary of the domain would result in two regions of increased pressure traveling across the atmosphere, which would make the measurement more difficult.\\
+Note that this is one of the key differences between simulation using the hydrostatic NSE versus using the non-hydrostatic NSE.
+According to Coiffier, using the hydrostatic NSE "eliminates sound waves because of the nydrostatic relation which has a \emph{filtering} effect on them"\cite{coiffier2011fundamentals}.
+
+\subsection{Energy Conservation}\label{sec:energy_conservation_test}
+The third way of testing the implementation is by testing the hypothesis of energy conservation.
+As the choice of boundary conditions dictates that energy in the system must stay constant, every simulation of the non-hydrostatic NSE should have the same property.
+That is, every system state produced by the simulation should have the same energy as the starting condition.\\
+To this end the formula for calculating the total energy in the system per area \ref{eq_energy} is used.
+\begin{align*}
+E'=\int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds
+\end{align*}
+When assuming energy to stay constant over time, it makes sense to use the energy contained in the system at the beginning as a baseline.
+This way, by subtracting the baseline energy from the energy calculated at some later time during simulation, the error can be tracked over time.\\
+Of course, in order for it to be possible for an error to appear, the system must change over time, i.e. not be stationary.
+Other than that any starting condition may be chosen.
+For the following simulations, the starting conditions were as follows: $T=273K$, $w=0$.
+For $p$, first, the stationary solution was used as a baseline, i.e. $p(s)=\pi (s)=s\cdot 101325\frac{N}{m^2}$.
+Then a Gaussian bellcurve of magnitude $0.1\frac{N}{m^2}$ with its maximum at $z=35km$ was added onto this configuration.
+\\
+The results of this for both the Lorenz-grid and the Charney-Phillips-grid can be seen in Fig. \ref{energy_error}.
+The baseline energy for both was $3163398684.51234J$.
+
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=1.0\textwidth]{figures/cp_energy_error.pdf}}
+  	\makebox[\textwidth]{
+  		 \includegraphics[width=1.0\textwidth]{figures/lorenz_energy_error.pdf}}
+    \caption{Energy deviation over time for Lorenz-Grid and Charney-Phillips-grid.}
+    \label{fig:energy_error}
+    \small
+Both simulations were run using $1000$ grid points and a time step size of $2.5ms$.
+\end{figure}
+
+To explain the larger error when using the Charney-Phillips-grid, one has to look at the composition of energy.
+Recall that energy in the atmospheric system can be split up into three components: internal energy, kinetic energy, and geopotential energy.
+
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=1.0\textwidth]{figures/cp_energy_split.pdf}}
+    \caption{Deviation of each component of energy over time for Charney-Phillips-grid.}
+    \label{fig:cp_energy_split}
+    \small
+    The simulation was run using $1000$ grid points and a time step size of $2.5ms$.
+\end{figure}
+
+When plotting the individual deviations for each component, as is done in Fig. \ref{fig:cp_energy_split}, one can see that the kinetic energy deviation is almost negligible at around $3\cdot10^{-3}J$.
+Instead the discrepancy for the Charney-Phillips-grid must originate from an asymmetry between the deviation of internal and geopotential energy.
+While not certain, this asymmetry is probably rooted in the manner the time-derivative for temperature $T$ is calculated numerically.\\
+Recall the prognostic equation for $T$:
+\begin{align*}
+\frac{\partial T}{\partial t} &= \frac{RT}{C_p}\frac{\partial \text{ln}p}{\partial t}\\
+&=\frac{gp}{C_p-R}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}
+\end{align*}
+It can be seen that $T$ either depends on $\frac{\partial \text{ln}p}{\partial t}$, or $p$ (when substituting in the prognostic equation for $\frac{\partial \text{ln}p}{\partial t}$).
+For the Charney-Phillips-grid, both of these variables are sampled on the offset grid, meaning that in order to calculate $\frac{\partial T}{\partial t}$, an averaging operator has to be applied, which is not especially accurate.\\
+In light of this, the Lorenz grid should be preferred when simulating the non-hydrostatic NSE.
+
+\subsection{Comparison of the two Implementations}
+The final way the two implementations were tested, is by comparing the simulation outputs, after a certain amount of elapsed time.
+For purposes of this test, both implementations were initialized with identical starting conditions.
+Just like in the previous section, any starting condition can be chosen.
+For simplicity's sake, the same starting condition as in the previous section \ref{sec:energy_conservation_test} was used.\\
+Using said starting condition, both simulations were run for $240s$ of simulation time, using a spacial resolution of $1000$ grid points, and a temporal resolution of $2.5ms$.
+The result of the two simulations on the different grids can be seen in Fig. \ref{fig:simulations}.\\
+The similar look of the separate simulation results for pressure deviation $\Delta p$ and vertical wind speed $w$ is no optical illusion.
+It can also be verified numerically:
+When taking the difference between the two simulation results, the largest absolute difference\footnote{Also known as the $L_\infty$-norm} for $\Delta p$ is $8.71\cdot 10^{-11}$, and the largest absolute difference for $w$ is $9.32\cdot 10^{-9}$.
+The difference for $T$ was not determined, because the two $T$-grids are offset to one another by definition of the Charney-Phillips and Lorenz grids, so any comparison would have taken place through inaccurate averaging operations.\\
+The minuscule difference of $\Delta p$ and $w$ between implementations reaffirms the assumption made in section \ref{sec:energy_conservation_test} that the error in energy conservation for the Charney-Phillips grid must stem from inaccuracies in $T$.
+
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=0.8\textwidth]{figures/cp_240s_bump.pdf}}
+  	\makebox[\textwidth]{
+  		 \includegraphics[width=0.8\textwidth]{figures/lorenz_240s_bump.pdf}}
+    \caption{Simulation results using the Charney-Phillips grid (first three diagrams), and the Lorenz grid (last three diagrams).}
+    \label{fig:simulations}
+    \small
+Both simulations were run using $1000$ grid points and a time step size of $2.5ms$.
+\end{figure}
+
+
+In summary, both implementations pass all tests
 
 %In this section the effects (all?) possible choices of simplifications, integrators etc. is analyzed.\\
 %To this end we introduce different ways of measuring errors, i.e. different norms, and use them to measure the difference between different simulations.
@@ -168,7 +291,7 @@ This is reflected by both implementations as can be seen in Fig.
 %\subsection{Simplifications to the Navier Stokes Equations} % effects of simplifications
 %have one simulation without simplifications run with high precision (RK4 with tiny step-sizes and high grid resolution), and compare that to simulations using high precision with simplifications.
 
-\subsection{Grid Discretizations}% grid discretizations
-Quantify the difference between the two different grids.
-How do we really know which one is better?
-Find ways to quantify which one is more accurate?
+%\subsection{Grid Discretizations}% grid discretizations
+%Quantify the difference between the two different grids.
+%How do we really know which one is better?
+%Find ways to quantify which one is more accurate?

@@ -409,9 +409,9 @@ A measure of mass in a given column of the atmosphere can be described using the
 \int_{z_{bottom}}^{z_{top}}\rho(z)dz
 \end{align*}
 Exploiting equation \ref{eq_ds_dz} to substitute $z$ by $s$ yields:
-\begin{align*}
+\begin{align}\label{eq_mass_conservation}
 \int_{s_{top}}^{s_{bottom}}\rho(s)\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds = \int_{s_{top}}^{s_{bottom}}\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds = \int_{s_{top}}^{s_{bottom}}\frac{1}{g}\left( \frac{\partial \pi}{\partial s} \right) ds
-\end{align*}
+\end{align}
 From the equation system we know that both $\left( \frac{\partial \pi}{\partial s} \right)$ and $g$ are constant over time, which leads to the conclusion that in this equation system, the mass in the observed domain is constant over time.
 \\
 The second constant, energy, can be split up into three separate components: internal energy $\rho C_vT$, kinetic energy $\frac{\rho}{2}w^2$, and geopotential energy $\rho gz$.
@@ -420,11 +420,11 @@ The expression for energy density $E$ (i.e. energy per volume) then becomes: TOD
 E = (C_vT+\frac{1}{2}w^2 + gz)\rho
 \end{align*}
 Integrating this over the entire simulated column and yet again exploiting equation \ref{eq_ds_dz} yields energy per area $E'$:
-\begin{align*}
-E' &= \int_{z_{bottom}}^{z_{top}} (C_vT+\frac{1}{2}w^2 + gz)\frac{p}{RT} dz\\
-&=  \int_{s_{top}}^{s_{bottom}} (C_vT+\frac{1}{2}w^2 + gz(s))\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds\\
-&=  \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\\
-\end{align*}
+\begin{align}
+E' &= \int_{z_{bottom}}^{z_{top}} (C_vT+\frac{1}{2}w^2 + gz)\frac{p}{RT} dz\nonumber\\
+&=  \int_{s_{top}}^{s_{bottom}} (C_vT+\frac{1}{2}w^2 + gz(s))\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds\nonumber\\
+&=  \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\label{eq_energy}
+\end{align}
 Assuming $s_{top}$ and $s_{bottom}$ are constant, it can be shown that the change of energy per area over time can be written as follows:
 \begin{align}\label{dE_dt}
 \frac{\partial E'}{\partial t} = w(s_{bottom})p(s_{bottom})-w(s_{top})p(s_{top})

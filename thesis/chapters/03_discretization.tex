@@ -49,7 +49,14 @@ f(x + u \Delta x) &= f(x) + \frac{1}{1!}\cdot\frac{\partial f}{\partial x}(x)\cd
 The equation system consists of $l+u$ unknowns, i.e. $\frac{\partial^k f}{\partial x^k}(x,v)$, and $l+u$ equations.
 The error of the approximation made by solving for one of the unknowns $\frac{\partial^k f}{\partial x^k}(x,v)$ is $\mathcal{O}((\Delta x) ^{l+u+1-k})$ ($-k$ comes from the fact that the equation needs to be divided by $\Delta x ^k$ before being solved).
 In this thesis we will mostly make use of the first derivative.
-To this end, most commonly the following four configurations are used:
+To this end, most commonly the following four configurations are used, which are also visualized in Fig. \ref{fig:finite_differences}:
+
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=0.9\textwidth]{figures/forwards_backwards_central.pdf}}
+    \caption{Visualization of forwards ($l=0,u=1$), backwards ($l=1,u=0$), and central differences ($l=1,u=1$).}
+    \label{fig:finite_differences}
+\end{figure}
 
 \begin{align*}
 l=0,u=1&: \frac{\partial f}{\partial x}(x) = \frac{f(x+\Delta x) - f(x)}{\Delta x} + \mathcal{O}((\Delta x)^{1})\\
@@ -68,6 +75,18 @@ for periodic boundary conditions with high enough spacial resolution, the deriva
 
 
 \section{Grid Discretizations}
+\begin{figure}[ht]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=.8\textwidth]{figures/discretization.pdf}}
+    \caption{Different variants of discretization}
+    \label{fig:grid_discretization}
+\end{figure}
+\begin{figure}[ht]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=.8\textwidth]{figures/lorenz_cp.pdf}}
+    \caption{Variable distribution for Lorenz grid and Charney-Phillips grid}
+    \label{fig:lorenz_cp}
+\end{figure}
 TODO: source\\
 When implementing the non-hydrostatic version of the NSE discussed in section \ref{sec:non_hydrostatic}, there are three variables to be considered: Vertical wind speed $w$, pressure $\text{ln}p$, and Temperature $T$.
 Each of them vary across the atmosphere and must thus be sampled at different points across space.
@@ -81,9 +100,10 @@ It is also assumed that the distance between two consecutive grid-points is the 
 Note that in this context, distance between grid-points does not necessarily correspond to distance (measured in meters) in the real world.
 This is due to the alternative coordinate system introduced in section \ref{sec:non_hydrostatic}, which transforms equidistant grid-points in the s-coordinate-system, to non-equidistant grid-points in the z-coordinate system, depending on how the function $\pi(s)$ is defined.
 \\
-Having now established that all three variables ($\text{ln}p$, $T$, and $w$) will be sampled along grids of equal grid size, one remaining question is how the grids should be aligned or offset to one another, or if the grids of some of the variables should be identical.\\
+Having now established that all three variables ($\text{ln}p$, $T$, and $w$) will be sampled along grids of equal grid size, one remaining question is how the grids should be aligned or offset to one another, or if the grids of some of the variables should be identical.
+To reiterate the train of thought behind grid discretization refer to Fig. \ref{fig:grid_discretization}.
 TODO: source
-For the NSE there are two prevailing grid-systems: The Lorenz-grid, and the Charney-Phillips-grid, which are shown in Figure TODO.\\
+For the NSE there are two prevailing grid-systems: The Lorenz-grid, and the Charney-Phillips-grid, which are shown in Figure \ref{fig:lorenz_cp}.
 For the Lorenz-grid, vertical wind $w$ is placed on the aligned grid, whereas pressure $\text{ln}p$ and Temperature $T$ are on the offset grid.\\
 For the Charney-Phillips-grid, both vertical wind $w$ and Temperature $T$ are placed on the aligned grid, and only pressure $\text{ln}p$ is on the offset grid.\\
 The reason for always placing $w$ on the aligned grid, and pressure $\text{ln}p$ on the offset grid, is to enforce the boundary conditions discussed in section \ref{sec:boundary}.
@@ -91,7 +111,6 @@ By placing wind $w$ on the aligned grid, it is possible to force $w_{top}$ and $
 In contrast, with pressure $\text{ln}p$ it is desirable not to have a sampling point at the upper boundary of the domain, because one may want to postulate that pressure at the upper boundary is zero, because the atmosphere is supposed to end there, i.e. $p_{top}=0$, which would mean $\text{ln}p = -\infty$.
 To avoid dealing with non-computable numbers, pressure $\text{ln}p$ is placed on the offset grid.\\
 The remaining variable Temperature $T$ can then either be placed on the offset or the aligned grid, because it not affected to boundary conditions.
-
 
 \section{Discretization of Time/Types of Integrators}
 Before examples of integrators can be introduced, they first need to be defined.
