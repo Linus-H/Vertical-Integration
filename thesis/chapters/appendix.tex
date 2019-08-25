@@ -1,6 +1,6 @@
 \chapter{Appendix}
 \section{Derivation: Change of Energy per Area Over Time}\label{sec:derivation:dE_dt}
-For this derivation the non-hydrostatic NSE derived in section \ref{} are used.
+For this derivation the non-hydrostatic NSE derived in section \ref{sec:non_hydrostatic} are used.
 It is also assumed that $s_{top}$ and $s_{bottom}$ are constant.\\
 \begin{align*}
 \frac{\partial E'}{\partial t} &= \frac{\partial}{\partial t}\int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\\
@@ -31,23 +31,23 @@ Using these reshaped terms, $E'$ can be written as:
 &=\int_{s_{top}}^{s_{bottom}} \left(\frac{\partial (wp)}{\partial s}\right) ds = w(s_{bottom})p(s_{bottom})-w(s_{top})p(s_{top})
 \end{align*}
 
-\section{Laplace Transform}\label{sec:laplace_trafo}
-The Laplace Transform $\mathcal{L}\{x(t)\}(s)$ of $x(t)$ is defined as:
-\begin{align*}
-\mathcal{L}\{x(t)\}(s)=X(s)=\int_0^\infty x(t)\exp (-st)dt
-\end{align*}
-In this context $s\in \mathrm{C}$ is a complex number, and \emph{not} a vertical coordinate.\\
-For differential equations one useful identity is the Laplace Transform of derivatives:
-\begin{align*}
-\mathcal{L} \left\{ \frac{dx}{dt}(t) \right\} &=\int_0^\infty \frac{dx}{dt}(t)\exp (-st)dt\\
-&=x(t)\exp(-st)\rvert _0^\infty + s  \int_0^\infty x(t)\exp (-st)dt\\
-&=-x(t=0) + sX(s)
-\end{align*}
+%\section{Laplace Transform}\label{sec:laplace_trafo}
+%The Laplace Transform $\mathcal{L}\{x(t)\}(s)$ of $x(t)$ is defined as:
+%\begin{align*}
+%\mathcal{L}\{x(t)\}(s)=X(s)=\int_0^\infty x(t)\exp (-st)dt
+%\end{align*}
+%In this context $s\in \mathrm{C}$ is a complex number, and \emph{not} a vertical coordinate.\\
+%For differential equations one useful identity is the Laplace Transform of derivatives:
+%\begin{align*}
+%\mathcal{L} \left\{ \frac{dx}{dt}(t) \right\} &=\int_0^\infty \frac{dx}{dt}(t)\exp (-st)dt\\
+%&=x(t)\exp(-st)\rvert _0^\infty + s  \int_0^\infty x(t)\exp (-st)dt\\
+%&=-x(t=0) + sX(s)
+%\end{align*}
 
-\section{Error using Charney-Phillips-Grid for Stationary Solution}\label{sec:stationary_cp_error}
-\begin{figure}[htpb]
-	\makebox[\textwidth]{ 
-  		 \includegraphics[width=1.0\textwidth]{figures/cp_240s_stat.pdf}}
-    \caption{Error (deviation from stationary solution) made using RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Charney-Phillips grid}
-    \label{fig:cp_stat_err}
-\end{figure}
+%\section{Error using Charney-Phillips-Grid for Stationary Solution}\label{sec:stationary_cp_error}
+%\begin{figure}[htpb]
+%	\makebox[\textwidth]{ 
+%  		 \includegraphics[width=1.0\textwidth]{figures/cp_240s_stat.pdf}}
+%    \caption{Error (deviation from stationary solution) made using RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Charney-Phillips grid}
+%    \label{fig:cp_stat_err}
+%\end{figure}

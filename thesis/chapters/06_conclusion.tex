@@ -1,0 +1,34 @@
+% !TeX root = ../main.tex
+% Add the above to each chapter to make compiling the PDF easier in some editors.
+
+\chapter{Conclusion}\label{chapter:conclusion}
+In this chapter the thesis is summarized and some possible areas of future work based on the Python tool are suggested.
+The code is freely available for this purpose as a Github repository at \url{https://github.com/Linus-H/Vertical-Integration}.
+In this chapter the work is be summarized and some further possible future work is be discussed.
+
+\section{Summary}
+In this thesis, first, a basic introduction to the Navier Stokes Equations for numerical weather prediction was given.
+Having defined the most general equation system, this system was then rearranged and simplified, by assuming that horizontal wind $\textbf{V}$ is zero.
+Thereafter, the variable $z$ was substituted by a new vertical coordinate $s$, which leads to a new equation system with some advantageous properties, such as a high spatial resolution in the lower areas of the atmosphere in contrast to the low spatial resolution at the top of the atmosphere.
+On top of this, this substitution allowed for the upper bound for the domain, to be found dynamically instead of setting it at the beginning of the simulation manually.\\
+This was the equation system that was used in the later sections.\\
+Having established the version of the NSE to be simulated, the applied methodology for spatial and temporal discretization was explained in section \ref{chapter:discretization}.\\
+Then the modular framework of the software was outlined in section \ref{chapter:implementation}, and an example of an implementation was given at the end of that section.\\
+Finally the tests conducted on the implementation and their results were described in section \ref{chapter:numerical_study}.
+
+
+\section{Future Work}
+There are multiple classes for expanding the work done in this thesis.\\
+The first category consists of more experiments that could be conducted in the non-hydrostatic equation-system.
+\begin{itemize}
+\item Observing the effects of varying temporal and spatial resolution; the effects would be expected to be quite significant, as the non-hydrostatic equation system is non-linear in nature.
+\item Experimenting with other time integrations methods/other integrators, to see whether they yield significantly different results from the Runge-Kutta-methods primarily used in this thesis.
+\item Measuring the wave-speeds/speed of sound of waves at different wave-lengths. 
+\end{itemize}
+The second category of possible expansion are comparative in nature:
+\begin{itemize}
+\item compare the simulation results of the non-hydrostatic NSE to simulation results from implementations using the hydrostatic NSE
+\item compare the non-hydrostatic implementation to real-world measurements, by adding the remaining two dimensions of the horizontal to the implementation.
+\end{itemize}
+Lastly, it would be interesting to introduce standardized benchmarks for the non-hydrostatic NSE.
+So far, such benchmarks only exist for systems using the hydrostatic NSE (TODO Source for hydrostatic Benchmarks), making standardized comparisons between different implementations of then non-hydrostatic NSE impossible.
