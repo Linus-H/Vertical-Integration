@@ -1,30 +1,29 @@
 \chapter{Appendix}
 \section{Derivation: Change of Energy per Area Over Time}\label{sec:derivation:dE_dt}
-For this derivation the non-hydrostatic NSE derived in section \ref{sec:non_hydrostatic} are used.
-It is also assumed that $s_{top}$ and $s_{bottom}$ are constant.\\
+For this derivation we use the non-hydrostatic NSE derived in Section~\ref{sec:non_hydrostatic}.
+We also assume that $s_{top}$ and $s_{bottom}$ are constant.\\
 \begin{align*}
 \frac{\partial E'}{\partial t} &= \frac{\partial}{\partial t}\int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\\
-&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(C_v\frac{\partial T}{\partial t}+\frac{1}{2}\frac{\partial w^2}{\partial t} + g\frac{\partial z(s)}{\partial t}\right) \left( \frac{\partial \pi}{\partial s} \right) ds + \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial}{\partial t}\frac{\partial \pi}{\partial s} \right) ds\\
+&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(C_v\frac{\partial T}{\partial t}+\frac{1}{2}\frac{\partial w^2}{\partial t} + g\frac{\partial z(s)}{\partial t}\right) \left( \frac{\partial \pi}{\partial s} \right) ds \\&~~~~+ \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial}{\partial t}\frac{\partial \pi}{\partial s} \right) ds\\
 &= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(C_v\frac{\partial T}{\partial t}+w\frac{\partial w}{\partial t} + g\frac{\partial z(s)}{\partial t}\right) \left( \frac{\partial \pi}{\partial s} \right) ds\\
-&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(\frac{C_vRT}{C_p}\frac{\partial \text{ln}p}{\partial t}-gw\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) + g\frac{\partial}{\partial t}\left(\frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial \pi}{\partial s}\right)ds'\right)\right) \left( \frac{\partial \pi}{\partial s} \right) ds\\
+&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(\frac{C_vRT}{C_p}\frac{\partial \text{ln}p}{\partial t}-gw\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) + g\frac{\partial}{\partial t}\left(\frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial \pi}{\partial s}\right)ds'\right)\right) \\&~~~~~~~~~~~~~~\cdot\left( \frac{\partial \pi}{\partial s} \right) ds\\
 \end{align*}
-In order to enhance readability, the three terms will now be treated separately, starting with the first term (with $C_v=C_p-R$).
+In order to enhance readability, the three terms are now transformed separately, starting with the first term (with $C_v=C_p-R$).
 \begin{align*}
 \frac{C_vRT}{C_p}\frac{\partial \text{ln}p}{\partial t} &= \frac{(C_p-R)RT}{C_p}\frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\\
 &= gp\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}
 \end{align*}
-For now, the second term can stay as it is.
-The third term can be reshaped as follows (assuming $w(s_{bottom})=0$):
+For now, the second term can stay as is.
+We reshape the third term as follows (assuming $w(s_{bottom})=0$):
 \begin{align*}
-g\frac{\partial}{\partial t}\left(\frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial \pi}{\partial s}\right)ds'\right) &= R\int _s ^{s_{bottom}} \frac{\partial}{\partial t}\left(\frac{T}{p}\right)\left(\frac{\partial \pi}{\partial s}\right)ds' + R\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial}{\partial t}\frac{\partial \pi}{\partial s}\right)ds'\\
+g\frac{\partial}{\partial t}\left(\frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial \pi}{\partial s}\right)ds'\right) &= R\int _s ^{s_{bottom}} \left(\frac{\partial \pi}{\partial s}\right)\frac{\partial}{\partial t}\left(\frac{T}{p}\right)ds' + R\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial}{\partial t}\frac{\partial \pi}{\partial s}\right)ds'\\
 &= R\int _s ^{s_{bottom}} \left(\frac{\partial \pi}{\partial s}\right)\frac{\partial}{\partial t}\left(\frac{T}{p}\right)ds'\\
 &= R\int _s ^{s_{bottom}} \left(\frac{\partial \pi}{\partial s}\right)\left(-\frac{g}{R}\left(\frac{\partial\pi}{\partial s}\right)^{-1}\frac{\partial w}{\partial s}\right)ds'\\
 &= -g\int _s ^{s_{bottom}} \left(\frac{\partial w}{\partial s}\right)ds'\\
 &= -g\left( w(s_{bottom}) - w(s) \right)\\
 &= gw(s)
 \end{align*}
-
-Using these reshaped terms, $E'$ can be written as:
+With these reshaped terms, $E'$ can be written as:
 \begin{align*}
 \frac{\partial E'}{\partial t} &= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(gp\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}-gw\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)+gw \right)\left( \frac{\partial \pi}{\partial s} \right) ds\\
 &=\int_{s_{top}}^{s_{bottom}} \left(p \frac{\partial w}{\partial s}+w\frac{\partial p}{\partial s}\right) ds\\

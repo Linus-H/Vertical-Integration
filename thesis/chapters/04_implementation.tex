@@ -2,79 +2,91 @@
 % Add the above to each chapter to make compiling the PDF easier in some editors.
 
 \chapter{Implementation}\label{chapter:implementation}
-In order to test the effects of the modifications and simplifications made in chapter \ref{chapter:navier_stokes}, and the effects of discretization described in chapter \ref{chapter:discretization}, the non-hydrostatic NSE from section \ref{sec:non_hydrostatic} and everything discussed in chapter \ref{chapter:discretization} was implemented using a custom framework written in Python 3 with aid of the numpy-library.
-The architecture of this framework will be described in this chapter.
+In this chapter we describe the architecture of the custom framework implemented for this thesis.
+It is written in Python~3 with aid of the numpy-library.
+The framework's aim is testing the effects of the modifications and simplifications made in Chapter~\ref{chapter:navier_stokes}, and the effects of discretization described in Chapter~\ref{chapter:discretization}.
+To this end the non-hydrostatic NSE from Section~\ref{sec:non_hydrostatic}, and everything discussed in Chapter~\ref{chapter:discretization} was implemented within the framework.
+
+%In order to test the effects of the modifications and simplifications made in Chapter~\ref{chapter:navier_stokes}, and the effects of discretization described in Chapter~\ref{chapter:discretization}, the non-hydrostatic NSE from Section~\ref{sec:non_hydrostatic}, and everything discussed in Chapter~\ref{chapter:discretization} was implemented using a custom framework written in Python~3 with aid of the numpy-library.
+%The architecture of this framework is described in this chapter.
 
 \section{Design}
-The framework was created keeping the design principle of modularity in mind.
-This has several advantages.
-First, it becomes possible to test and verify every component of the framework individually.
-Second, it becomes easier to fulfill the goal of the framework, namely to test every possible configuration of simplifications and discretizations.
-Modularizing these simplifications and discretizations makes it possible to switch between them easily.
-\\
-The functionality of the framework can be separated into two components. 
-The first component is responsible for generating the data through either simulation or usage of analytic solutions.
+We created the framework keeping the design principle of modularity in mind.
+This way, we can test and verify every component of the framework individually.
+It also becomes easier to fulfill the goal of the framework, namely to test different configurations of simplifications and discretizations.
+Modularizing these simplifications and discretizations makes it easy to switch between them.
+
+We separated the functionality of the framework into two components.
+The first component generates data through simulations or analytic solutions.
 This component is called Generator.
-\\
-The second component can then be used to evaluate the generated data, by using its error tracking and visualization\footnote{using matplotlib} capabilities.
+The second component can then evaluate the generated data by utilizing its error tracking and visualization\footnote{using matplotlib} capabilities.
 This component is called Evaluator.
 
 \subsection*{Generator}
-Focusing on the data-generating component, its functionality was split up as follows:
+Focusing on the data-generating component, we split its functionality up as follows:
 \begin{itemize}
 \item differential operators, modeled by functions. 
 These functions take in a vector representing a scalar or vector field (represented by numpy-arrays), perform their respective operation on it, and return the result of the operation.
 \item storing the system state in instances of the class \texttt{State}.
 This class wraps a numpy-array storing the state variables, and the names of the all axes and variables.
 \item differential equations, modeled by classes inheriting from the abstract class \texttt{TimeDerivative}.
-When called and given an instance of \texttt{State}, objects of the \texttt{TimeDerivative} class calculate the time derivative given the current state, by applying the prognostic equations of their respective differential equation to it.
+When called and given an instance of \texttt{State}, objects of the \texttt{TimeDerivative} class calculate the time derivative at the current state.
+They do so by applying the prognostic equations of their respective differential equation.
 \item integrators, modeled by classes inheriting from the abstract class \texttt{Integrator}.
-During instantiation they receive an initial state and a differential equation (in the form of an \texttt{TimeDerivative} instance), which they can integrate using a specified step size.
-Every time an instance of \texttt{Integrator} is called it will integrate its differential equation by one step, advance its internal time by one step, and output the modified \texttt{State} instance.
+During instantiation they receive an initial state and a differential equation (in the form of a \texttt{TimeDerivative} instance) which they will integrate using a specified step size.
+Every time an instance of \texttt{Integrator} is called, it integrates its differential equation by one step, advances its internal time by one step, and outputs the modified \texttt{State} instance.
 \item analytic solutions to differential equations, modeled by classes inheriting from the abstract class \texttt{Solution}.
-As these solutions are analytic, any time $t$ can be specified, and an instance of \texttt{Solution} will output the state of the system modeled by its differential equation.
-In order to be more similar to \texttt{Integrator} classes, they also contain an internal timer, which can be advanced by calling the instance of \texttt{Solution} without specifying a time $t$.
+As these solutions are analytic, any time $t$ can be specified, and an instance of \texttt{Solution} outputs the state of the system modeled by its differential equation.
+In order to be more similar to \texttt{Integrator} classes, they also contain an internal timer which can be advanced by calling the instance of \texttt{Solution} without specifying a time $t$.
 \end{itemize}
-Using this separation into classes fulfills the objective of modularity.
-For one, one \texttt{Integrator} class can be replaced for another without affecting other components of the program.
-The same goes for different implementations of the same differential operators.
-Second, for a given differential equation, it is possible to implement several different test scenarios or analytic solutions, by representing each by its own \texttt{Solution} class.
+With this separation into classes we fulfill the objective of modularity.
+For one, we can replace one implementation of \texttt{Integrator} for another without affecting other components of the program.
+The same goes for different implementations of the same differential operator.
+Second, for a given differential equation, it is possible to implement multiple test scenarios or analytic solutions, each represented by their own \texttt{Solution} class.
 Last, it is possible to change the differential equation being simulated by changing the \texttt{TimeDerivative} class.
-\\
-As already mentioned above, as another design step taken for better readability, any class which repeatedly outputs new data was implemented as an iterator.
-This includes all classes inheriting from \texttt{Integrator} and \texttt{Solution}, as they both generate new output for every iteration.
-Using iterators makes code using repeated data-generation more compact and readable.
+
+As another design step taken for better readability, any class which repeatedly outputs new data was implemented as an iterator.
+This includes all classes inheriting from \texttt{Integrator} and \texttt{Solution}, as both generate new output for every iteration.
+Iterators make code containing repeated data-generation more compact and readable.
 
 \subsection*{Evaluator}
 The evaluator component builds on the premise that there is a solution (coming from a \texttt{Solution} object) and a calculated result (coming from an \texttt{Integrator} object).
 Both calculated results and solutions are a discrete series of system states over time.
-Within the program they are represented by a discrete series of \texttt{State} objects at monotonically increasing timestamps.
-Of course there may be some differences between the solution and the calculated result, which will subsequently be called errors.
+Within the program we represent the result by a discrete series of \texttt{State} objects at monotonically increasing timestamps.
+Of course there may be some differences between the accurate solution and the calculated result which we subsequently call errors.
 \\
-The functionality of the component was split up as follows:
+
+\noindent
+We split the functionality of the component as follows:
 \begin{itemize}
-\item the \texttt{ErrorTracker} class, which is used to store a series of errors, along with labels (e.g. time, or spatial resolution).
+\item the \texttt{ErrorTracker} class which can store a series of errors, along with labels (e.g. time, or spatial resolution).
 Example: To store errors over time, every time step, an instance of \texttt{ErrorTracker} is given a timestamp as a label, the calculated result, and the solution at that timestamp.
-From this it calculates the error (using a norm of the programmers choice) and stores it together with the timestamp.
-\item the \texttt{ErrorIntegrator} class, which also calculates the error whenever it is given a calculated result and a solution, but then adds it its memorized total error, instead of storing it individually.
-\item the \texttt{WindowManager} class is used for displaying both instances of \texttt{State} and of \texttt{ErrorTracker} visually.
+From this it calculates the error (utilizing a norm of the programmers choice) and stores it along with the timestamp.
+\item the \texttt{ErrorIntegrator} class which also calculates the error whenever it is given a calculated result and a solution.
+It then adds it to its memorized total error, instead of storing it individually.
+\item the \texttt{WindowManager} class displays both instances of \texttt{State} and of \texttt{ErrorTracker} visually.
 Errors can be displayed both on a logarithmic and on an ordinary scale.
-\\
-For displaying \texttt{State} objects, the class also provides some functionality to apply a custom transformation to the data to be displayed, before displaying it.
-\\
-Example: When simulating, $\text{ln}p$ can be a prognostic variable. In order to display $p$ instead of $\text{ln}p$, it needs to transformed through exponentiation first.
+
+For displaying \texttt{State} objects, the class also provides some functionality to apply a custom transformation to the data, before displaying it.
+
+\emph{Example}: When simulating, $\text{ln}p$ can be a prognostic variable.
+In order to display $p$ instead of $\text{ln}p$, we need to transformed it through exponentiation first.
 \end{itemize}
 
 \subsection{Operators}
 The smallest units of the framework are the operators.
-Two categories of operators have been implemented: averaging operators, and the differential operators discussed in section \ref{section:diff_op}.\\
-The averaging operators follow the naming scheme:
+We implemented two categories of operators: averaging operators, and the differential operators discussed in Section~\ref{section:diff_op}.
+\\
+
+\noindent
+The averaging operators follow the naming scheme
 \\
 \texttt{[operation abbreviation]\_e[error order]}
 \\
 where the error order indicates how many neighboring variables are taken into account when calculating the local average.
-When considering a high spatial resolution, using more neighboring variables will make the estimation more accurate.\\
-Example: Averaging samples of a function $f$ on an equidistant grid of mesh size $\Delta x$ by averaging each grid point with the following grid point.
+When considering a high spatial resolution, using more neighboring variables makes the estimation more accurate.
+\\
+\emph{Example}: Averaging samples of a function $f$ on an equidistant grid of mesh size $\Delta x$ by averaging each grid point with the following grid point.
 \begin{figure}[htpb]
   \centering
   \begin{tabular}{c}
@@ -87,10 +99,11 @@ Example: Averaging samples of a function $f$ on an equidistant grid of mesh size
 The differential operators follow the naming scheme:
 \\
 \texttt{[operation abbreviation]\_n[operator order]\_e[error order]}
-\\ 
+\\
 where the \texttt{operator order} can either be \texttt{1} for the first order derivative, or \texttt{2} for the second order derivative (also known as the laplacian).
-The error order \texttt{e} is the exponent of $h$ in the error term $\mathcal{O}(h^\texttt{e})$ (see section \ref{section:diff_op}).\\
-Example: calculating the derivative $\frac{df}{dx}$ of some function $f$ w.r.t. $x$ on an equidistant grid with mesh size $\Delta x$
+The error order \texttt{e} is the exponent of $h$ in the error term $\mathcal{O}(h^\texttt{e})$ (see Section~\ref{section:diff_op}).
+\\
+\emph{Example}: calculating the derivative $\frac{df}{dx}$ of some function $f$ w.r.t. $x$ on an equidistant grid with mesh size $\Delta x$
 \begin{figure}[htpb]
   \centering
   \begin{tabular}{c}
@@ -101,40 +114,41 @@ Example: calculating the derivative $\frac{df}{dx}$ of some function $f$ w.r.t. 
 \end{figure}
 
 \subsection{Class Structure and Information Flow}
-The interaction between the different types of classes is visualized in fig. \ref{UML_diagram}.
-
 \begin{figure}[!h]
 	\makebox[\textwidth]{ 
   		 \includegraphics[width=.8\textwidth]{figures/UML.pdf}}
     \caption{UML-Style-Diagram}
     \label{UML_diagram}
 \end{figure}
-
+The interaction between the different types of classes is visualized in Fig.~\ref{UML_diagram}.
 All communication between classes is done by passing references to \texttt{State}-objects.
-As \texttt{State} objects can take up a lot of space in memory, passing them by reference is better than passing copies of them.
+As \texttt{State} objects can take up a lot of space in memory, passing them by reference is better than passing copies.
 For the same reason, whenever possible, \texttt{State}-objects are reused to avoid overcrowding memory.
-\\
+
 During execution, both the \texttt{Integrator}- and the \texttt{Solution}-instance contain one \texttt{State}-object each.
-Whenever new information is requested from them, they generate it, and return a reference to their internal \texttt{State}-object.
-Now, the program that requested the information can use the \texttt{State}-objects.
-To this end the Evaluator components can be used.
+Whenever we request new information from them, they generate it, and return a reference to their internal \texttt{State}-object.
+Now, the program that requested the information can process the \texttt{State}-objects.
+To this end the Evaluator components can be employed.
 
 \subsection{Usage of the Framework}
-In this section the framework is demonstrated using the example of the wave equation with periodic boundary conditions\footnote{i.e. $u(x)=u(x+a)$ if $a$ is the periodicity} in the following form:
+In this section we demonstrate the framework on the example of the wave equation with periodic boundary conditions\footnote{i.e. $u(x)=u(x+a)$ if $a$ is the periodicity} in the following form:
 \begin{align*}
 \frac{du}{dt} &= \frac{dv}{dx}\\
 \frac{dv}{dt} &= c^2\frac{du}{dx}
 \end{align*}
-As was foreseen during design, there are multiple implementations of the abstract \texttt{Integrator}, namely implementations of RK1 (explicit Euler), RK2 (explicit Heun), RK4, and an implementation of an exponential integrator.
-All of them can be found in the same folder.
-\\
+We wrote multiple pre-implementations of the abstract class \texttt{Integrator}, namely implementations of RK1 (explicit Euler), RK2 (explicit Heun), RK4.
+%, and an implementation of an exponential integrator.
+All of them can be found in the folder \texttt{./integrators/}.
+
 The remaining abstract classes are \texttt{TimeDerivative} and \texttt{Solution}.
-Both of them are dependent on the differential equation to be simulated, and on the method used to discretize space.
+Both of them are dependent on the differential equation to be simulated, and on the discretization of space.
 In other words: different spatial discretizations/grids require new implementations of both \texttt{TimeDerivative} and \texttt{Solution}.
-For this reason there is a separate folder for each differential equation to be analyzed.
+For this reason we create separate folders\footnote{within the \texttt{./cases/} folder} for each differential equation to be analyzed.
 Within each folder an appropriate implementation of \texttt{TimeDerivative} and \texttt{Solution} can be found.
 \\
-Using the example of the wave equation, the implementation of the \texttt{TimeDerivative}-class can be written as follows:\\
+
+\noindent
+In the example of the wave equation, we can write the implementation of the \texttt{TimeDerivative}-class as follows:\\
 \begin{tabular}{c}
 \begin{lstlisting}[language=Python]
 class PeriodicWaveTimeDerivative(TimeDerivative):
@@ -156,7 +170,7 @@ class PeriodicWaveTimeDerivative(TimeDerivative):
 \end{lstlisting}
 \end{tabular}
 \\\\
-For implementation of the \texttt{Solution}-class d'Alemberts solution is used, which dictates that for a given starting condition
+We implement the \texttt{Solution}-class with d'Alembert's solution which dictates that for a given starting condition
 \begin{align*}
 u(x,t=0) &= f(x)\\
 v(x,t=0) &= 0
@@ -164,7 +178,7 @@ v(x,t=0) &= 0
 the solution can be written as
 \begin{align*}
 u(x,t) &= \frac{1}{2}(f(x+ct)+f(x-ct))\\
-v(x,t) &= \frac{c}{2}(f(x+ct)-f(x-ct))
+v(x,t) &= \frac{c}{2}(f(x+ct)-f(x-ct)).
 \end{align*}
 The resulting implementation is:\\
 \begin{tabular}{c}
@@ -196,10 +210,11 @@ class WaveEqSolution(Solution):
 \end{lstlisting}
 \end{tabular}
 \\\\
-To now put everything together, the modus operandi is as follows:
-First, an initial state of the system must be defined.
-If the calculated result should be compared against an analytic solution, the initial state can be gained by first creating an instance of \texttt{Solution}, and then asking it for the system state at time $0$.
-Otherwise one can directly create an instance of \texttt{State} and set its initial conditions manually.
+To put everything together, now, the modus operandi is as follows:
+First, we must define an initial state of the system.
+If we want to compare the calculated result against an analytic solution, the initial state must be gained from an instance of \texttt{Solution}.
+This can be done by first creating an instance of \texttt{Solution}, and then asking it for the system state at time $0$.
+Otherwise we can directly create an instance of \texttt{State} and set its initial conditions manually.
 \\
 In the example there is a solution so the starting condition can be gained as follows:\\
 \begin{tabular}{c}
@@ -210,7 +225,7 @@ initial_state = solver.solution(t=0)
 \end{lstlisting}
 \end{tabular}
 \\\\
-Next, an instance of \texttt{TimeDerivative} must is created.\\
+Next, we create an instance of \texttt{TimeDerivative}.\\
 \begin{tabular}{c}
 \begin{lstlisting}[language=Python]
 # calculate mesh size
@@ -223,15 +238,17 @@ Both this instance and the instance of \texttt{State} containing the starting co
 \begin{tabular}{c}
 \begin{lstlisting}[language=Python]
 # creating an instance of RungeKutta.Explicit
-integrator = RungeKutta.Explicit(initial_state, time_derivative, t0=0,delta_t=dt)
+integrator = RungeKutta.Explicit(initial_state, time_derivative,
+                                     t0 = 0 , delta_t = dt)
 \end{lstlisting}
 \end{tabular}
 \\\\
-Now, depending on what the aim of the simulation is, the appropriate instances from the Evaluator components can be instantiated, which concludes the setup.
+Now, depending on what the aim of the simulation is, we can instantiate the appropriate classes from the Evaluator components which concludes the setup.
 \\
-As both \texttt{Integrator} and \texttt{Solution} are implemented as iterators, the system can simulated by using a simple \texttt{for}-loop.
-As an iterator, \texttt{Integrator} will return the calculated result, and \texttt{Solution} will return the analytic result.
-This means that within the \texttt{for}-loop the programmer has access to the accurate result, the analytic result, and can now perform any further necessary operations on those results.\\
+As both \texttt{Integrator} and \texttt{Solution} are implemented as iterators, we can simulate the system with a simple \texttt{for}-loop.
+As an iterator, \texttt{Integrator} returns the calculated result, and \texttt{Solution} returns the analytic result.
+This way the programmer has access to the accurate result and the analytic result within the \texttt{for}-loop.
+Within it, one can now perform any necessary further operations.\\
 \begin{tabular}{c}
 \begin{lstlisting}[language=Python]
 for int_state, sol_state in zip(integrator, solver): 
@@ -239,56 +256,64 @@ for int_state, sol_state in zip(integrator, solver):
 \end{lstlisting}
 \end{tabular}
 \\\\
-For some of the most common operations a programmer might want to do within the \texttt{for}-loop, a function performing the entire setup has been preimplemented in the \texttt{run\_ utils.py} file.
-\\
-Another helpful preimplementation is that of the numerical reference solution.
-It can be used whenever no analytic solution is known, but a reference solution is still required.
-In this case, a reference solution is created by simulating the differential equation using RK4 and doing very small time-steps.
-To avoid having to re-calculate this, the result of this time-intensive simulation is stored to the disk.
+For some of the common operations a programmer might want to do within the \texttt{for}-loop, we pre-imlemented a function performing the entire setup in the \texttt{run\_ utils.py} file.
+
+Another helpful pre-implementation is that of the numerical reference solution.
+One can employ it whenever no analytic solution is known, but still needs a reference solution.
+In this case, a reference solution is created by simulating the differential equation with RK4 and very small time-steps.
+To avoid re-calculation, we cache the result of this time-intensive simulation.
 
 \section{Testing}\label{sec:testing}
-While it is not possible to mathematically prove that the implementation is without fault, the next best thing is exhaustive testing.
-For this framework testing usually entails checking the outputs of the components against a reference solution, which was found separately.
-This reference solution is usually analytic in nature and has to be derived through manual calculation.
-\\
-The approach taken to test the framework was bottom-up, i.e. first, the smallest possible components were tested in isolation (unit tests), then, components using only tested sub-components could be tested, too.
-In the following the tests for the Generator components are described.
+While it is not possible to mathematically prove that the implementation is without fault\footnote{we would first have to perform the Herculean task of formally verifying that Python~3 itself is without fault}, the next best thing is exhaustive testing.
+For this framework, testing entails checking the outputs of the components against a reference solution which we must find separately.
+This reference solution is usually analytic in nature and must derived through manual calculation.
+
+We took the approach of testing the framework bottom-up, i.e. first, we tested the smallest possible components in isolation (unit tests).
+Then, we tested components building only on tested sub-components, and so on.
+In the following sections we describe the tests for the Generator components.
 
 \subsection{Operators}
 In the case of this framework the smallest components are the operators.
-They were tested using operations simple enough that an analytic expression exists.
-Then the result of the numerical operator was compared against this analytic expression.
+We tested them on operations simple enough that an analytic expression exists.
+Then we compared the result of the numerical operator against this analytic expression.
 For the averaging operators this step was sufficient.
-\\
-In order to further verify the derivative operators, the order of the error was also checked, i.e. after changing the spatial resolution by a factor of $a$, an operator of the $n$-th error order was expected to reduce its error by a factor of $a^n$.
+
+In order to further verify the derivative operators, the order at which the error converges was also checked, i.e. after changing the spatial resolution by a factor of $a$, an operator of the $n$-th error order was expected to reduce its error by a factor of $a^n$.
 
 \subsection{Integrators}
-In order to test the integrators separately from the differential operators, single-variable differential equations were used.
-Having only one variable and no spatial dimension means spatial derivative operators do not have to be utilized.
-For testing purposes four such differential equations for which analytic solutions exist, were implemented as subclasses of  \texttt{TimeDerivative} and \texttt{Solution}.
-Having isolated the Integrator as the component to be tested (as much as possible), it is then run at different resolutions.
-For Runge Kutta methods of order $n$ an increase in resolution by a factor of $a$ was expected to reduce error by a factor of $a^n$.
-However, for exponential integrators this method fails, as exponential integrators are either accurate down to machine precision or wholly inaccurate.
-For them, instead, a very small error was sufficient in order to complete the test.
+In order to test the integrators separately from the differential operators, we started with single-variable differential equations.
+Having only one variable and no spatial dimension means we did not need to utilize any spatial derivative operators.
+For testing purposes we implemented four such differential equations for which analytic solutions exist as subclasses of \texttt{TimeDerivative} and \texttt{Solution}.
+Having isolated the Integrator as the component to be tested, it was then run at different time resolutions.
+For Runge Kutta methods of order $n$ an increase in resolution by a factor of $a$ was expected to reduce the error by a factor of $a^n$.
+
+One should always keep in mind that this method of testing for convergence does not always work.
+For example, for exponential integrators this method would fail, as exponential integrators are either accurate down to machine precision or wholly inaccurate.
 
 \subsection{Differential Equations}
-Having verified the implementation of both operators and integrators, the only component left to verify are the implementations of the differential equations in the form of \texttt{TimeDerivative}-implementations.
-The process for this is similar to the previous sections: First, some analytic solution is found.
-The breadth of this analytic solution can vary in its universality, from analytic solutions describing the evolution of the system given any starting condition\footnote{which make numeric solutions redundant}, to analytic solutions describing the stationary solution of the system.
-A stationary solution is a solution for which the state of the system does not change.
-This solution is then implemented as a \texttt{Solution} class.
-\\
-After finding such an analytic solution, its initial state is given to an integrator (usually RK4), which uses the \texttt{TimeDerivative}-implementation to be tested in order to calculate its results independently from the analytic solution found.
-\\
-Now running both the analytic solution and the calculated simulation, these two results can be compared.
-If the results are coinciding, the implementation of \texttt{TimeDerivative} has not been disproved.
-To further verify the solution, one can also vary the resolution with which RK4 is run.
-If change in resolution by a factor of $a$ translates into a reduction in error by a factor of $a^4$, this is a good indicator that the solution described by \texttt{TimeDerivative} converges towards the analytic solution, which was found separately.
+Having verified the implementation of both operators and integrators, the only component left to verify are the implementations of the differential equations.
+These are represented by \texttt{TimeDerivative}-implementations.
+The process for this is similar to the previous sections: First, we find some analytic solution.
+The breadth of this analytic solution can vary in its universality.
+From analytic solutions describing the evolution of the system from any given starting condition\footnote{which make numeric solutions redundant}, to analytic solutions just describing the stationary solution\footnote{A stationary solution is a solution for which the state of the system does not change.} of the system.
+We then implement this solution as a \texttt{Solution} class.
+
+Thereafter, we give the system's initial state to an integrator (usually RK4).
+This integrator in turn calls the \texttt{TimeDerivative}-implementation to be tested in order to run the simulation.
+From this we gain a simulation-result independent from the analytic solution.
+
+At the end of this simulation we have both an analytic solution and a calculated simulation which we can compare.
+If the results are coinciding down to numerical precision, the implementation of \texttt{TimeDerivative} is not disproved.
+
+Especially for linear PDEs to further verify the solution, one can also vary the resolution with which RK4 is run.
+If a change in resolution by a factor of $a$ translates into a reduction in error by a factor of $a^4$, this is a good indicator that the solution described by \texttt{TimeDerivative} converges towards the analytic solution.
 
 \subsection{Example}
-Now that the implementation architecture has been detailed, the implementation of the non-hydrostatic NSE in the form of a \texttt{TimeDerivative}-implementation is explained.
-More specifically an implementation of the Lorenz-grid is shown.\\
-First, the variables used in the implementation are detailed:\\
+Now that we detailed the implementation architecture, the implementation of the non-hydrostatic NSE in the form of a \texttt{TimeDerivative}-implementation is explained.
+More specifically an implementation of the Lorenz-grid is shown.
+\newpage
+\noindent
+First, we define the variables which appear in the implementation:\\
 {\tabulinesep=0.5mm
 \begin{center}
 \begin{tabu}{c|c|c}
@@ -301,7 +326,7 @@ Variable Name & Type & Meaning \\
 \hline 
 \texttt{dpi\_ds}& function & this represents $\frac{\partial\pi}{\partial s}$ \\ 
 \hline 
-\texttt{state\_vars} & 2d-array/list of vectors & \makecell{contains the state-variables.\\$\text{ln}p$=\texttt{state\_vars[0]}\\ $T$=\texttt{state\_vars[1]}\\ $w$=\texttt{state\_vars[2]}}\\ 
+\texttt{state\_vars} & \makecell{2d-array/\\list of vectors} & \makecell{contains the state-variables.\\$\text{ln}p$=\texttt{state\_vars[0]}\\ $T$=\texttt{state\_vars[1]}\\ $w$=\texttt{state\_vars[2]}}\\ 
 \hline 
 \texttt{t} & scalar & \makecell{contains the elapsed simulation time\\(is not used in this implementation).} \\ 
 \hline 
@@ -321,22 +346,23 @@ Variable Name & Type & Meaning \\
 \hline 
 \end{tabu} 
 \end{center}}
-
-The only two operators utilized are the following:\\
+\noindent
+The only two operators we will utilize are the following:\\
 \begin{tabular}{c}
 \begin{lstlisting}[language=Python]
 diff_s_align_n1_e2(f_offset, delta_s)
 diff_s_offset_n1_e2(f_aligned, delta_s)
 \end{lstlisting}
 \end{tabular}\\
-Both functions approximate the derivative using central differences with a twist.
-Usually, when central differences are calculated, if the input is on an aligned grid, the output will also be on an aligned grid.
-This means the derivative at location $f(s)$ is approximated using values at $f(s-\Delta s)$ and at $f(s+\Delta s)$.
+Both functions approximate the derivative through central differences with a twist.
+Normally, when central differences are calculated, if the input is on an aligned grid, the output is also located on an aligned grid.
+This means the derivative at location $f(s)$ is approximated from values at $f(s-\Delta s)$ and at $f(s+\Delta s)$.
 In contrast, \texttt{diff\_s\_offset\_n1\_e2} takes its input on an aligned grid, and outputs it on an offset grid.
-That is, the derivative at location $f(s)$ is approximated using the values at $f(s-\frac{\Delta s}{2})$ and $f(s+\frac{\Delta s}{2})$.
-Vice versa, \texttt{diff\_s\_offset\_n1\_e2} takes its input on an offset grid, and outputs it on an aligned grid.\\
-Using these definitions, implementation of the non-hydrostatic NSE is reasonably simple.
-When reading the code, note the close relation to the mathematical notation, which can best be seen by writing them down side by side:
+That is, the derivative at location $f(s)$ is approximated from the values at $f(s-\frac{\Delta s}{2})$ and $f(s+\frac{\Delta s}{2})$.
+Vice versa, \texttt{diff\_s\_offset\_n1\_e2} takes its input on an offset grid, and outputs it on an aligned grid.
+
+With these definitions, implementation of the non-hydrostatic NSE is reasonably simple.
+When reading the code, note the close relation to the mathematical notation which can be seen by writing them down side by side:
 \paragraph{Evolution of Vertical Wind Speed:}
 \begin{align*}
 \frac{\partial w}{\partial t} = -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)
@@ -422,7 +448,7 @@ class LorenzTimeDerivative(TimeDerivative):
     # transform result into canonical format
     return np.stack((dlnp_dt, dT_dt, dw_dt), axis=-1).transpose()
 \end{lstlisting}
-\end{tabular}\\
+\end{tabular}
 
 
 %\begin{itemize}

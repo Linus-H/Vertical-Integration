@@ -3,74 +3,79 @@
 
 \chapter{Introduction}\label{chapter:introduction}
 \section{Motivation}\label{sec:motivation}
-\emph{Meteorology}, or the accurate simulation of short-term weather is of central economic importance to many industries including agriculture, airlines and tourism.
-\emph{Climatology}, or the study of long-term weather trends is the key scientific driver of the debate and political action surrounding climate change.
-Although this debate is often expressed in economic terms, it also involves complex issues such as the nature of scientific certainty, morality, and fairness across generations.
-Evidently, the quality of the underlying scientific models is important.\\
-In studying climate and meteorology models, a lot of focus is put on simulating on a large spatial and temporal scale.
-As one main aim of such models is to make predictions in the real world, their simulation must simulate time significantly faster than time elapses in the real world.
+Some of the great advancements in society that have been enabled by the advent of computers were achieved in the fields of \emph{meteorology} and \emph{climatology}.
+For example, \emph{meteorology}, or the accurate simulation of short-term weather has become of central economic importance to many industries including agriculture~\cite{gommes2010guide}, airlines~\cite{sharman2016aviation}, and tourism~\cite{becken2011tourism}.
+\emph{Climatology}, or the study of long-term weather trends has become the key scientific driver of the debate and political action surrounding climate change~\cite{carey2012climate}.
+Evidently, both of these fields are of central societal importance, and the quality of the underlying scientific models is crucial.
+%Although this debate is often expressed in economic terms, it also involves complex issues such as the nature of scientific certainty~\cite{smith2011uncertainty}, morality~\cite{caney2011morality}, and fairness across generations~\cite{mintzer2001climate}.
+
+
+In studying climate and meteorology models, a lot of focus is put on simulations on a large spatial and temporal scale.
+As one main aim of such models is to make predictions of the real world, the models must simulate time significantly faster than time elapses in the real world.
 However, simulating the entire planet with all of its small details and physical effects with extreme precision is impossible.
 Instead, such models often make simplifying assumptions and reduce the spatial and temporal resolution at which to simulate, in order to make computation of the models feasible.
+
 For weather and climate prediction, a lot of these simplifications affect the vertical structure of the atmosphere, i.e. it is simulated with less detail than the horizontal structure.
-This is justified by reasoning that the physical effects in the horizontal dimension are a lot more significant than some short-term effects in the vertical dimension, and should thus be allocated more computational resources.
-And while this line of reasoning enables simulations that are good enough to make many predictions in the real world, it also neglects the study of the aforementioned short-term effects, such as sound, in the vertical dimension of the atmosphere.\\
-For this reason it may be interesting to study just that: the degree to which the omission of short-term effects of the vertical of the atmosphere affect mid- to long-term predictions.
-Of course, this necessitates accurate simulation of the vertical dimension of the atmosphere, the basics of which will be outlined from the literature in this thesis.
+This is justified by reasoning that physical effects in the horizontal dimension are a lot more significant than some short-term effects in the vertical dimension, and should thus be allocated more computational resources.
+While this line of reasoning enables simulations that are good enough to make many predictions in the real world, it neglects the study of the aforementioned short-term effects in the vertical dimension of the atmosphere.
+One of the disregarded physical effects, for example, is sound which is essentially a pressure wave propagating through the atmosphere.
+
+For this reason it may be interesting to study just that: the degree to which the omission of short-term effects of the vertical dimension of the atmosphere affect mid- to long-term predictions.
+Of course, this necessitates accurate simulation of the vertical dimension of the atmosphere, the basics of which we will outline in this thesis.
+Based on this, we will then showcase an implementation of a simulation of the vertical dimension of the weather system.
+This is intended as a foundation for others to build upon in order to look into the effects of omitting short-term vertical effects.
 
 \section{Methodology}
-In order to simulate both weather or climate, so-called Partial Differential Equations (PDEs) are used, i.e. mathematical equations which describe the evolution of a system in both time and space using only the current state of said system as an input.
-This paradigm harks back to Newton and Leibniz, and many of the fundamental models of today's science are expressed as PDEs, including Schr\"odinger's equation of quantum mechanics, Maxwell's equations of electromagnetics, and the Navier-Stokes equations of fluid dynamics.
-For meteorology the Navier-Stokes equations (NSE) are of central importance.\\
-However, PDEs only describe in which `direction` a system will evolve in the future, and do not provide any predictions on their own.
-Instead they must either be solved analytically\footnote{i.e. a closed-form mathematical formula without differential operators is derived that describes the complete evolution of a system over time and space given its initial state} (for simple cases) , or they can be solved numerically.
-The latter option of numerical approximation on computers takes the `direction` given by the PDE and (using one of many numerical techniques from the literature) changes the state of the system a little bit in said `direction` time and time again, in order to simulate the evolution of the system over time.
-This is the only option for complex systems such as the weather.\\
-There are many ways of solving PDEs numerically, but all of them generally follow the same four steps:
+In order to simulate both weather or climate we employ so-called Partial Differential Equations (PDEs).
+These are mathematical equations which describe the evolution of a system in both time and space, taking only the current state of the weather system as an input.
+This paradigm harks back to Newton and Leibniz, and many of the fundamental models of today's science are expressed as PDEs.
+This includes Schr\"odinger's equation of quantum mechanics, Maxwell's equations of electromagnetics, and the Navier-Stokes equations of fluid dynamics.
+For meteorology the Navier-Stokes equations (NSE) are of central importance.
+
+However, PDEs only describe in which ``direction'' a system will evolve in the future, and do not provide any predictions on their own.
+Thus, they must either be solved analytically\footnote{i.e. a closed-form mathematical formula without differential operators is derived that describes the complete evolution of a system over time and space given its initial state} (for simple cases), or numerically.
+Generally, the latter option of numerical approximation on computers is less accurate, and is performed utilizing one of many numerical techniques from the literature.
+This is the only option for complex systems such as the weather.
+
+In this thesis we use the Runge-Kutta methods which predict a system's evolution by repeatedly simulating small time steps.
+Each of these small time steps is made by changing the state of the system in the ``direction'' dictated by PDE.
+\\
+
+\noindent
+In order to solve PDEs numerically, in this thesis we adhere to the following four steps:
 \begin{enumerate}
 \item \emph{Modeling}: Finding a system of PDEs that describe a given physical system.
-\item \emph{Approximating}: simplifying the system of PDEs by making assumptions about the system. For example, in the small-angle approximation of a pendulum system it is assumed that $\sin(\theta)=\theta$, where $\theta$ is an angle close to zero.
-\item \emph{Space Discretization}: Inevitably, when simulating a continuous variable in space, such as temperature, it needs to be sampled at some points, which means it is discretized.
-The choice of the location of these points is important and has to be considered for every scalar and vector field in the PDE.
+\item \emph{Approximation}: simplifying the system of PDEs by making assumptions about the system. For example, in the small-angle approximation of a pendulum system it is assumed that $\sin(\theta)=\theta$, where $\theta$ is an angle close to zero.
+\item \emph{Space Discretization}: Inevitably, when simulating a continuous variable in space, such as temperature, it needs to be sampled at some points which means it is discretized.
+The choice of the location of these points is important and must be considered for every scalar and vector field in the PDE.
 %if the system contains scalar- or vector-fields, choosing the locations at which to store the values of each individual field
-\item \emph{Time Discretization/Integration}: Finally, a numerical method for approximating how the system will change, given the simplified PDE and the values of the variables at the chosen points, must be chosen.
+\item \emph{Time Discretization/Integration}: Finally, a numerical method for approximating how the system will change, given the simplified PDE and the values of the variables at the sampling locations, must be chosen.
 %choosing an integration method
 \end{enumerate}
 Each of these four steps introduces trade-offs which need to be weighed against one another:
-In designing a numerical PDE solver (a) accuracy, (b) computation time, and perhaps (c) ease of use and adaptation must be considered.
-For example recalling section \ref{sec:motivation}, often some accuracy in the vertical dimension is sacrificed for reduced computation time.\\
+In designing a numerical PDE solver (a) accuracy, (b) computation time, and perhaps (c) ease of use and adaptability must be considered.
+For example recalling Section~\ref{sec:motivation}, often some accuracy in the vertical dimension is sacrificed for reduced computation time.
 Generally, these optimizations are domain-specific to the problem at hand.
 
 \section{Outline}
-In this thesis a highly stylized model of the atmosphere is studied.
-In particular the main focus is put on the spatial variation in the vertical dimension, i.e. perpendicular to the surface of the Earth.\\
-We will relax the simplifying assumption of \emph{hydrostatic equilibrium} that is often made in Step 2 above, and which posits that the force of gravity balances out the vertical pressure gradient force that results from decreasing air pressure at higher altitudes\cite{coiffier2011fundamentals}.
-In effect this common assumption can be rephrased as saying that the atmosphere is neither sucked up into the vacuum of space, nor collapsed down to the surface of the planet.
-And while this assumption is evidently sensible on average, it does not take into account local variations that may be of interest (e.g. sound waves).\\
-This, together with a short introduction to the NSE and some other simplifications, is described in chapter \ref{chapter:navier_stokes}, accounting for steps 1 and 2 above.\\
-Thereafter, in section \ref{chapter:discretization} both spatial and temporal discretization for the NSE are described, which concludes steps 3 and 4.\\
-Having described the theoretical basis for this stylized model of the atmosphere, the implementation of a flexible prototyping tool\footnote{in Python 3}, which permits exploration of the trade-offs between accuracy and computational time, and comparisons between different decisions made in steps 3 and 4, is described.
-For this reason the tool was designed with the aim of modularity, in order to make changing between different design choices easy, by simply replacing a single component of the software by another.
-It was also written as a simple toolbox for other students and researchers to use in the future.
-Its design is described in chapter \ref{chapter:implementation}.\\
-Thereafter, in chapter \ref{chapter:numerical_study}, first, the implementation of the toolbox is thoroughly tested to exclude it as a source of errors.
-Then, using the toolbox, two different implementations of the simplified NSE are tested.\\
-Finally, in chapter \ref{chapter:conclusion} the work is summarized and possible extensions for further research are proposed.
+In this thesis we study a highly stylized model of the atmosphere.
+In particular we put the main focus on the spatial variation in the vertical dimension, i.e. perpendicular to the surface of the Earth.
 
+We will relax the simplifying assumption of \emph{hydrostatic equilibrium} often made in Step 2 above.
+It posits that the force of gravity balances out the vertical pressure gradient force that results from decreasing air pressure at higher altitudes~\cite{coiffier2011fundamentals}.
+In other words, the atmosphere is neither sucked up into the vacuum of space, nor collapsed down to the surface of the planet.
+While this assumption is evidently sensible on average, it does not take into account local variations that may be of interest (e.g. sound waves).
+We describe this, together with a short introduction to the NSE and some other simplifications, in Chapter~\ref{chapter:navier_stokes}, accounting for Step~1 and Step~2 above.
+Thereafter, in Chapter~\ref{chapter:discretization} we describe both spatial and temporal discretization for the NSE which completes Step~3 and Step~4.
+This concludes the description of the theoretical basis for this stylized model of the atmosphere.
 
-%At one point or another, most parts of applied physics and engineering make use of partial differential equations (PDEs), which are equations describing how the state of a system will evolve.
-%And while a small subset of these PDEs can be solved analytically, i.e. it is possible to write down a mathematical formula that solves the PDE and thus describes the future evolution system from any starting state, it is more common to come across PDEs which are not solvable in such a way.
-%Instead it becomes necessary to approximate solutions to such PDEs numerically.
-%Generally this process can be split up into four steps:
-%\begin{enumerate}
-%\item \emph{Modeling}: finding a system of PDEs that describe a system
-%\item \emph{Approximating}: simplifying the system of PDEs by making assumptions about the system (e.g. small angle approximation for a pendulum system)
-%\item \emph{Space Discretization}: if the system contains scalar- or vector-fields, choosing the locations at which to store the values of each individual field
-%\item \emph{Time Discretization}: choosing an integration method
-%\end{enumerate}
-%Each of these four steps introduce different trade-offs between computational efficiency and errors.
-%This thesis will go through all of these four steps by applying them to a strongly simplified model of weather.
-%More specifically this thesis will only look into the vertical part of weather simulation using the Navier-Stokes equations.
-%The vertical part is viewed in isolation, because current weather simulation tools often split up the vertical and horizontal part of simulation by alternating between simulating horizontal and vertical effects. [TODO: find source]
-%After applying the four steps to the system, the errors introduced by the possible choices in each of the steps will be analyzed.
-%To this end, the numerical approximation was implemented using Python 3.
-%The software architecture behind this implementation will be described in section \ref{chapter:implementation}.
+We outline the implementation of the flexible prototyping tool\footnote{written in Python 3} in Chapter~\ref{chapter:implementation}.
+Its goal is to permit exploration of the trade-offs between accuracy and computational time, and comparisons between different decisions made in Steps 3 and 4.
+For this reason we designed the tool with the design principle of modularity.
+This makes the switch between different design choices as simple as replacing a single component of the software for another.
+We wrote this tool with the hope that it may be prove useful for other students and researchers in the future.
+The code comprises approx. 2500 lines of code and is freely available at the Github repository \url{https://github.com/Linus-H/Vertical-Integration}.
+
+In Chapter~\ref{chapter:numerical_study} we first thoroughly unit-test the implementation of the toolbox to exclude it as a source of errors.
+Then, utilizing the toolbox, we study two different implementations of the simplified NSE.
+Finally, in Chapter~\ref{chapter:conclusion} we summarize the work and propose possible extensions for further research.

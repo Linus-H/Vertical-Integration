@@ -1,12 +1,23 @@
 \chapter{Navier Stokes Equations for Atmospheric Simulation}\label{chapter:navier_stokes}
-As mentioned in the introduction our system of interest is a simplified model of weather.
-This system is commonly described using a variant of the Navier Stokes Equations used for atmospheric simulation (NSE).
-For this reason, in this section the NSE will first be introduced, completing the first step of \emph{modeling}.
-Thereafter, some common simplifications will be introduced, and the boundary conditions of the system will be discussed.
-This accounts for the second step of \emph{approximating}.\\
+In this chapter we outline the mathematical foundation for the remaining chapters.
+To this end, in Section~\ref{sec:var_and_not} we define the basic variables and notation.
+Then, in Section~\ref{sec:def_NSE} we present a quite general form of the Navier Stokes Equations (NSE).
+They can be used to model the atmosphere which concludes Step 1 (\emph{modeling}).
 
-Before the system of equations can be understood, first, the symbols used within them must be discussed.
-The following table introduces the used symbols, their colloquial names, their type, and their SI-unit.
+In Section~\ref{sec:non_altering}, we introduce three non-altering rearrangements for the purpose of streamlining computer implementations.
+Thereafter, in Section~\ref{sec:altering} we show two simplifications which do alter the numerical results, including the important hydrostatic assumption.
+Subsequently, in Section~\ref{sec:alt_coor} we familiarize the reader with a non-altering and generally nonlinear coordinate transformation of the vertical dimension with the purpose of obtaining a better-suited discretization.
+Then, in Section~\ref{sec:non_hydrostatic} we arrive at the final formulation of the NSE in the non-hydrostatic case.
+This concludes Step 2 (\emph{approximation}).
+Specifically, this non-hydrostatic model is studied in following chapters.
+
+In Section~\ref{sec:identities} we present some identities which are helpful for verifying simulation models, as certain properties must be preserved.
+Last, in Section~\ref{sec:boundary} we comment on the boundary conditions that are an integral part of any system of PDEs.
+
+\newpage
+\section{Variables and Notation}\label{sec:var_and_not}
+Before one can understand the system of equations that constitute the NSE, the symbols appearing within them must be defined.
+In the following table we introduce the symbols, their colloquial names, their type, and their SI-unit.\\\\
 
 \begin{tabular}{c|c|c|c}
 \hline
@@ -39,14 +50,13 @@ $\textbf{Q}$ & source/sink term for heat & scalar field & $\frac{J}{mol\cdot K}$
 $\textbf{M}$ & source/sink term for specific humidity & scalar field & $\frac{g}{s\cdot kg}$ \\ 
 %\hline 
 \end{tabular}
-\\
-The value of $R$ can be calculated by dividing the ideal gas constant $8.31\frac{J}{mol K}$\cite{mohr2008codata} by the molar mass of dry air $28.96\frac{g}{mol}$\cite{langeheinecke1993thermodynamik}.
-The value for specific heat $C_p$ can be found in \cite{beckett1955tables}.
-\\
-
-Now the only components missing to write down the NSE are the differential operators.
+\\\\\\
+We calculated the value of $R$ by dividing the ideal gas constant $8.31\frac{J}{mol\cdot K}$~\cite{mohr2008codata} by the molar mass of dry air $28.96\frac{g}{mol}$~\cite{langeheinecke1993thermodynamik}.
+The value for specific heat $C_p$ can be found in~\cite{beckett1955tables}.
+\newpage\noindent
+Now the only components missing in order to write down the NSE are the differential operators.
 In the following table $A$ stands in for an arbitrary scalar field.
-The third definition of $\nabla$ will be used in later sections and has been included for completeness' sake.
+The definition of $\nabla$ is used in later sections and is included for completeness' sake.
 
 {\tabulinesep=0.5mm
 \begin{center}
@@ -67,34 +77,46 @@ $\nabla$ & $\begin{pmatrix}
 \frac{\partial }{\partial y}
 \end{pmatrix}$ & 2-dimensional nabla-operator
 \end{tabu}
-\end{center}}
+\end{center}}\noindent
+In the following, full standalone versions of the NSE are marked by a \fbox{box} \mbox{surrounding} the equations.
 
 
-Using these definitions the most general form of the equations can be written as follows \cite{coiffier2011fundamentals}:
-\begin{empheq}[box=\doublebox]{align}
-&\text{momentum equation} &\frac{D\textbf{V}_3}{Dt} &= -2\boldsymbol{\Omega}\times \textbf{V}_3 - \frac{1}{\rho}\nabla _3 p - \nabla _3 \Phi + \textbf{F}\;\; \label{eq_mom}\\
-&\text{thermodynamic equation}& \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
-&\text{continuity equation}& \frac{D\rho}{Dt} &= -\rho \nabla _3 \cdot \textbf{V}_3\label{eq_cont}\\
-&\text{water vapor equation}& \frac{Dq}{Dt} &= \textbf{M}\label{eq_water}\\
-&\text{equation of state}& p &= \rho R T \label{eq_state}
+\section{Navier Stokes Equations}\label{sec:def_NSE}
+Employing these definitions a general form of the equations can be written as follows~\cite{coiffier2011fundamentals}:
+\begin{empheq}[box=\widefbox]{align}
+&\text{Momentum Equation} &\frac{D\textbf{V}_3}{Dt} &= -2\boldsymbol{\Omega}\times \textbf{V}_3 - \frac{1}{\rho}\nabla _3 p - \nabla _3 \Phi + \textbf{F}\;\; \label{eq_mom}\\
+&\text{Thermodynamic Equation}& \frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}+\frac{\textbf{Q}}{C_p}\label{eq_therm}\\
+&\text{Continuity Equation}& \frac{D\rho}{Dt} &= -\rho \nabla _3 \cdot \textbf{V}_3\label{eq_cont}\\
+&\text{Water Wapor Equation}& \frac{Dq}{Dt} &= \textbf{M}\label{eq_water}\\
+&\text{Equation of State}& p &= \rho R T \label{eq_state}
 \end{empheq}
-\subsubsection{Interpretation of the Terms}
-The material derivatives in the above equations account for the fact that the physical properties of a fluid parcel need to ``travel'' along with that fluid parcel through space, e.g. when the entirety of a gas is moving to the right at a constant speed, and there happens to be a region of higher density within that gas, this high-density region has to move right along with the gas.
 
-Next, the right-hand sides of the above equations are interpreted, starting with the momentum equation \ref{eq_mom}:
+\subsubsection{Interpretation of the Terms}
+The material derivatives in the above equations account for the fact that the physical properties of a fluid parcel need to ``travel'' along with that parcel through space.
+Imagine, for example, a space filled with a gas which moves to the right at a constant speed.
+If there happens to be a region of higher density within that gas, this high-density region must move right along with the gas.
+\\
+
+\noindent
+Next, we interpret the right-hand sides of the above equations, starting with the Momentum Equation~\ref{eq_mom}~\cite{coiffier2011fundamentals}.
 \begin{itemize}
-\item $-2\boldsymbol{\Omega}\times \textbf{V}_3$ this term describes the Coriolis effect, which needs to be modeled because the rotating earth is used as the frame of reference.
-\item $- \frac{1}{\rho}\nabla _3 p$ this pressure force term describes how air flows from regions of high pressure to regions of low pressure.
-\item $- \nabla _3 \Phi$ this term describes how air flows from high  potential to low potential, i.e. in the direction of gravity.
+\item $-2\boldsymbol{\Omega}\times \textbf{V}_3$: this term describes the Coriolis effect which needs to be modeled because the frame of reference is the rotating earth.
+\item $- \frac{1}{\rho}\nabla _3 p$: this pressure force term describes how air flows from regions of high pressure to regions of low pressure.
+\item $- \nabla _3 \Phi$: this term describes how air flows from high  potential to low potential, i.e. in the direction of gravity.
 \end{itemize}
-For complete accuracy a term of the shape $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity can be added \cite{cabralnsthermo}.
-However dynamic viscosity $\mu \approx 1.7\cdot 10^{-5}\frac{kg}{sm}$\cite{cengel2010fluid} is very small, so the term can often be ignored.
+For more accuracy once could add a term of the form $\frac{\mu}{\rho} \nabla _3^2 \textbf{V}_3$ accounting for the viscosity~\cite{cabralnsthermo}.
+However, dynamic viscosity $\mu \approx 1.7\cdot 10^{-5}\frac{kg}{sm}$~\cite{cengel2010fluid} is very small, so the term can often be ignored.
 \\
-Looking at the thermodynamic equation \ref{eq_therm}, there is only a single term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describing how temperature changes given how the pressure changes.
-This relationship depends on temperature and pressure, because the thermodynamic properties of air also depend on the current temperature and pressure.
-To be more accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ could be added, to account for thermal conduction, but for these equations they can be neglected, because thermal diffusivity of air $\alpha \approx 2\cdot 10^{-5}\frac{m^2}{s}$ \cite{cengel2010fluid} is sufficiently small.
+
+\noindent
+In the Thermodynamic Equation~\ref{eq_therm}, there is only a single term $\frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}$ describing how temperature changes with pressure.
+This relationship dictates the the thermodynamic properties of air.%depends on temperature and pressure, because the thermodynamic properties of air depend on these properties.
+To be more accurate a term of the shape $\frac{\alpha R}{C_p}\nabla _3^2 T$ could be added, to account for thermal conduction.
+However, for these equations this term can be neglected, because the thermal diffusivity of air $\alpha \approx 2\cdot 10^{-5}\frac{m^2}{s}$~\cite{cengel2010fluid} is sufficiently small.
 \\
-Lastly, interpreting the continuity equation \ref{eq_cont}, it can be helpful to expand the material derivative, in order to highlight how the two similar terms can describe different effects.
+
+\noindent
+Lastly, interpreting the Continuity Equation~\ref{eq_cont}, it can be helpful to expand the material derivative, in order to highlight how the two similar terms can describe different effects.
 \begin{align*}
 \frac{D\rho}{Dt} &= -\rho \nabla _3 \cdot \textbf{V}_3\\
 \frac{\partial \rho}{\partial t} + \textbf{V}_3 \cdot \nabla _3 \rho &= -\rho \nabla _3 \cdot \textbf{V}_3\\
@@ -103,82 +125,84 @@ Lastly, interpreting the continuity equation \ref{eq_cont}, it can be helpful to
 The first term accounts for how density travels along with the flow.
 The second term describes how the density of a gas is reduced if the flow is divergent, i.e. if more material flows away from a point in space than flows in, the amount of material in that point reduces.
 \\
-In the following the source/sink terms $\textbf{F}$, $\textbf{Q}$ and $\textbf{M}$ are set to zero in order to study a simplified closed system.
-Also, the water vapor equation \ref{eq_water} is ignored because it becomes trivial when $M$ is set to zero.
+
+\noindent
+In the following, the source/sink terms $\textbf{F}$, $\textbf{Q}$ and $\textbf{M}$ are set to zero in order to study a simplified closed system.
+Also, the Water Vapor Equation~\ref{eq_water} is ignored because it becomes trivial when $M$ is set to zero.
 
 \subsubsection{Categories of Equations and Variables}
-The equations can be split up into two categories, depending on their function.
+The equations can be split into two categories, depending on their function~\cite{coiffier2011fundamentals}.
 The first category comprises any equations describing the evolution of a variable over time.
-Such equations are called \emph{prognostic}, and can be identified by their containing either a material derivative $\frac{D}{Dt}$, or a partial derivative of time $\frac{\partial}{\partial t}$.
+Such equations are called \emph{prognostic}, and can be identified by their containing either a material derivative $\frac{D}{Dt}$ or a partial time derivative $\frac{\partial}{\partial t}$.
 These are the equations which need to be numerically approximated in order to simulate the system.
 
-The second category consists of all remaining equations, which are called \emph{diagnostic}.
-By method of exclusion they do not contain time derivatives, and only describe static relationships between variables at any point in time.
+The second category consists of all remaining equations.
+They are called \emph{diagnostic}.
+They do not contain time derivatives, and only describe static relationships between variables at any point in time.
+In the case of the ``raw'' NSE, only the Equation of State~\ref{eq_state} is \emph{diagnostic}, with the remaining equations being \emph{prognostic}.
+\\
 
-In the case of the ``raw'' NSE, only the equation of state \ref{eq_state} is \emph{diagnostic}, with the remaining equations being \emph{prognostic}.
-
+\noindent
 Conversely, a variable is called \emph{prognostic} if its evolution is described by some \emph{prognostic} equation.
 Otherwise it is called \emph{diagnostic}.
 
-\section{Rearrangements and Simplifications}
-Having written down and interpreted the NSE, it is now time to perform the second step of \emph{approximating} them.
-This is done for several reasons, all of which can be boiled down to computational efficiency.
-When implementing the original NSE directly, several issues arise.
+
+\section{Rearrangements and Simplifications}\label{sec:rearr_and_simpl}
+All of the rearrangements and simplifications in this section are based on the book ``Fundamentals of Numerical Weather Prediction'' by Jean Coiffier~\cite{coiffier2011fundamentals} unless other sources are cited.
 \\
-First, the raw equations contain some redundancy, e.g. both $\rho$ and $p$ are used in the equations, even though there is a linear relationship between the two (equation of state \ref{eq_state}).
-Having to perform this conversion between the two variables during simulation is inefficient.
-Getting rid of this kind of inefficiency by transforming the equations does not affect the result of simulations.
-Thus, rearrangements are called \emph{non-altering}.
-\\
+
+\noindent
+Having written down and interpreted the NSE, in this section we perform the second step of \emph{approximating} them.
+This is done for multiple reasons, all of which can be boiled down to computational efficiency.
+
+When implementing the original NSE directly, two issues arise.
+First, the raw equations contain some redundancy, e.g. both $\rho$ and $p$ appear in the equations, even though a linear relationship between the two exists~(Equation of State~\ref{eq_state}).
+Performing this conversion between the two variables during simulation is inefficient.
+Eliminating of this kind of inefficiency by transforming the equations does not affect the result of simulations.
+Such rearrangements are called \emph{non-altering}.
+
 Second, depending on what atmospheric effects are of interest, some terms in the NSE are negligible.
 Computing them would yet again be inefficient.
 However, simplifying the NSE by ignoring these terms does alter the result of simulations.
-For this reason simplifications are called \emph{altering}.
+For this reason such simplifications are called \emph{altering}.
 \\
-\\
-In this section, first, some \emph{non-altering} rearrangements are made and, second, some \emph{altering} simplifications are introduced.
-The former have the main goal of condensing the NSE into a more compact and efficient format.
-The latter only have the goal of making computation more efficient.\\
-All of the rearrangements and simplifications made in this section are based on the book \emph{Fundamentals of numerical weather prediction} by Jean Coiffier\cite{coiffier2011fundamentals} unless other sources are cited.
 
-%both in order to make computation more efficient, and to transform the equations into a form more conducive to making simplifications.
-%These rearrangements do not affect the simulation results.
-%\\
-%Afterwards, some simplifications will be introduced, which do affect the simulation results, but in turn significantly reduce the computational intensity.
-%\\
-%This reduction in computational intensity stems from the fact that simplifications transform the nature of some of the equations from prognostic into diagnostic, thus reducing the number of differential equations to be simulated.
+\noindent
+In this section we first make some \emph{non-altering} rearrangements and thereafter introduce some \emph{altering} simplifications.
+The former have the purpose of condensing the NSE into a more compact and efficient format.
+The latter only aim to make computation more efficient.
 
-\subsection{Non-Altering Rearrangements}
-The main goal of these rearrangements is to rewrite the NSE in a form more conducive to applying simplifications, although they sometimes also have the nice side-effect of making computation more efficient.
+\subsection{Non-Altering Rearrangements}\label{sec:non_altering}
+The main goal of these rearrangements is rewriting the NSE in a form more conducive to applying simplifications later on.
+Sometimes the rearrangements also have the nice side effect of making computation more efficient.
 These rearrangements do not change the number of prognostic equations.
 They can, however, change the number of diagnostic variables, and the type (diagnostic, prognostic) of a variable.
+
 \subsubsection{Replacing Occurrences of $\rho$ by $p$}\label{subsec_rho_p}
-As mentioned above, having the NSE contain both $\rho$ and $p$ is redundant.
-This makes it desirable to replace occurrences of $\rho$ by $p$.
-In the NSE the only diagnostic equation containing $\rho$ is the continuity equation \ref{eq_cont} ($\rho$ in the momentum equation \ref{eq_mom} can simply be replaced using \ref{eq_state}).
-Using the equation of state \ref{eq_state} and the thermodynamic equation \ref{eq_therm}, yields
+Having the NSE contain both $\rho$ and $p$ is redundant.
+In the NSE the only diagnostic equation containing $\rho$ is the Continuity Equation~\ref{eq_cont}, as $\rho$ in the Momentum Equation~\ref{eq_mom} can simply be replaced with~\ref{eq_state}.
+Using the Equation of State~\ref{eq_state} and the Thermodynamic Equation~\ref{eq_therm}, yields:
 \begin{align*}
 \frac{D\rho}{Dt} &\stackrel{(\ref{eq_state})}{=} \frac{D\frac{p}{RT}}{Dt} = \frac{1}{RT}\frac{Dp}{Dt}-\frac{p}{RT^2}\frac{DT}{Dt}\\
 &\stackrel{(\ref{eq_therm})}{=} \frac{1}{RT}\frac{Dp}{Dt}-\frac{1}{C_pT}\frac{Dp}{Dt} = \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt}
-\end{align*}.
-Now, inserting this into the continuity equation \ref{eq_cont}, we get:
+\end{align*}
+Now, inserting this into the Continuity Equation~\ref{eq_cont}, we get:
 \begin{align*}
 \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt} &= \frac{D\rho}{Dt} = -\rho \nabla _3 \cdot \textbf{V}_3\\
 \frac{1}{T}\frac{C_p-R}{RC_p}\frac{Dp}{Dt} &\stackrel{(\ref{eq_state})}{=} -\frac{p}{RT} \nabla _3 \cdot \textbf{V}_3\\
 \frac{Dp}{Dt} &= - \frac{p}{1-\frac{R}{C_p}} \nabla _3 \cdot \textbf{V}_3
 \end{align*}
-This makes $\rho$ into a purely diagnostic variable, and elevates $p$ to the status of diagnostic variable.
-
+This turns $\rho$ into a purely diagnostic variable, and elevates $p$ to the status of a prognostic variable.
 
 \subsubsection{Splitting into Vertical and Horizontal Parts}
-For this second rearrangement one has to look at $\Phi = gz$.
-The only occurence of $\Phi$ is in the momentum equation \ref{eq_mom} in the form of $-\nabla _3 \Phi=\begin{pmatrix}0 & 0 & -g \end{pmatrix}^T $.
-This means $\Phi$ only affects the vertical component of $\textbf{V}_3$.
-For this reason it makes sense to split $\textbf{V}_3$ (and thus the NSE) into its vertical and horizontal components.
-To this end two new variables $\textbf{V} \in \mathbb{R}^2$ and $w\in \mathbb{R}$, representing horizontal and vertical winds respectively, are introduced.
-Additionally, $\boldsymbol{k}$ is the vertical unitvector (always perpendicular to the ground), and $f=2\Omega \sin \phi$ is the Coriolis parameter.
-Assuming gravity to only act in the vertical and being constant across the atmosphere, we can write $-\nabla_3 \Phi = -g \boldsymbol{k}$.
-Using these definitions to replace $\textbf{V}_3$, we end up with the following equation system:
+For the second rearrangement one must look at $\Phi = gz$.
+The only occurrence of $\Phi$ is in the Momentum Equation~\ref{eq_mom} in the form of $-\nabla _3 \Phi=\begin{pmatrix}0 & 0 & -g \end{pmatrix}^T $.
+This implies that $\Phi$ only affects the vertical component of $\textbf{V}_3$.
+For this reason we split $\textbf{V}_3$ (and thus the NSE) into its vertical and horizontal components.
+To this end, we define two new variables $\textbf{V} \in \mathbb{R}^2$ and $w\in \mathbb{R}$, representing horizontal and vertical winds respectively.
+Additionally, $\boldsymbol{k}$ is the vertical unit vector (always perpendicular to the surface of the Earth), and $f=2\Omega \sin \phi$ is the Coriolis parameter.
+Assuming gravity only to act vertically and being constant across the atmosphere, we write $-\nabla_3 \Phi = -g \boldsymbol{k}$.
+Utilizing these definitions to replace $\textbf{V}_3$, we arrive at the following equation system:
 \begin{empheq}[box=\widefbox]{align*}
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
 \frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
@@ -187,15 +211,14 @@ Using these definitions to replace $\textbf{V}_3$, we end up with the following 
 \end{empheq}
 
 \subsubsection{Using $\text{ln}p$ as a Prognostic Variable}
-Looking at the NSE after having replaced $\rho$ by $p$ and split the equations into vertical and horizontal parts, it can be observed that $p$ always occurs in the pattern $\frac{1}{p}\nabla p$, $\frac{1}{p}\frac{Dp}{Dt}$, or $\frac{1}{p}\frac{\partial p}{\partial t}$.
-In order to further save on computational intensity, it would be desirable not to calculate $\frac{1}{p}$.
-This leads to a common transformation applied to the NSE, namely the replacement of $p$ by $\text{ln}p$, making $\text{ln}p$ a prognostic and $p$ a diagnostic variable.
-The effect of this transformation can be observed by taking the derivative of $\text{ln}p$, w.r.t. some variable $\iota$, and applying the chain rule:
+Looking at the NSE after replacing $\rho$ by $p$ and splitting the equations into vertical and horizontal parts, $p$ always occurs in the patterns $\frac{1}{p}\nabla p$, $\frac{1}{p}\frac{Dp}{Dt}$, or $\frac{1}{p}\frac{\partial p}{\partial t}$.
+In order to further decrease computational intensity, it would be desirable not to calculate $\frac{1}{p}$.
+This leads to a common transformation of the NSE, namely the replacement of $p$ by $\text{ln}p$, making $\text{ln}p$ a prognostic and $p$ a diagnostic variable.
+One can observe the effect of this transformation by taking the derivative of $\text{ln}p$, w.r.t. some variable $\xi$, and applying the chain rule:
 \begin{align*}
-\frac{d\text{ln}p}{d\iota} =  \frac{1}{p}\frac{dp}{d\iota}
+\frac{d\text{ln}p}{d\xi} =  \frac{1}{p}\frac{dp}{d\xi}
 \end{align*}
-The right side of this equation is the pattern just observed.
-\\
+Note that the right side of this equation is the pattern just observed.
 Applying the above identity to the NSE results in the following set of equations:
 \begin{empheq}[box=\widefbox]{align*}
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - RT\nabla \text{ln}p\\
@@ -204,43 +227,31 @@ Applying the above identity to the NSE results in the following set of equations
 \frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} \left(\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)
 \end{empheq}
 
-\subsection{Altering Simplifications}
-In the previous section the NSE have been transformed into a more handy form, without affecting the result of simulations.
-In this section the NSE will be further simplified by making certain assumptions about the prognostic variables.
-All of the following simplifications will result in one less prognostic equation and thus one less prognostic variable.
+\subsection{Altering Simplifications}\label{sec:altering}
+In the previous section we transformed the NSE into a more practical form, without affecting the result of (theoretical) simulations.
+In this section we further simplify the NSE by making certain assumptions about the prognostic variables.
+All of the following simplifications result in one less prognostic equation and thus one less prognostic variable.
 Having one less prognostic equation usually reduces computational efforts.
-This in turn entails that the results of simulations will be changed by making these simplifications.
-
-\subsubsection{Ignoring Horizontal Winds}\label{subsec_horizon}
-As main focus of this thesis is the vertical part of the NSE, we are not interested in $\textbf{V}$ as a prognostic variable.
-The most straightforward simplification to remove $\textbf{V}$ from the equations, is the assumption that $\textbf{V}=0$.
-This makes turns horizontal momentum equation into a diagnostic equation stating that the horizontal gradient of pressure is zero.
-The equation system resulting from this assumption is:
-\begin{empheq}[box=\widefbox]{align*}
-\nabla p &= 0\\
-\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
-\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
-\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \frac{\partial w}{\partial z}\\
-p &= \rho R T
-\end{empheq}
-
+However, the simulation results are altered by applying these simplifications.
 
 \subsubsection{Hydrostatic Assumption}\label{subsec_hydrostat}
-While not implemented in this thesis, the hydrostatic assumption is quite relevant in current weather prediction methods.
-For this reason it is only briefly outlined in this section, but will not be used in the thesis.\\
-When simulating a region of the atmosphere, quite often the breadth of the region considered is a lot larger than its height.
-For this reason, horizontal effects become dominant and several sources claim \cite{coiffier2011fundamentals}\cite{durran2010numerical} that it becomes sufficient to approximate the vertical.
-To this end, the commonly made assumption is that the force of gravity $-\rho g$ and the vertical of the pressure gradient force $-\frac{\partial p}{\partial z}$ directly cancel each other out, i.e. their sum equals zero.
-This results in the the hydrostatic assumption:
+The hydrostatic assumption is still relevant in current weather prediction methods~\cite{jang2016comparison}.
+However, it is neither implemented nor further studied in this thesis.
+For these reasons we only briefly outline it in this section.
+
+When simulating a region of the atmosphere, often the width of the region considered is a lot larger than its height.
+Hence, horizontal effects become dominant and~\cite{coiffier2011fundamentals},\cite{durran2010numerical} claim that it is sufficient to approximate the vertical dimension.
+To this end, it is commonly assumed that the force of gravity $-\rho g$ and the vertical of the pressure gradient force $-\frac{\partial p}{\partial z}$ directly cancel each other out, i.e. their sum equals zero~\cite{coiffier2011fundamentals}.
+This results in the hydrostatic assumption:
 \begin{align}\label{eq_hydrostat_assump}
 \frac{\partial p}{\partial z} = -\rho g 
 \end{align}
-As gravity and pressure gradient force are the only effects affecting the evolution of vertical wind speed $w$, this results in
+As gravity and pressure gradient force are the only effects affecting the evolution of vertical wind speed $w$, this we get
 \begin{align*}
-\frac{Dw}{Dt} &= - \frac{1}{\rho} \frac{\partial p}{\partial z} - g = 0
-\end{align*},
-which removes the vertical momentum equation from the ranks of the prognostic equations, replacing it with the diagnostic hydrostatic assumption.
-The resulting set of equations are:
+\frac{Dw}{Dt} &= - \frac{1}{\rho} \frac{\partial p}{\partial z} - g = 0.
+\end{align*}
+This removes the Vertical Momentum Equation from the ranks of the prognostic equations, replacing it with the diagnostic hydrostatic assumption.
+The resulting set of equations is:\\
 \begin{empheq}[box=\widefbox]{align*}
 \frac{\partial p}{\partial z} &= -\rho g \\
 \frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - \frac{RT}{p}\nabla p\\
@@ -248,122 +259,107 @@ The resulting set of equations are:
 \frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \left(\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)\\
 \end{empheq}
 
+\subsubsection{Ignoring Horizontal Winds}\label{subsec_horizon}
+\begin{figure}[!h]
+	\makebox[\textwidth]{ 
+  		 \includegraphics[width=0.8\textwidth]{figures/AGI_Cantner_WeatherModel.png}}
+    \caption{Visualization of vertical column from~\cite{Carpenter2016}}
+    \label{fig:column}
+\end{figure}
+In this thesis, $\textbf{V}$ as a prognostic variable is not of interest.
+Instead, we want to focus on the vertical part of the NSE.
+Thus, one straightforward simplification to remove $\textbf{V}$ from the equations is the assumption $\textbf{V}=\frac{D\textbf{V}}{Dt}=0$.
+This turns the Horizontal Momentum Equation into a diagnostic equation stating that the horizontal gradient of pressure is zero.
+Starting from the equation system derived in Section~\ref{sec:non_altering} as a baseline, the non-hydrostatic equation system resulting from this assumption is:\\
+\begin{empheq}[box=\widefbox]{align*}
+\nabla p &= 0\\
+\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
+\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
+\frac{Dp}{Dt} &= -\frac{p}{1- \frac{R}{C_p}} \frac{\partial w}{\partial z}\\
+p &= \rho R T
+\end{empheq}
+From the lack of horizontal gradients in this equation system, we can deduce that there is no interaction between any columns of the atmosphere.
+By column of the atmosphere we mean a space described by a rectangular base shape that expands from the surface of the planet to the top of the atmosphere, as can be seen in Fig.~\ref{fig:column}.
+Because all columns must be the same, knowing about one column is equivalent to knowing about the entire atmosphere.
+For this reason it is sufficient to view a single column in isolation, when assuming $\textbf{V}=\frac{D\textbf{V}}{Dt}=0$.
 
-%\subsubsection{Assuming Constant Temperature}
-%The last simplification does not have any real-world applications, because it is very inaccurate, but is instead useful for testing implementations of the equation systems.
-%For this simplification it is assumed that temperature is constant across the domain, i.e. $T=\text{const}$.
-%As already mentioned, making this assumption for a domain spanning the entire vertical of the atmosphere is inaccurate.
-%From this assumption it follows that $0=\frac{DT}{Dt}=\nabla _3T$
-%This has an effect on two equations.
-%First, the thermodynamic equation \ref{eq_therm} becomes irrelevant (DIAGNOSTIC $0=\frac{Dp}{Dt}$!?!%)
-%Second, the rewriting of the continuity equation \ref{eq_cont} in section \ref{subsec_rho_p} can be simplified, it was assumed there that $\frac{DT}{Dt}\neq 0$.
-%Keeping this in mind, the equations can be written as follows:
-%\begin{align*}
-%\frac{D\textbf{V}}{Dt} &= -f\boldsymbol{k} \times \textbf{V} - %\frac{RT}{p}\nabla p\\
-%\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g \\
-%\frac{Dp}{Dt} &= -p (\nabla \cdot \textbf{V} + \frac{\partial w}{\partial z})
-%\end{align*}
 
-\section{Alternative Coordinate Systems}
-Having rearranged and simplified the NSE, in this section a substitution of $z$ by a new vertical coordinate $s$ is introduced.
-The reason for this substitution can be found when considering the boundaries within which to simulate the system.
-%When simulating the NSE, boundaries within which to simulate have to be chosen.
-Assuming $\textbf{V}=0$, i.e. the equation system from section \ref{subsec_horizon} is used, the only boundaries left to be chosen are the vertical ones.
-Using the equations in section \ref{subsec_horizon} these vertical boundaries can only be described by specifying the vertical lower and upper bound by their relative heights to sea level, i.e. $z_{\text{bottom}}$ and $z_{\text{top}}$ respectively.
+\section{Alternative Vertical Coordinate}\label{sec:alt_coor}
+%Having rearranged and simplified the NSE, in this section we substitute $z$ by a new vertical coordinate $s$.
+%One reason for this substitution are the boundaries within which the system should be simulated.
+%The reason for this substitution can be found when considering the boundaries within which to simulate the system.
+%Assuming $\textbf{V}=\frac{D\textbf{V}}{Dt}=0$, i.e. the second equation system from Section~\ref{subsec_horizon} applies, one only has to choose the vertical boundaries.
+%Using said equation system, we can only specify the boundaries by fixing the vertical lower and upper limit.
+In the second equation system of Section~\ref{subsec_horizon}, we can only specify the vertical boundaries by fixing the vertical lower and upper limit.
+In other words, we must manually choose the relative heights to sea level of the lower bound $z_{\text{bottom}}$ and the upper bound $z_{\text{top}}$.
+In order to simulate a column (Fig.~\ref{fig:column}) of the atmosphere, it would be desirable for $z_{\text{bottom}}$ to be located at the planetary surface, and $z_{\text{top}}$ at the top of the atmosphere.
+However, the surface is not flat, meaning the value of $z_{\text{bottom}}$ is dependent on location.
+Also, there is no clear end to the atmosphere, meaning there is no obvious single value $z_{\text{top}}$ at which to stop simulating.
+
+Considering these problems, it would be advantageous to measure height by a scale other than meters relative to sea level\footnote{in the hydrostatic system, for example, pressure can be a vertical coordinate~\cite{kasahara1974various}}.
+As is commonly done in the literature~\cite{kasahara1974various}, we instead define a placeholder variable $s$ for measuring height which may in general be a nonlinear and continuously differentiable transformation of the height $z$.
+In this way, any possible scale for height can be plugged in with ease.
 \\
-In order to simulate a column of the atmosphere, it would be desirable to have $z_{\text{bottom}}$ be located at ground level, and $z_{\text{top}}$ at the top of the atmosphere.
-\\
-However, specifying the boundaries directly by their height relative to sea level, has several disadvantages.
-First, the ground is not flat, meaning the value of $z_{\text{bottom}}$ is dependent on location.
-Second, there is no clear end to the atmosphere, meaning there is no obvious single value $z_{\text{top}}$ at which to stop simulating.
-\\
-Considering these problems, it would be desirable not to measure height in meters relative to sea level, but by some other measure.
-And as there is no other obvious measurement of height that would optimal, instead a placeholder variable for measuring height $s$ is introduced.
-This way any possible other measurement of height can easily be plugged in.\\
-Yet again all formulas in this section can also be found in the book ``Fundamentals of numerical weather prediction`` \cite{coiffier2011fundamentals}.
+
+\noindent
+Yet again the interested reader can find all formulas in this section in the book ``Fundamentals of Numerical Weather Prediction''~\cite{coiffier2011fundamentals}.
+
 \subsubsection{Identities to get from $z$ to $s$}
-Considering that the old measurement of height $z$ used in the NSE was suboptimal and $s$ is supposed to replace it, this means that all occurrences of $z$ in the NSE need to be replaced by $s$.
-%Often, $s$ will be dependent on pressure $p$ in some way, as this way an equidistant spacing of $s$ will correspond to higher spatial resolution in areas where $p$ is changing a lot.\\
-This change from $z$ to $s$ as a vertical coordinate affects all differential operators in the NSE, meaning all of them need to be rewritten.
-\\
-First, the horizontal derivative w.r.t. $x$ or $y$ will be rewritten.
-In the NSE it was always implicitly assumed that derivatives w.r.t. $x$ and $y$ were calculated at constant height $z$.
+%The old measurement of height $z$ in the NSE is suboptimal and must be replaced by $s$.
+%This entails that all occurrences of $z$ in the NSE must be replaced by $s$.
+Switching from $z$ to $s$ as a vertical coordinate affects all differential operators in the NSE.%, meaning all of them must be revised.
+We begin by rewriting the horizontal derivative w.r.t. $x$ or $y$.
+In the NSE one always implicitly assumes that derivatives w.r.t. $x$ and $y$ are calculated at constant height $z$.
 This can be denoted by a subscript $\left(\frac{\partial A}{\partial x}\right)_z$ (where $A$ is a placeholder for any scalar or vector field).
 We are interested in $\left(\frac{\partial A}{\partial x}\right)_s$, i.e. the partial derivative of $A$ w.r.t. $x$ at constant $s$.
-According to \cite{kasahara1974various} this can be written as (for formula for $y$ is analogous):
+According to~\cite{kasahara1974various} one can write this as (for $y$ analogously):
 \begin{align*}
 \left(\frac{\partial A}{\partial x}\right)_s &= \left( \frac{\partial A}{\partial x}\right)_z + \frac{\partial A}{\partial z}\left(\frac{\partial z}{\partial s}\right)_s
 \end{align*}
-To interpret this term, one can to imagine the two-dimensional surface comprising all points in space having the property of $s=s_0$.
-As $s$ is a measurement of height, for every vertical specified by $(x,y)$ there is exactly one point in the vertical with the property of $s=s_0$.
-\\
-$\left(\frac{\partial A}{\partial x}\right)_s$ can be interpreted as the change in the value of $A$ when moving in the direction of $x$ and changing height $z$ in order stay on the surface $s=s_0$.
-Infinitesimally speaking, this change in value of $A$ can be decomposed into two parts.
+To interpret this term, imagine the two-dimensional surface comprising all points in space with the property $s=s_0$.
+As $s$ is a measurement of height, for every vertical column specified by $(x,y)$ there is exactly one point with the property $s=s_0$.
+
+One can interpret $\left(\frac{\partial A}{\partial x}\right)_s$ as the change in the value of $A$ when moving in the direction of $x$ and changing height $z$ in order stay on the surface $s=s_0$.
+Infinitesimally speaking, we can decompose this change in value of $A$ into two parts.
 First, the change of $A$ due to moving in the direction of $x$ at a constant height $z$: $\left( \frac{\partial A}{\partial x}\right)_z$.
 Second, the change in $A$ due to having to move vertically in order to stay on the surface $s=s_0$.
-This terms magnitude depends on both how much vertical movement was necessary $\left(\frac{\partial z}{\partial s}\right)_s$, and on how much $A$ changes with $z$: $\frac{\partial A}{\partial z}$. 
-Using this identity a new horizontal derivative operator $\nabla_s$ can be introduced:
+The magnitude of this term depends on both how much vertical movement (change in $z$) was necessary $\left(\frac{\partial z}{\partial s}\right)_s$, and on how much $A$ changes with $z$: $\frac{\partial A}{\partial z}$. 
+Using this identity we define a new horizontal derivative operator $\nabla_s$:
 \begin{align}
 \nabla _s A &= \nabla _z A+\frac{\partial s}{\partial z}(\nabla _sz)\frac{\partial A}{\partial s}\label{id_h_diff}
 \end{align}
-
-Using Leibnitz's notation, the replacement for vertical spatial derivatives can be rewritten as follows:
+Exploiting Leibniz's notation, we write the replacement for vertical spatial derivatives as follows:
 \begin{align}
 \frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial A}{\partial s}\label{id_v_diff}
 \end{align}
-
-Lastly, as the material derivative was not dependent on the vertical coordinate system, according to \cite{kasahara1974various} it can be written (with $\dot{s}=\frac{ds}{dt}$ being a generalized version of vertical wind speed, i.e. how much distance $ds$ along the height measurement $s$ does a fluid parcel cover in a time $dt$):
+Finally, as the material derivative was not dependent on the vertical coordinate system, according to~\cite{kasahara1974various} we can write (with $\dot{s}=\frac{ds}{dt}$ being a generalized version of vertical wind speed, i.e. the distance $ds$ along the height measurement $s$ a fluid parcel covers in a time $dt$):
 \begin{align}
 \frac{D}{Dt} &= \left(\frac{\partial}{\partial t}\right)_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}\label{id_t_diff}
 \end{align}
 
+\subsubsection{Identity to get from $\frac{\partial}{\partial z}$ to $\frac{\partial}{\partial s}$}
+There is an unknown term $\frac{\partial s}{\partial z}$ in Eq.~\ref{id_v_diff}.
+To find an identity for this term we define a new variable: hydrostatic pressure $\pi$.
+When not making the hydrostatic assumption, this step may seem a little paradoxical, though even in that case, the definitions hold true.
+\\
 
-%To this end, the following identities are used, with $c\in\{x,y\}$ \cite{kasahara1974various}:
-%\begin{align}
-%\begin{split}
-%\left(\frac{\partial A}{\partial c}\right)_s &= \left( \frac{\partial A}{\partial c}\right)_z + \frac{\partial A}{\partial z}(\frac{\partial z}{\partial s})_s\\
-%\Rightarrow \nabla _s A &= \nabla _z A+\frac{\partial s}{\partial z}(\nabla _sz)\frac{\partial A}{\partial s}\\
-%\frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial A}{\partial s}\\
-%\frac{D}{Dt} &= (\frac{\partial}{\partial t})_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s}
-%\end{split}\label{eq_s_identities}
-%\end{align}
-
-
-\subsubsection{Non-Hydrostatic Equations}\label{sec:non_hydrostatic}
-Using these equations, the thermodynamic equation \ref{eq_therm} becomes:
-\begin{align*}
-\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
-\frac{\partial T}{\partial t} &\stackrel{(\ref{id_t_diff})}{=} -\textbf{V} \cdot \nabla _s T - \dot{s} \frac{\partial T}{\partial s}+\frac{RT}{C_p}\frac{D\text{ln}p}{Dt}
-\end{align*}
-For the other equations a somewhat paradoxical step has to be taken.
-In order to derive the non-hydrostatic Navier Stokes equations, hydrostatic pressure $\pi$ is introduced as a proxy-variable.
-This is done in order to express $\frac{\partial s}{\partial z}$ in equation \ref{id_v_diff}.
+\noindent
 Hydrostatic pressure $\pi$ has the properties:
 \begin{align}
 \frac{\partial \pi}{\partial z} &= -\rho g = - \frac{p}{RT}g \nonumber \\
 \pi(z) &= \int_\infty ^z \rho g dz' \nonumber \\
 \Rightarrow \frac{\partial s}{\partial z} &= \frac{\partial s}{\partial \pi}\frac{\partial \pi}{\partial z} = - g\rho\left(\frac{\partial \pi}{\partial s}\right)^{-1} = - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \label{eq_ds_dz}
 \end{align}
-Now introducing $\frac{\partial \pi}{\partial s}$ as a new diagnostic variable, equation \ref{id_v_diff} can be rewritten:
+Now introducing $\frac{\partial \pi}{\partial s}$ as a new prognostic variable, Eq.~\ref{id_v_diff} becomes:
 \begin{align}
 \frac{\partial A}{\partial z} &= \frac{\partial s}{\partial z} \frac{\partial A}{\partial s}\nonumber\\
 &\stackrel{\ref{eq_ds_dz}}{=} - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\frac{\partial A}{\partial s}\label{id_v_diff2}
 \end{align}
-Using $\frac{\partial \pi}{\partial s}$, the equation for vertical wind can be written as:
-\begin{align*}
-\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g\\
-&\stackrel{(\ref{id_v_diff2})}{=} g \left(\frac{\partial \pi}{\partial s}\right)^{-1}\frac{\partial p}{\partial s} - g\\
-&= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)
-\end{align*}
-In a similar fashion using $\frac{\partial \pi}{\partial s}$ as a new variable, the equation for pressure becomes (in the last line $\Phi = zg$ is exploited):
-\begin{align*}
-\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} \left(\nabla_z \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)\\
-&\stackrel{(\ref{id_h_diff} \& \ref{id_v_diff})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} - \frac{\partial s}{\partial z} (\nabla _sz)\cdot \frac{\partial \textbf{V}}{\partial s} + \frac{\partial s}{\partial z}\frac{\partial w}{\partial s}\right)\\
-&\stackrel{(\ref{eq_ds_dz})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} + \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} (\nabla _s \Phi)\cdot\frac{\partial \textbf{V}}{\partial s} - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\right)\\
-\end{align*}
 
-Now that $\frac{\partial \pi}{\partial s}$ is a new diagnostic variable, it needs its own diagnostic equation, which can be gained by starting from the continuity equation \ref{eq_cont}.
-Utilizing the above identities, it can be shown that the following equations hold\footnote{for further detail refer to \cite{coiffier2011fundamentals}}.
+\subsubsection{New Prognostic Equations}
+Now that $\frac{\partial \pi}{\partial s}$ is a new prognostic variable, it needs its own prognostic equation which we obtain by starting from the Continuity Equation~\ref{eq_cont}.
+Utilizing the above identities, it can be shown that the following equations hold~\cite{coiffier2011fundamentals}.
+
 \begin{align*}
 \text{original equation:}~~~~ \frac{d}{dt}\left(\text{ln}\rho\right) &+ \nabla _z \cdot \textbf{V} + \frac{\partial w}{\partial z} = 0 \\
 \frac{d}{dt}\left(\text{ln}\left(\rho\frac{\partial z}{\partial s}\right)\right) &+ \nabla _s \cdot \textbf{V} + \frac{\partial \dot{s}}{\partial s} = 0\\
@@ -373,13 +369,37 @@ Utilizing, $\rho\frac{\partial z}{\partial s} \stackrel{(\ref{eq_ds_dz})}{=} - \
 \begin{align*}
 \frac{\partial}{\partial t}\left(\frac{\partial \pi}{\partial s}\right) &= - \nabla _s \cdot \left(\frac{\partial \pi}{\partial s}\textbf{V}\right) - \frac{\partial }{\partial s}\left(\frac{\partial \pi}{\partial s}\dot{s}\right)
 \end{align*}
-Integrating this equation from $s_{top}$ to $s$, gives a diagnostic equation for $\dot{s}$:
+Integrating this equation from $s_{top}$ to $s$ also yields a diagnostic equation for $\dot{s}$:
 \begin{align*}
 \dot{s}\frac{\partial \pi}{\partial s} = -\int _{s_{top}}^s\nabla _s \cdot \left(\frac{\partial \pi}{\partial s}\textbf{V}\right)ds' + \frac{\partial \pi}{\partial \pi_{\text{bottom}}} \int  _{s_{top}}^{s_{bottom}} \nabla _s \cdot \left(\frac{\partial \pi}{\partial s}\textbf{V}\right) ds
 \end{align*}
 
-Now making the assumption that horizontal winds are zero again, i.e. $\textbf{V}=0$, using the above relation necessitates that $\dot{s}=0$.
-Setting $\dot{s}=0$ and $\textbf{V}=0$ in all of the equations results in the following equation system:
+
+\section{Non-Hydrostatic Navier Stokes Equations}\label{sec:non_hydrostatic}
+In this section we apply the alternative coordinate system from Section~\ref{sec:alt_coor} to the non-hydrostatic NSE arrived at in Section~\ref{subsec_horizon}.
+We then use this to derive the equation system which is employed in the remainder of this thesis.
+\\
+
+\noindent
+Utilizing the identities from Section~\ref{sec:alt_coor}, the Thermodynamic Equation~\ref{eq_therm} becomes:
+\begin{align*}
+\frac{DT}{Dt} &= \frac{R}{C_p}\frac{T}{p}\frac{Dp}{Dt}\\
+\frac{\partial T}{\partial t} &\stackrel{(\ref{id_t_diff})}{=} -\textbf{V} \cdot \nabla _s T - \dot{s} \frac{\partial T}{\partial s}+\frac{RT}{C_p}\frac{D\text{ln}p}{Dt}
+\end{align*}
+Adopting $\frac{\partial \pi}{\partial s}$ as a new prognostic variable, the Vertical Momentum Equation can be written as:
+\begin{align*}
+\frac{Dw}{Dt} &= - \frac{RT}{p} \frac{\partial p}{\partial z} - g\\
+&\stackrel{(\ref{id_v_diff2})}{=} g \left(\frac{\partial \pi}{\partial s}\right)^{-1}\frac{\partial p}{\partial s} - g\\
+&= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)
+\end{align*}
+In a similar fashion, the equation for pressure becomes (by exploiting $\Phi = zg$ in the last line):
+\begin{align*}
+\frac{D\text{ln}p}{Dt} &= -\frac{1}{1- \frac{R}{C_p}} \left(\nabla_z \cdot \textbf{V} + \frac{\partial w}{\partial z}\right)\\
+&\stackrel{(\ref{id_h_diff} \& \ref{id_v_diff})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} - \frac{\partial s}{\partial z} (\nabla _sz)\cdot \frac{\partial \textbf{V}}{\partial s} + \frac{\partial s}{\partial z}\frac{\partial w}{\partial s}\right)\\
+&\stackrel{(\ref{eq_ds_dz})}{=} -\frac{1}{1- \frac{R}{C_p}} \left(\nabla _s \cdot \textbf{V} + \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} (\nabla _s \Phi)\cdot\frac{\partial \textbf{V}}{\partial s} - g\frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\right)\\
+\end{align*}
+Now making the assumption that horizontal winds are zero, i.e. $\textbf{V}=0$, the above relation necessitates that $\dot{s}=0$.
+Setting $\dot{s}=0$ and $\textbf{V}=0$ in all of the equations results in the following equation system which is employed in the remainder of this thesis and thus marked by a double box:
 
 \begin{empheq}[box=\doublebox]{align*}
 \frac{\partial w}{\partial t} &= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) \\
@@ -391,86 +411,98 @@ Note that for $\textbf{V}=\dot{s}=0$, the material derivative and partial time d
 \begin{align*}
 \frac{D}{Dt} = \left(\frac{\partial}{\partial t}\right)_s + \textbf{V} \cdot \nabla _s + \dot{s}\frac{\partial }{\partial s} = \left(\frac{\partial}{\partial t}\right)_s
 \end{align*}
-\\
-Now that the NSE have been rewritten in the $s$-coordinate system, the $s$-coordinates have to be defined.
-One way of defining the vertical coordinate, according to Laprise \cite{laprise1992euler} is implicitly, by defining two functions $f$ and $h$, and with $\pi_0$ and $\pi _{bottom}$ being a reference pressure and hydrostatic pressure at the bottom, respectively:
+
+
+\section{Useful Identities}\label{sec:identities}
+\subsection{Calculating z from s}
+Having rewritten the NSE in generic $s$-coordinates, in this section we define the $s$-coordinate that we are going to use.
+One way of defining the vertical coordinate, according to Laprise~\cite{laprise1992euler} is implicitly, by defining two functions $f$ and $h$ (with some reference pressure $\pi_0$, and hydrostatic pressure at the bottom $\pi _{bottom}$):
 \begin{align*}
 \pi (s) = f(s)\pi_0 + h(s)\pi_{bottom}
 \end{align*}
-Using this equation, and integrating equation (\ref{eq_ds_dz}) with respect to $s$ yields:
+Working with this equation, and integrating Eq.~\ref{eq_ds_dz} with respect to $s$ yields:
 \begin{align}\label{eq_s_to_z}
 z(s) = z_{bottom} + \frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)ds'
 \end{align}
-W.l.o.g. it is assumed that $s=0$ at the top of the system and $s=1$ at the bottom, from which it follows that:
+Without loss of generality we assume that $s=0$ holds at the top of the system and that $s=1$ is true at the bottom, from which it follows that:
 \begin{align*}
 \pi(1) = \pi_{bottom} \Rightarrow f(1) = 0 , h(1) = 1
 \end{align*}
-Also, assuming pressure at the top of the atmosphere is nonexistent:
+Also, assuming pressure at the top of the atmosphere to be zero:
 \begin{align*}
 \pi(0) = 0 \Rightarrow f(0) = 0, h(0) = 0
 \end{align*}
-Other than these restrictions, $f$ and $g$ can be chosen arbitrarily, as long as $\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)$ is strictly positive for $s\in[0;1]$, as this ensures that $z(s)$ is monotonically decreasing, making substitutions of $z$ by $s$ in integrals valid.
+Other than these restrictions, we can choose $f$ and $g$ arbitrarily, as long as $\frac{\partial \pi}{\partial s}=\left(\pi_0 \frac{\partial f}{\partial s} + \pi_{bottom} \frac{\partial h}{\partial s}\right)$ is strictly positive for $s\in[0;1]$.
+This ensures that $z(s)$ is monotonically decreasing, making substitutions of $z$ by $s$ in integrals valid.
 
-\paragraph{Useful Identities}
-In order to verify implementations of these formulas, it is useful to find quantities which have to stay constant over time.
-The two most commonly used quantities are mass and energy.
-A measure of mass in a given column of the atmosphere can be described using the following integral:
+\subsection{Conservation Properties}
+To verify implementations of these formulas later, it is useful to find quantities which must stay constant over time.
+Two such quantities are mass and energy.
+One measure of mass in a given column of the atmosphere~(see Fig.~\ref{fig:column})\footnote{space described by a rectangular base shape that expands from the surface of the planet to the top of the atmosphere} is given by the following integral:
 \begin{align*}
 \int_{z_{bottom}}^{z_{top}}\rho(z)dz
 \end{align*}
-Exploiting equation \ref{eq_ds_dz} to substitute $z$ by $s$ yields:
+Exploiting Eq.~\ref{eq_ds_dz} to substitute $z$ by $s$ yields:
 \begin{align}\label{eq_mass_conservation}
 \int_{s_{top}}^{s_{bottom}}\rho(s)\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds = \int_{s_{top}}^{s_{bottom}}\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds = \int_{s_{top}}^{s_{bottom}}\frac{1}{g}\left( \frac{\partial \pi}{\partial s} \right) ds
 \end{align}
-From the equation system we know that both $\left( \frac{\partial \pi}{\partial s} \right)$ and $g$ are constant over time, which leads to the conclusion that in this equation system, the mass in the observed domain is constant over time.
+From the equation system we know that both $\left( \frac{\partial \pi}{\partial s} \right)$ and $g$ are constant over time.
+This leads to the conclusion that the mass in the observed domain is constant over time in this equation system.
 \\
+
+\noindent
 The second constant, energy, can be split up into three separate components (\cite{vallis2017atmospheric} page 45): internal energy $\rho C_vT$, kinetic energy $\frac{\rho}{2}w^2$, and geopotential energy $\rho gz$.
 The expression for energy density $E$ (i.e. energy per volume) then becomes:
 \begin{align*}
 E = (C_vT+\frac{1}{2}w^2 + gz)\rho
 \end{align*}
-Integrating this over the entire simulated column and yet again exploiting equation \ref{eq_ds_dz} yields energy per area $E'$:
+Integrating this over the entire simulated column and yet again exploiting Eq.~\ref{eq_ds_dz} yields energy per area $E'$:
 \begin{align}
 E' &= \int_{z_{bottom}}^{z_{top}} (C_vT+\frac{1}{2}w^2 + gz)\frac{p}{RT} dz\nonumber\\
 &=  \int_{s_{top}}^{s_{bottom}} (C_vT+\frac{1}{2}w^2 + gz(s))\frac{p}{RT}\frac{RT}{pg} \left( \frac{\partial \pi}{\partial s} \right) ds\nonumber\\
 &=  \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\label{eq_energy}
 \end{align}
-Assuming $s_{top}$ and $s_{bottom}$ are constant, it can be shown that the change of energy per area over time can be written as follows (the full derivation can be found in appendix \ref{sec:derivation:dE_dt}):
+Assuming $s_{top}$ and $s_{bottom}$ are constant, we have shown that the change of energy per area over time can be written as follows (the full derivation can be found in Appendix~\ref{sec:derivation:dE_dt}):
 \begin{align}\label{dE_dt}
 \frac{\partial E'}{\partial t} = w(s_{bottom})p(s_{bottom})-w(s_{top})p(s_{top})
 \end{align}
-This equation entails that the change of energy in a column is proportional to the amount of air ($\sim p$) flowing over the boundaries ($\sim w$).
-But as the mass in the observed domain is constant, the mass of air flowing over the boundaries still needs to be contained by the domain, meaning the domain must grow, i.e. either $s_{top}$ or $s_{bottom}$ must change.
-However this change of $s_{top}$ or $s_{bottom}$ would break the premise for equation \ref{dE_dt}.
-In order to prevent this from happening, i.e. enforce the premise, the right hand side must be kept at zero, which in turn entails requirements for $w$ and $p$ at the boundaries.
-This leads us to the next section: Boundary conditions.
-
-%\subsection{Hydrostatic Equations:}
-%Yet another equation system can be gained by making use of the hydrostatic assumption from section \ref{subsec_hydrostat}.
+This equation states that the change of energy in a column is proportional to the amount of air ($\sim p$) flowing over the boundaries ($\sim w$).
+However, as the mass in the observed domain is constant, the mass of air flowing over the boundaries still needs to be contained by the domain.
+Therefore the domain must grow, i.e. either $s_{top}$ or $s_{bottom}$ must change.
+However, this change of $s_{top}$ or $s_{bottom}$ would break the premise for Eq.~\ref{dE_dt}.
+In order to prevent this from happening, i.e. to enforce the premise, the right hand side must be kept at zero which in turn calls for restrictions of $w$ and $p$ at the boundaries.
 
 \section{Boundary Conditions}\label{sec:boundary}
-From the above discussion, it follows that some restrictions have to be put in place for the value of the variables at the boundaries of the observed domain, in order to avoid errors.
-\subsubsection{Vertical Wind}
-Looking at the lower boundary, which is placed on the planet's surface, it makes sense to set vertical wind to $w_{bottom}=0$.
-This means no air can move into or out of the ground.\\
-The choice of $w$ at the upper boundary is less restricted.
+From the above discussion, it follows that some restrictions must be put in place for the values of the variables at the boundaries of the observed domain, in order to avoid errors.
+\subsection{Vertical Wind}
+Considering the lower boundary which is placed on the planet's surface, it makes sense to set vertical wind to $w_{bottom}=0$.
+No air can move into or out of the ground.
+
+The choice of $w$ at the upper boundary is less constrained.
 On the one hand, it can make sense to set $w_{top}=0$.
-This, together with the choice of $w_{bottom}=0$, sets the equation for change in energy \ref{dE_dt} is zero, ensuring energy conservation.
-On the other hand, analogously to the reasoning for setting $w_{bottom}=0$ in order to simulate a hard wall at the bottom, setting $w_{top}=0$ is equivalent to assuming there is a wall at the top of the atmosphere.
-Of course this is not true to reality.\\
-The other option is to let $w_{top}$ change freely according to its evolution equation, which depends on $\frac{\partial p}{\partial s}\rvert _{s_{top}}$, which itself depends on the boundary condition of $p$.
-\subsubsection{Pressure and Density}
-In this section for purposes of discussion of boundary conditions $p$ and $\rho$ can be used interchangeably, as they are connected by the ideal gas law $p=\rho RT$.
+This, together with the choice of $w_{bottom}=0$, sets the equation for change in energy Eq.~\ref{dE_dt} is zero, ensuring energy conservation.
+On the other hand, setting $w_{top}=0$ corresponds to a wall at the top of the atmosphere\footnote{This is analogous to the reasoning for setting $w_{bottom}=0$ to simulate a hard wall at the bottom.}.
+Of course this is not true to reality.
+
+The other option is to let $w_{top}$ change freely according to its evolution equation which depends on $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ which itself depends on the boundary condition of $p$.
+\subsection{Pressure and Density}
+In this section $p$ and $\rho$ are used interchangeably, as they are connected by the ideal gas law $p=\rho RT$.
 At the lower boundary there is no restriction to the density, so it is described by its evolution equation.
-This can be concluded by looking at the equation for change in energy \ref{dE_dt}.
-The previous section set $w_{bottom}=0$, so $p_{bottom}$ has no influence on energy conservation anymore.\\
+We can infer this by looking at the equation for change in energy Eq.~\ref{dE_dt}.
+The previous section set $w_{bottom}=0$, so $p_{bottom}$ has no influence on energy conservation anymore.
+
 As discussed above, the upper boundary of $p$ is connected to the upper boundary of $w$.
-In case $w_{top}$ is evolving according to its diagnostic equation, $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ needs to be chosen.
-The most natural formulation is to assume $p$ is continued smoothly over the upper boundary, and then calculating $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ from there.
-However this would violate the conservation of energy\footnote{or at least the chosen variant of defining energy}.
-The other option is to postulate $p_{top}=0$, which is generally not very smooth, and makes for discontinuous/inaccurate values of $\frac{\partial p}{\partial s}\rvert _{s_{top}}$.\\
-For this reason for simplicity's sake the remainder of this thesis makes the (physically inaccurate) assumption of $w_{top}=0$, as this allows for $p_{top}$ to change freely without violating energy conservation.
-\subsubsection{Temperature}
-For temperature $T$ no restrictions need to be put in place for the boundary conditions, because $T$ neither has impact on energy conservation nor on mass conservation.
+In case $w_{top}$ evolves according to its diagnostic equation, $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ must be chosen.
+The most natural formulation is to assume that $p$ is continued smoothly over the upper boundary, and then calculating $\frac{\partial p}{\partial s}\rvert _{s_{top}}$ from that.
+However, this would violate the conservation of energy\footnote{or at least our definition of energy}.
+The other option is to postulate $p_{top}=0$ which is generally not smooth, and results in discontinuous/inaccurate values of $\frac{\partial p}{\partial s}\rvert _{s_{top}}$.
+
+For this reason (and for simplicity's sake) in the remainder of this thesis we make the (physically inaccurate) assumption of $w_{top}=0$, as this allows for $p_{top}$ to change freely without violating energy conservation.
+
+As mentioned above, setting $w_{top}=0$ is physically inaccurate.
+Some more sophisticated models, e.g.~\cite{kar1995formulation},\cite{baik2007effects}, employ sponge-layers to deal with this problem.
+
+\subsection{Temperature}
+For temperature $T$ no restrictions need to be put in place for the boundary conditions, because $T$ affects neither energy conservation nor mass conservation.
 This means that $T$ is also described by its usual evolution equation at the boundaries.
 
