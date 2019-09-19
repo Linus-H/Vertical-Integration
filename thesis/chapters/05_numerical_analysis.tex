@@ -1,6 +1,6 @@
 \chapter{Numerical Studies}\label{chapter:numerical_study}
 Having discussed how the NSE were simplified, discretized, and implemented, in this section we test and validate the implementation.
-To this end we discuss the results of the unit tests from Section~\ref{sec:testing} by looking at the numerical errors made by the differential operators and integrators.
+To this end we discuss the results of the unit tests from Section~\ref{sec:testing} by examining the numerical errors made by the differential operators and integrators.
 Thereafter we analyze the implementations of the non-hydrostatic NSE discussed in Section~\ref{sec:non_hydrostatic}.
 
 \section{Validation by Analyzing Numerical Errors}
@@ -10,7 +10,7 @@ Thereafter we analyze the implementations of the non-hydrostatic NSE discussed i
 \subsection{Differential Operators}\label{sec:numeric_diff_ops}
 To test the differential operators, the function $f(x)=\sin(20\pi (x-e))$ with derivative $\frac{df}{dx}=20\pi\cos(20\pi (x-e))$ was used on the domain $[0;1]$.
 The offset of $e$ was included in order to avoid random perfect results.
-For example. if maxima, minima and zero crossings happen to be located exactly at sample point, even a simple central difference would result in no error.
+For example, if maxima, minima and zero crossings happen to be located exactly at the sample points, even a simple central difference would result in no error.
 With an offset of an irrational number, such as $e$, this is improbable.
 
 To test the different methods of calculating the derivative numerically, we sampled the domain at resolutions ranging from $5$ to $20\cdot 10^7$ samples which were spread equidistantly across the domain.
@@ -30,7 +30,7 @@ To test the different methods of calculating the derivative numerically, we samp
 \end{figure}
 We first look at the implementation of the finite differences.
 If their implementation is correct, we expect the error [\texttt{finite\_difference(x)}$-\frac{df}{dx}$] to drop with increasing resolution.
-More specifically for a finite difference operator of order $n$, when increasing the number of samples by a factor of $a$ we expect a decrease in error by a factor of $a^{-n}$.
+More specifically for a finite difference operator of order $n$, when increasing the number of samples by a factor of $a$ we expect a decrease in error by a factor of $a^{n}$.
 The positive result of the test can be seen in Fig.~\ref{fig:derivative_error}.
 
 We can also see that above a certain spatial resolution, the error increases again which is due to numerical errors.
@@ -40,7 +40,7 @@ This division of small numbers is not well-supported by floating point numbers, 
 Concerning the spectral derivative, we would expect that the error drops down to machine precision as soon as the Nyquist sampling rate is reached.
 The Nyquist sampling rate is twice the highest frequency occurring in the signal whose derivative is to be calculated.
 In this case the highest frequency is $10$, because the argument of $\sin$ was $2\pi\cdot 10$, meaning the Nyquist sampling rate is $20$.
-The fact this theoretical result can be observed in practice (Fig.~\ref{fig:fft_error}), is a strong indication that the implementation is correct.
+The fact that this theoretical result can be observed in practice (Fig.~\ref{fig:fft_error}), is a strong indication that the implementation is correct.
 
 
 \FloatBarrier
@@ -54,7 +54,7 @@ The fact this theoretical result can be observed in practice (Fig.~\ref{fig:fft_
 
 \subsection{Integrators}
 \subsubsection{Runge-Kutta-Integrators}
-As described in Section~\ref{sec:testing}, we tested the integrators by comparing the results to analytic solution of differential equations.
+As described in Section~\ref{sec:testing}, we tested the integrators by comparing the results to analytic solutions of differential equations.
 Specifically, we first tested against three types of differential equations, whose solutions are known analytically.
 The first one was time-invariant and had only one variable, i.e. no spatial resolution.
 The second one introduced time-variance, while the third one added spatial resolution.
@@ -115,7 +115,7 @@ In the red and the blue areas the log-error is positive (up to $150$) and negati
 
 Interestingly, spatial resolution and temporal resolution are intertwined.
 If a very high spatial resolution (a lot of samples) is chosen, one also must choose a high temporal resolution (small time steps).
-This can be seen when plotting a heatmap of the error made with the RK4-integrator over different spatial and temporal resolutions.
+This can be seen when plotting a heatmap of the error made with the RK4 integrator over different spatial and temporal resolutions.
 This phenomenon can be seen in Fig.~\ref{fig:heatmap_wave_eq_step_size_numgridpoints}.
 Roughly speaking, in order to keep the error from diverging, an inverse proportion between spatial resolution and time step size should be kept.
 For example, when doubling the spatial resolution, one should at least halve the time step size, in order to stay stable.
@@ -138,7 +138,7 @@ For example, when doubling the spatial resolution, one should at least halve the
 
 \section{Study of Errors in Implementation of NSE}
 In this section we analyze the two implementations of the NSE.
-As no single standardized benchmarking system for testing the vertical dimension of the non-hydrostatic NSE-equations in isolation exists, complete verification of the implementation is not possible.
+As no single standardized benchmarking system for testing the vertical dimension of the non-hydrostatic NSE in isolation exists, complete verification of the implementation is not possible.
 Instead, we considered four tests:
 \begin{itemize}
 \item comparison with a stationary solution
@@ -150,8 +150,8 @@ Due to the nature of the non-hydrostatic NSE, we cannot test for mass conservati
 
 \subsection{Comparison with Stationary Solution}
 We first test the implementation by cross-checking it with the stationary solution.
-This means that the system's state must stay constant in case the starting condition is a stationary solution of the non-hydrostatic NSE.
-To find a stationary solution for the non-hydrostatic NSE, we set all time-derivatives to zero:
+This means that the system state must stay constant in case the starting condition is a stationary solution of the non-hydrostatic NSE.
+To find a stationary solution for the non-hydrostatic NSE, we set all time derivatives to zero:
 \begin{align}
 \frac{\partial w}{\partial t} =0&= -g\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right)\label{stat_dw_dt} \\
 \frac{\partial \text{ln}p}{\partial t}=0 &= \frac{g}{1- \frac{R}{C_p}} \frac{p}{RT}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}\label{stat_dlnp_dt}\\
@@ -176,10 +176,10 @@ This is reflected by both implementations as can be seen in Fig.~\ref{fig:lorenz
 %  		 \includegraphics[width=1.0\textwidth]{figures/lorenz_240s_stat.pdf}}
     \makebox[\textwidth]{ 
   		 \includegraphics[width=1.0\textwidth]{figures/l_cp_240s_error.pdf}}
-    \caption{Relative Error (deviation from stationary solution) with RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (L) and Charney-Phillips-grid (CP);
+    \caption{Relative Error (deviation from stationary solution) with RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (L) and Charney-Phillips grid (CP);
     the plots for $\frac{\Delta \text{ln}p}{p}$ and $\Delta w$ for both simulations were essentially identical, so both were only plotted once.}
 
-    %\caption{Error (deviation from stationary solution) with RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (the corresponding diagram \ref{fig:cp_stat_err} for the Charney-Phillips-grid is nearly identical and can be found in appendix \ref{sec:stationary_cp_error})}
+    %\caption{Error (deviation from stationary solution) with RK4, time-step-size $2.5ms$, and $1000$ grid points, after $240s$ of simulation time on Lorenz grid (the corresponding diagram \ref{fig:cp_stat_err} for the Charney-Phillips grid is nearly identical and can be found in appendix \ref{sec:stationary_cp_error})}
     \label{fig:lorenz_stat_err}
     
 \end{figure}
@@ -187,9 +187,9 @@ This is reflected by both implementations as can be seen in Fig.~\ref{fig:lorenz
 \subsection{Comparison with Real World Measurements}
 Another method to test the implementation is a comparison with measurements from the real world.
 First, we can compare the distribution of density $\rho=\frac{p}{RT}$ in the stationary case to real world measurements of the atmosphere made by NASA~\cite{larson1963stratosphere}.
-For the simulation we assumed that pressure at the bottom of the system was $\pi_{bottom}=1atm=101325 Pa$, and $T=273K$.
+For the simulation we assumed that pressure at the bottom of the system was $\pi_{bottom}=1\text{atm}=101325 \text{Pa}$, and $T=273K$.
 Additionally, it was assumed that $\pi (s) = s\cdot\pi_{bottom}$
-In Fig.~\ref{fig:cmp_nasa} it can be seen that the calculated result closely mirrors reality.
+In Fig.~\ref{fig:cmp_nasa} we see that the calculated result closely mirrors reality.
 
 
 \begin{figure}[!h]
@@ -213,7 +213,7 @@ This is close to the actual speed of sound at sea level around $331\frac{m}{s}$ 
 	\makebox[\textwidth]{ 
   		 \includegraphics[width=1.0\textwidth]{figures/sound_speed.pdf}}
     \caption{Graph of location over time of (a) a region of increased pressure; (b) a reference object moving at the speed of sound ($331\frac{m}{s}$);
-    the simulation was run with $1000$ grid points and a time step size of $2.5ms$ on a Lorenz-grid. Simulations on Charney-Phillips-grids yield similar results.}
+    the simulation was run with $1000$ grid points and a time step size of $2.5ms$ on a Lorenz grid. Simulations on a Charney-Phillips grid yield similar results.}
     \label{fig:sound_speed}
 \end{figure}
 
@@ -227,8 +227,8 @@ Note that this is one of the key differences between simulation with the hydrost
 According to Coiffier, usage of the hydrostatic NSE ``eliminates sound waves because of the hydrostatic relation which has a \emph{filtering} effect on them''~\cite{coiffier2011fundamentals}.
 
 \subsection{Energy Conservation}\label{sec:energy_conservation_test}
-The third way of testing the implementation is testing the hypothesis of energy conservation.
-As the choice of boundary conditions dictates that energy in the system must stay constant, every simulation of the non-hydrostatic NSE should have the same property.
+The third way to test the implementation is testing the hypothesis of energy conservation.
+As the choice of boundary conditions dictates that the energy in the system must stay constant, every simulation of the non-hydrostatic NSE should have the same property.
 That is, every system state produced by the simulation should have the same energy as the starting condition.
 
 To this end we employ the formula for calculating the total energy in the system per area~\ref{eq_energy}:
@@ -236,7 +236,7 @@ To this end we employ the formula for calculating the total energy in the system
 E'=\int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds
 \end{align*}
 When assuming energy to stay constant over time, it makes sense to take the energy contained in the system at the beginning as a baseline.
-This way, by subtracting the baseline energy from the energy calculated at some later time during simulation, we can track the error over time.
+In this way, by subtracting the baseline energy from the energy calculated at some later time during simulation, we can track the error over time.
 
 Of course, in order for it to be possible for an error to appear, the system must change over time, i.e. not be stationary.
 Other than that any starting condition may be chosen.
@@ -244,7 +244,7 @@ For the following simulations, the starting conditions were as follows: $T=273K$
 For $p$ the stationary solution was taken as a baseline, i.e. $p(s)=\pi (s)=s\cdot 101325\frac{N}{m^2}$.
 Then a Gaussian bell curve of magnitude $0.1\frac{N}{m^2}$ with its maximum at $z=35km$ was added onto this configuration.
 
-The results of this for both the Lorenz-grid and the Charney-Phillips-grid can be seen in Fig.~\ref{fig:energy_error}.
+The results of this for both the Lorenz grid and the Charney-Phillips grid can be seen in Fig.~\ref{fig:energy_error}.
 The baseline energy for both grids was nearly identical (down to the fifteenth digit) at $E'_0=2.814\cdot 10^9J$. %$2814147192.3283653J$.
 
 \begin{figure}[!h]
@@ -252,28 +252,28 @@ The baseline energy for both grids was nearly identical (down to the fifteenth d
   		 \includegraphics[width=1.0\textwidth]{figures/cp_energy_rel_error.pdf}}
   	\makebox[\textwidth]{
   		 \includegraphics[width=1.0\textwidth]{figures/lorenz_energy_rel_error.pdf}}
-    \caption{Relative energy deviation $\frac{E'(t)-E'_0}{E'_0}$ over time for Lorenz-Grid and Charney-Phillips-grid;
+    \caption{Relative energy deviation $\frac{E'(t)-E'_0}{E'_0}$ over time for Lorenz Grid and Charney-Phillips grid;
     both simulations were run with $1000$ grid points and a time step size of $2.5ms$.}
     \label{fig:energy_error}
 \end{figure}
 
-It can be seen that usage of the Lorenz-grid leads to lower errors in energy conservation, than usage of the Charney-Phillips-grid.
-This is in line with the design goal of energy conservation Lorenz had in mind when designing his grid~\cite{lorenz1960energy}.
+In this example the Lorenz grid leads to lower errors in energy conservation, than usage of the Charney-Phillips grid.
+This is in line with the design goal of energy conservation that Lorenz had in mind when designing his grid~\cite{lorenz1960energy}.
 
-To explain the larger error when employing the Charney-Phillips-grid, one must look at the composition of energy.
+To explain the larger error when employing the Charney-Phillips grid, one must look at the composition of energy.
 Recall that energy in the atmospheric system can be split up into three components: internal energy, kinetic energy, and geopotential energy.
 
 \begin{figure}[!h]
 	\makebox[\textwidth]{ 
   		 \includegraphics[width=1.0\textwidth]{figures/cp_energy_split.pdf}}
-    \caption{Deviation of each component of energy over time for Charney-Phillips-grid;
+    \caption{Deviation of each component of energy over time for Charney-Phillips grid;
     the simulation was run with $1000$ grid points and a time step size of $2.5ms$.
     }
     \label{fig:cp_energy_split}
 \end{figure}
-\noindent
-When plotting the individual deviations for each component, as is done in Fig.~\ref{fig:cp_energy_split}, one can see that the kinetic energy deviation is rather negligible at around $3\cdot10^{-3}J$.
-Instead the increased energy deviation for the Charney-Phillips-grid must originate from an asymmetry between the deviation of internal and geopotential energy.
+
+When plotting the individual deviations for each component, as is done in Fig.~\ref{fig:cp_energy_split}, we see that the kinetic energy deviation is rather negligible at around $3\cdot10^{-3}J$.
+Instead the increased energy deviation for the Charney-Phillips grid must originate from an asymmetry between the deviation of internal and geopotential energy.
 It appears that this asymmetry is inherently rooted in the averaging operation necessary to calculate the time-derivative for temperature $T$ numerically.
 
 Looking further at the averaging operation, we recall the prognostic equation for $T$:
@@ -282,8 +282,8 @@ Looking further at the averaging operation, we recall the prognostic equation fo
 &=\frac{gp}{C_p-R}\left(\frac{\partial \pi}{\partial s}\right)^{-1} \frac{\partial w}{\partial s}
 \end{align*}
 
-We see that $T$ either depends on $\frac{\partial \text{ln}p}{\partial t}$, or $p$ (when substituting in the prognostic equation for $\frac{\partial \text{ln}p}{\partial t}$).
-For the Charney-Phillips-grid, both of these variables are sampled on the offset grid, meaning that in order to calculate $\frac{\partial T}{\partial t}$, an averaging operator must be applied.
+We see that $T$ either depends on $\frac{\partial \text{ln}p}{\partial t}$, or on $p$ (when substituting in the prognostic equation for $\frac{\partial \text{ln}p}{\partial t}$).
+For the Charney-Phillips grid, both of these variables are sampled on the offset grid, meaning that in order to calculate $\frac{\partial T}{\partial t}$, an averaging operator must be applied.
 Taking an average is not especially accurate.
 This explanation supports the interpretation that there is no implementation error.
 
@@ -292,7 +292,7 @@ In light of this, when conservation of energy is essential, the Lorenz grid shou
 \subsection{Comparison of the two Implementations}
 Finally, we tested the two implementations by comparing the simulation outputs after a certain amount of elapsed time.
 For purposes of this test, we initialized both implementations with identical starting conditions.
-Just like in the previous section, any starting condition can be chosen.
+Just as in the previous section, any starting condition can be chosen.
 For simplicity's sake, we employ the same starting condition as in the previous Section~\ref{sec:energy_conservation_test}.
 
 Using said starting condition, we ran both simulations for $240s$ of simulation time, with a spatial resolution of $1000$ grid points, and a temporal resolution of $2.5ms$.

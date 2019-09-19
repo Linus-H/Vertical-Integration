@@ -1,12 +1,12 @@
 \chapter{Appendix}
-\section{Derivation: Change of Energy per Area Over Time}\label{sec:derivation:dE_dt}
+\section*{Derivation: Change of Energy per Area over Time}\label{sec:derivation:dE_dt}
 For this derivation we use the non-hydrostatic NSE derived in Section~\ref{sec:non_hydrostatic}.
 We also assume that $s_{top}$ and $s_{bottom}$ are constant.\\
 \begin{align*}
 \frac{\partial E'}{\partial t} &= \frac{\partial}{\partial t}\int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial \pi}{\partial s} \right) ds\\
-&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(C_v\frac{\partial T}{\partial t}+\frac{1}{2}\frac{\partial w^2}{\partial t} + g\frac{\partial z(s)}{\partial t}\right) \left( \frac{\partial \pi}{\partial s} \right) ds \\&~~~~+ \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial}{\partial t}\frac{\partial \pi}{\partial s} \right) ds\\
+&=~~~~\int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(C_v\frac{\partial T}{\partial t}+\frac{1}{2}\frac{\partial w^2}{\partial t} + g\frac{\partial z(s)}{\partial t}\right) \left( \frac{\partial \pi}{\partial s} \right) ds \\&~~~~+ \int_{s_{top}}^{s_{bottom}} \frac{1}{g}(C_vT+\frac{1}{2}w^2 + gz(s)) \left( \frac{\partial}{\partial t}\frac{\partial \pi}{\partial s} \right) ds\\
 &= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(C_v\frac{\partial T}{\partial t}+w\frac{\partial w}{\partial t} + g\frac{\partial z(s)}{\partial t}\right) \left( \frac{\partial \pi}{\partial s} \right) ds\\
-&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(\frac{C_vRT}{C_p}\frac{\partial \text{ln}p}{\partial t}-gw\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) + g\frac{\partial}{\partial t}\left(\frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial \pi}{\partial s}\right)ds'\right)\right) \\&~~~~~~~~~~~~~~\cdot\left( \frac{\partial \pi}{\partial s} \right) ds\\
+&= \int_{s_{top}}^{s_{bottom}} \frac{1}{g}\left(\frac{C_vRT}{C_p}\frac{\partial \text{ln}p}{\partial t}-gw\left(1 - \frac{\partial p}{\partial s}\left(\frac{\partial \pi}{\partial s}\right)^{-1}\right) + g\frac{\partial}{\partial t}\left(\frac{R}{g}\int _s ^{s_{bottom}} \frac{T}{p}\left(\frac{\partial \pi}{\partial s}\right)ds'\right)\right) \\&~~~~~~~~~~~~~~~~\cdot\left( \frac{\partial \pi}{\partial s} \right) ds\\
 \end{align*}
 In order to enhance readability, the three terms are now transformed separately, starting with the first term (with $C_v=C_p-R$).
 \begin{align*}

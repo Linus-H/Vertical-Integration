@@ -116,6 +116,17 @@ In other words, the endless journey eastward is periodic and so are the boundary
 \section{Grid Discretizations}\label{sec:grid_discretization}
 \begin{figure}[ht]
 	\makebox[\textwidth]{ 
+  		 \includegraphics[width=.9\textwidth]{figures/50gridpoints.pdf}}
+  	\makebox[\textwidth]{ 
+  		 \includegraphics[width=.9\textwidth]{figures/s_to_z.pdf}}
+    \caption{Transformation of $s$-coordinates to $z$-coordinates;
+    both diagrams assume that $\pi (s)=s\cdot 1atm$, and $T=273K$, and use Eq.~\ref{eq_s_to_z} to translate an equidistant $s$-grid to a non-equidistant $z$-grid.
+    The first diagram shows where each grid point is located in $z$-coordinates with $50$ grid points. 
+    The second diagram shows the relationship between $s$-coordinates and $z$-coordinates.}
+    \label{fig:s_grid}
+\end{figure}
+\begin{figure}[ht]
+	\makebox[\textwidth]{ 
   		 \includegraphics[width=.8\textwidth]{figures/discretization.pdf}}
     \caption{Different variants of discretization}
     \label{fig:grid_discretization}
@@ -142,17 +153,7 @@ It is also assumed that the mesh size is the same for all three variables.
 Note that in this context, the distance between grid points does not necessarily correspond to distance (measured in meters) in the real world.
 This is due to the alternative coordinate system from Section~\ref{sec:non_hydrostatic} which transforms equidistant grid points in the s-coordinate-system to non-equidistant grid points in the z-coordinate system, depending on how the function $\pi(s)$ is defined.
 This effect can be observed in Fig.~\ref{fig:s_grid}.
-\begin{figure}[ht]
-	\makebox[\textwidth]{ 
-  		 \includegraphics[width=.9\textwidth]{figures/50gridpoints.pdf}}
-  	\makebox[\textwidth]{ 
-  		 \includegraphics[width=.9\textwidth]{figures/s_to_z.pdf}}
-    \caption{Transformation of $s$-coordinates to $z$-coordinates;
-    both diagrams assume that $\pi (s)=s\cdot 1atm$, and $T=273K$, and use Eq.~\ref{eq_s_to_z} to translate an equidistant $s$-grid to a non-equidistant $z$-grid.
-    The first diagram shows where each grid point is located in $z$-coordinates with $50$ grid points. 
-    The second diagram shows the relationship between $s$-coordinates and $z$-coordinates.}
-    \label{fig:s_grid}
-\end{figure}
+
 
 Having now established that all three variables ($\text{ln}p$, $T$, and $w$) are sampled along grids of equal mesh size, one remaining question is their relative placement.
 In other words, the offset between two grids for two variables is a free parameter.

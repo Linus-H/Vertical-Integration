@@ -73,6 +73,7 @@ for integrator, name, line_type in zip([RK4],
     # plt.grid()
     plt.xlabel("number of gridpoints")
     plt.ylabel("time step size")
+    plt.legend()
     plt.show()
 
     """print("u")
