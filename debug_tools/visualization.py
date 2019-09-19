@@ -1,9 +1,9 @@
 from matplotlib import pyplot as plt
 import matplotlib
 
+# this makes diagrams look like a TeX-thesis
 matplotlib.rcParams['mathtext.fontset'] = 'stix'
 matplotlib.rcParams['font.family'] = 'STIXGeneral'
-import numpy as np
 
 
 class WindowManager:

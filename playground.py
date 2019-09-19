@@ -10,10 +10,12 @@ from integrators.Heun import Explicit as RK2
 from integrators.RungeKutta import Explicit as RK4
 from cases import run_utils
 from matplotlib import pyplot as plt
+from starting_conditions import GaussianBump
+#########################################################
+# This file creates the heatmap-diagram from the thesis #
+#########################################################
 
 # Total simulation time
-from starting_conditions import GaussianBump
-
 sim_time = 0.5
 # time step size
 # dt = 0.1

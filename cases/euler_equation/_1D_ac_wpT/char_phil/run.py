@@ -3,10 +3,9 @@ from functools import partial
 
 from cases import run_utils
 from cases.euler_equation._1D_ac_wpT.char_phil.derivative import LogTimeDerivativeCP
-from cases.euler_equation._1D_ac_wpT.lorenz.derivative import LogTimeDerivativeLorenz
+from cases.euler_equation._1D_ac_wpT.char_phil.functions import *
 import utils
 import cases.euler_equation.consts as const
-from cases.euler_equation._1D_ac_wpT.char_phil.functions import *
 
 import integrators.RungeKutta
 
@@ -32,7 +31,7 @@ params = {
 axes = np.tile(np.linspace(0, params['domain_size'], num_grid_points + 1)[:-1], (3, 1))  # setup the axes
 axes[0] = axes[0] + 0.5 * ds  # offset the lnp-axis
 
-state = utils.State(3, num_grid_points, axes, [("z in $m$", "p in $\\frac{N}{m^2}$"), ("z in $m$", "T in $K$"), ("z in $m$", "w in $\\frac{m}{s}$")])  # create the state
+state = utils.State(3, num_grid_points, axes, [("z in $m$", "$\Delta p$ in $\\frac{N}{m^2}$"), ("z in $m$", "$\Delta T$ in $K$"), ("z in $m$", "$\Delta w$ in $\\frac{m}{s}$")])  # create the state
 
 # choose starting condition
 data = state.get_state_vars()  # get the underlying numpy-array
@@ -47,9 +46,9 @@ data[0] = pi(axes[0])
 
 z = s_offset_to_z(axes[0], np.log(data[0]), data[1], dpi_ds, num_grid_points)
 
-data[0] += starting_conditions.GaussianBump(0*0.5 * params['domain_size'], 0.0000001).get_start_condition(z)
+# data[0] += starting_conditions.GaussianBump(0*0.5 * params['domain_size'], 0.0000001).get_start_condition(z)
 # data[0] += starting_conditions.GaussianBump(0.5 * np.max(z), 0.0000001).get_start_condition(z) * 0.01
-#data[0] += starting_conditions.GaussianBump(35000, 0.0000001).get_start_condition(z) * 0.1
+# data[0] += starting_conditions.GaussianBump(35000, 0.0000001).get_start_condition(z) * 0.1
 # data[0] = data[0][0]
 data[0] = np.log(data[0])  # apply logarithm in order to have ln(rho)-axis
 # data[0][0] = -np.inf
@@ -82,12 +81,11 @@ def state_handler(state, t):
     energy_arr[2][iteration_cnt] = b
     energy_arr[3][iteration_cnt] = c
     energy_arr[4][iteration_cnt] = d
-    iteration_cnt+=1
-    if t >=240:
+    iteration_cnt += 1
+    if t >= 240:
         np.save(utils.data_path+"cp_energy.npy", energy_arr)
         np.save(utils.data_path+"cp_state.npy", state_vars)
         np.save(utils.data_path+"cp_axes.npy", axes)
-        #time.sleep(2000)
 
 
 run_utils.run_visual_without_solution(
@@ -97,8 +95,6 @@ run_utils.run_visual_without_solution(
     state,
     [(partial(s_offset_to_z, lnp=data[0], T=data[1], dpi_ds=dpi_ds, num_grid_points=num_grid_points),
       lambda x: np.exp(x) - pi(axes[0])),  # lnp
-     (partial(s_to_z, lnp=data[0], T=data[1], dpi_ds=dpi_ds, num_grid_points=num_grid_points), lambda x: x),  # T
+     (partial(s_to_z, lnp=data[0], T=data[1], dpi_ds=dpi_ds, num_grid_points=num_grid_points), lambda x: x-const.T),  # T
      (partial(s_to_z, lnp=data[0], T=data[1], dpi_ds=dpi_ds, num_grid_points=num_grid_points), lambda x: x)],  # w
     state_handler)
-#from matplotlib import pyplot as plt
-#plt.savefig(utils.data_path + "cp_fig.pdf")

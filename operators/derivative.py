@@ -49,7 +49,7 @@ def diff_n1_e4(data, delta_x):
     return output
 
 
-def diff_fft(data, delta_x):
+def diff_fft(data, delta_x):  # this has not been properly unit-tested, but seems to work for the wave-equation
     transformed = np.fft.fft(data) / len(data)
     shifted = np.fft.fftshift(transformed)
     N = len(data)

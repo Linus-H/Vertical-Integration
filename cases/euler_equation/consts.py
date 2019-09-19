@@ -1,4 +1,4 @@
-# TODO: check constants
+# some natural constants used in the NSE
 g = 9.81
 T = 273
 R = 286.99  # perfect gas constant

@@ -45,7 +45,7 @@ data[0] = pi(axes[0])
 
 z = s_offset_to_z(axes[0], np.log(data[0]), data[1], dpi_ds, num_grid_points)
 
-#data[0] += starting_conditions.GaussianBump(0*0.5 * params['domain_size'], 0.0000001).get_start_condition(z)
+# data[0] += starting_conditions.GaussianBump(0*0.5 * params['domain_size'], 0.0000001).get_start_condition(z)
 # data[0] += starting_conditions.GaussianBump(0.5 * np.max(z), 0.0000001).get_start_condition(z) * 0.01
 data[0] += starting_conditions.GaussianBump(35000, 0.0000001).get_start_condition(z) * 0.1
 # data[0] = data[0][0]
@@ -87,7 +87,6 @@ def state_handler(state, t):
         np.save(utils.data_path + "lorenz_energy.npy", energy_arr)
         np.save(utils.data_path + "lorenz_state.npy", state_vars)
         np.save(utils.data_path + "lorenz_axes.npy", axes)
-        #time.sleep(2000)
 
 
 run_utils.run_visual_without_solution(
@@ -99,8 +98,4 @@ run_utils.run_visual_without_solution(
       lambda x: np.exp(x)- pi(axes[0])),  # lnp
      (partial(s_offset_to_z, lnp=data[0], T=data[1], dpi_ds=dpi_ds, num_grid_points=num_grid_points), lambda x: x-const.T),  # T
      (partial(s_to_z, lnp=data[0], T=data[1], dpi_ds=dpi_ds, num_grid_points=num_grid_points), lambda x: x)],  # w
-    state_handler)
-
-#from matplotlib import pyplot as plt
-#plt.plot()
-#plt.savefig(utils.data_path + "lorenz_fig.pdf")
+    None)

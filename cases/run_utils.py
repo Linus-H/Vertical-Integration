@@ -153,5 +153,3 @@ every how many steps the state shall be displayed 'sampling_rate'.
             #print(t)
             for j in range(num_vars):
                 window_manager.display_state(1 + j, state, j, operations=display_operation[j])
-            if t>=130:
-                break

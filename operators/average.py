@@ -1,5 +1,6 @@
 import numpy as np
 
+# these operators have not been fully unit-tested
 
 def avg_forward_e1(data):
     rolled_backwards = np.roll(data, -1)

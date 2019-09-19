@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 import numpy as np
 
-data_path = "D:\\Workspace\\Vertical-Integration\\data\\"
+data_path = "" # TODO: set appropriate path to folder in which to store large amounts of data (avoid SSDs)
 
 
 class State:
